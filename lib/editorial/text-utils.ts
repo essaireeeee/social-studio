@@ -167,3 +167,68 @@ export function literalPattern(phrase: string): string {
     .join("");
   return `(?<![\\p{L}\\p{N}_])${body}(?![\\p{L}\\p{N}_])`;
 }
+
+// ---------------------------------------------------------------------------
+// Découpage (section 8.2)
+// ---------------------------------------------------------------------------
+
+const graphemeSegmenter = new Intl.Segmenter("fr", { granularity: "grapheme" });
+
+/** Caractères visibles : un emoji composé compte pour un. */
+export function countGraphemes(text: string): number {
+  let count = 0;
+  for (const _ of graphemeSegmenter.segment(text)) count += 1;
+  return count;
+}
+
+export function mentionRegex(): RegExp {
+  return /@[\w.]+/g;
+}
+
+/** Lignes non vides, sans espaces de bord. */
+export function contentLines(text: string): string[] {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+/** Paragraphes séparés par une ligne vide, chacun sous forme de lignes non vides. */
+export function splitParagraphs(text: string): string[][] {
+  return text
+    .split(/\n\s*\n/)
+    .map(contentLines)
+    .filter((lines) => lines.length > 0);
+}
+
+/** Phrases : coupure après une ponctuation forte ou à chaque retour à la ligne. */
+export function splitSentences(text: string): string[] {
+  return text
+    .split(/(?<=[.!?…])\s+|\n+/u)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
+}
+
+/** Mots normalisés (sans accents, minuscules), hors liens, hashtags, mentions et emojis. */
+export function tokenizeWords(text: string): string[] {
+  const cleaned = text
+    .replace(urlRegex(), " ")
+    .replace(hashtagRegex(), " ")
+    .replace(mentionRegex(), " ");
+  return normalizeText(cleaned)
+    .replace(/'/g, " ")
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter(Boolean);
+}
+
+const LEADING_EMOJI = new RegExp(`^(?:${EMOJI_SOURCE})`, "u");
+
+export function startsWithEmoji(line: string): boolean {
+  return LEADING_EMOJI.test(line.trim());
+}
+
+/** Ligne composée uniquement de hashtags (et d'emojis ou d'espaces). */
+export function isHashtagLine(line: string): boolean {
+  if (!hashtagRegex().test(line)) return false;
+  return line.replace(hashtagRegex(), "").replace(emojiRegex(), "").trim() === "";
+}

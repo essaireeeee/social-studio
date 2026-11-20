@@ -21,6 +21,7 @@ export const RULE_IDS = {
   finalQuestion: "rule-final-question",
   noHashtagSpam: "rule-no-hashtag-spam",
   noCopy: "rule-no-copy",
+  ctaLexicon: "rule-cta-lexicon",
 } as const;
 
 /** Valeurs utilisées quand le profil de style du mode est insuffisant (moins de 5 posts). */
@@ -33,6 +34,32 @@ export const STYLE_DEFAULTS = {
   recentHooksWindow: 20,
 } as const;
 
+/**
+ * Style utilisé par les moteurs tant que le profil du mode n'est pas validé ou que le
+ * corpus compte moins de 5 publications (section 8.8). Estimations de départ, remplacées
+ * par les mesures dès qu'un profil suffisant est validé.
+ */
+export const DEFAULT_STYLE_BY_MODE = {
+  live: {
+    charsMedian: 160,
+    charsP90: 280,
+    linesMedian: 4,
+    emojisPerPostMedian: 2,
+    emojiThreshold: STYLE_DEFAULTS.emojiThreshold,
+    hashtagsPerPostMedian: 1,
+    hashtagPosition: "end",
+  },
+  daily: {
+    charsMedian: 380,
+    charsP90: 700,
+    linesMedian: 7,
+    emojisPerPostMedian: 3,
+    emojiThreshold: STYLE_DEFAULTS.emojiThreshold,
+    hashtagsPerPostMedian: 2,
+    hashtagPosition: "end",
+  },
+} as const;
+
 /** Indices de défaite : la règle Samba Sima ne s'applique pas si le texte en contient. */
 export const DEFEAT_LEXICON = [
   "defaite",
@@ -42,6 +69,17 @@ export const DEFEAT_LEXICON = [
   "perd ",
   "a perdu",
   "revers",
+] as const;
+
+/** Expressions qui signalent un appel à l'action (section 8.7). Éditable par l'administrateur. */
+export const DEFAULT_CTA_LEXICON = [
+  "lien en bio",
+  "prenez vos places",
+  "billetterie",
+  "rendez-vous",
+  "on vous attend",
+  "à suivre",
+  "en direct",
 ] as const;
 
 /** Lettre, chiffre ou tiret bas : délimite un mot, accents compris (`\b` ne les gère pas). */
@@ -187,6 +225,17 @@ export const DEFAULT_EDITORIAL_RULES: readonly EditorialRule[] = [
     description: "Contrôlé par l'anti-copie des moteurs (Phase 5).",
     kind: "contextual",
     order: 120,
+    enabled: true,
+    editableBy: "admin",
+  },
+  {
+    id: RULE_IDS.ctaLexicon,
+    label: "Lexique des appels à l'action",
+    description:
+      "Sert à détecter les CTA dans les deux dernières lignes des publications (ADN éditorial). Les verbes à l'impératif en tête de ligne sont aussi reconnus.",
+    kind: "contextual",
+    values: [...DEFAULT_CTA_LEXICON],
+    order: 130,
     enabled: true,
     editableBy: "admin",
   },

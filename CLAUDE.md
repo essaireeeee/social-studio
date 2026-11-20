@@ -76,6 +76,8 @@ Une génération ne devient une référence de style qu'après validation par le
 
 - Persistance : toute écriture passe par `DataRepository` (`lib/database/repository.ts`). Pas d'index IndexedDB sur un booléen (non indexable) : filtrer avec `list({ filter })`. Ne jamais importer `*.server.ts` depuis du code client.
 - Toute sortie texte (moteur natif, IA, édition CM) passe par `lintText` (`lib/editorial/linter.ts`) avec les règles en base (`loadRules`). Les catégories et leurs champs viennent uniquement de `lib/categories/registry.ts`.
+- Style : les moteurs lisent `styleParameters(activeProfile(...), mode)` (`lib/editorial/profile-service.ts`), jamais un profil seulement proposé. Les démos n'entrent dans aucune statistique sauf option explicite.
+- Composants client qui lisent la base : `useRepository()` (null tant que les données ne sont pas prêtes) + `useLiveQuery`.
 - Les outils d'écriture de fichiers transforment les séquences `\u…` en caractères bruts. Pour un caractère invisible dans le code : `new RegExp("\\u…")` ou `String.fromCodePoint(…)`.
 
 @AGENTS.md

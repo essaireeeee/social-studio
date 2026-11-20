@@ -330,8 +330,10 @@ export const NgramSchema = z.object({
 });
 export type Ngram = z.infer<typeof NgramSchema>;
 
-const countedText = (key: "emoji" | "tag" | "text" | "word" | "pattern") =>
-  z.object({ [key]: z.string(), count: z.number().int().nonnegative() });
+const counted = <K extends string>(key: K) =>
+  z.object({ count: z.number().int().nonnegative() }).extend({
+    [key]: z.string(),
+  } as Record<K, z.ZodString>);
 
 export const StyleProfileSchema = z.object({
   id: idSchema,
@@ -363,26 +365,35 @@ export const StyleProfileSchema = z.object({
     lineStartRatio: z.number().min(0).max(1),
   }),
   hashtags: z.object({
-    top: z.array(countedText("tag")),
+    top: z.array(counted("tag")),
     perPostMedian: z.number(),
     position: z.enum(["end", "inline", "mixed"]),
   }),
   hooks: z.object({
     /** Premières lignes réelles, pour consultation uniquement. */
     samples: z.array(z.string()),
-    patterns: z.array(countedText("pattern")),
+    patterns: z.array(counted("pattern")),
     uppercaseRatio: z.number().min(0).max(1),
     exclamationRatio: z.number().min(0).max(1),
     questionRatio: z.number().min(0).max(1),
     avgWords: z.number(),
   }),
-  ctas: z.object({ top: z.array(countedText("text")) }),
+  /** CTA les plus fréquents : sans `categoryId` pour le mode entier, avec pour une catégorie. */
+  ctas: z.object({
+    top: z.array(
+      z.object({
+        text: z.string(),
+        count: z.number().int().nonnegative(),
+        categoryId: idSchema.optional(),
+      }),
+    ),
+  }),
   ngrams: z.object({
     bigrams: z.array(NgramSchema),
     trigrams: z.array(NgramSchema),
     quadgrams: z.array(NgramSchema),
   }),
-  vocabulary: z.object({ top: z.array(countedText("word")) }),
+  vocabulary: z.object({ top: z.array(counted("word")) }),
   structures: z.array(
     z.object({
       fingerprint: z.string(),

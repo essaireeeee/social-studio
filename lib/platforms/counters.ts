@@ -1,17 +1,10 @@
 /** Compteurs de caractères par plateforme. Logique pure. */
 import { parseTweet } from "twitter-text";
 import type { Platform } from "@/types/domain";
-import { hashtagRegex } from "@/lib/editorial/text-utils";
+import { countGraphemes, hashtagRegex } from "@/lib/editorial/text-utils";
 import { PLATFORM_RULES } from "./rules";
 
-const graphemeSegmenter = new Intl.Segmenter("fr", { granularity: "grapheme" });
-
-/** Caractères visibles : un emoji composé (👨‍👩‍👧) compte pour un. */
-export function countGraphemes(text: string): number {
-  let count = 0;
-  for (const _ of graphemeSegmenter.segment(text)) count += 1;
-  return count;
-}
+export { countGraphemes };
 
 /** Comptage pondéré officiel de X (emojis et caractères CJK comptent double, liens 23). */
 export function xWeightedLength(text: string): number {

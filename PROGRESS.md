@@ -7,7 +7,7 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | 0     | Setup du projet                                 | Terminée |
 | 1     | Schéma de données, persistance, exemples        | Terminée |
 | 2     | Catégories, règles éditoriales, linter          | Terminée |
-| 3     | Intelligence éditoriale (Brand Voice Extractor) | À faire  |
+| 3     | Intelligence éditoriale (Brand Voice Extractor) | Terminée |
 | 4     | Recherche des références                        | À faire  |
 | 5     | Moteur natif                                    | À faire  |
 | 6     | Moteur IA (Anthropic / OpenAI)                  | À faire  |
@@ -18,7 +18,48 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | 11    | Historique, dashboard, paramètres, données      | À faire  |
 | 12    | Tests, QA, README                               | À faire  |
 
-**Prochaine étape : Phase 3.**
+**Prochaine étape : Phase 4.**
+
+---
+
+## Phase 3 : Intelligence éditoriale, Brand Voice Extractor (terminée le 20/11/2026)
+
+### Livré
+
+- **Pré-traitement** (`lib/editorial/text-utils.ts`, `stopwords-fr.ts`, `stats.ts`) : graphèmes (`Intl.Segmenter`), lignes, paragraphes, phrases, mentions, mots normalisés ; 254 mots vides français ; médiane, percentile, moyenne.
+- **Extracteur** (`lib/editorial/style-extractor.ts`) : `buildStyleProfile` calcule tous les indicateurs de la section 8.3, par mode, sur les publications réelles (`isReference` et non démo ; démos seulement sur demande). Briques dédiées :
+  - `cta.ts` : CTA sur les deux dernières lignes hors hashtags, par lexique éditable ou impératif en tête de ligne ;
+  - `structure.ts` : empreinte H / B / I / Q / C / T / S (signatures reconnues depuis leurs gabarits en base) ;
+  - `hook-pattern.ts` : patrons d'accroche, noms connus remplacés par {NOM} / {EVENT}, nombres {N}, emojis {E}, jusqu'au 3e mot. L'exemple de la section 8.4 donne exactement `{E} ko de {NOM} au {N}`.
+- **Service des profils** (`lib/editorial/profile-service.ts`) : calcul enregistré comme « proposé », profil actif = dernier validé, profil en attente, validation réservée à l'administrateur, comparaison indicateur par indicateur, recalcul automatique après un import de plus de 10 publications (prêt pour la Phase 9), `styleParameters` pour les moteurs (mesures du profil validé, sinon valeurs par défaut de `rules.ts`).
+- **Écran `/editorial`** : onglets LIVE SHOW, DAILY & MEDIA et Comparer ; bouton Analyser / Recalculer avec option « Inclure les exemples fictifs » et bandeau d'avertissement ; message « Corpus insuffisant pour tirer des conclusions (N publications analysées) » sous 5 posts, avec les valeurs par défaut utilisées ; blocs Longueur, Emojis, Hashtags, Accroches, Expressions récurrentes, À varier, Structures, CTA et ponctuation, chacun avec le nombre de posts analysés et la date ; tableau de comparaison et validation ; section Règles éditoriales (activation par case, listes éditables, motifs) réservée à l'administrateur.
+- Composants `components/ui/{tabs,badge,input}.tsx`, hooks `useRepository` et `useActiveUser`.
+- **Seed v3** : ajout de la règle « Lexique des appels à l'action » (éditable comme les autres listes).
+
+### Validation
+
+- `typecheck`, `lint`, `format:check`, `build` : OK, sans avertissement.
+- `npm run test` : 203 tests (15 fichiers). Corpus de 20 publications fixtures : emojis (💥 12, 60 % des posts), hashtags, CTA, n-grammes, patrons d'accroche, structures, médianes et p90 vérifiés ; démos, non-références et DAILY exclus ; niveau de confiance selon la taille. Un corpus de 3 publications donne `insufficient` et aucune expression « À varier ».
+- `npm run test:e2e` : 7 scénarios, dont 3 nouveaux sur l'écran ADN (corpus insuffisant, profil mesuré puis validé, règles modifiées et conservées après actualisation).
+- Captures vérifiées à 1440 px et 390 px.
+
+### Décisions et écarts
+
+1. **Phrases répétées signalées entières.** Une phrase de 4 mots ou plus présente dans plus de 25 % des posts apparaît dans « À varier » d'un seul bloc, au lieu de 3 ou 4 n-grammes qui se chevauchent. Les n-grammes, eux, restent calculés et stockés comme le prévoit la section 8.3.
+2. **N-grammes utiles.** Une expression ne commence ni ne finit par un mot vide (« ko de », « a la fin » sont écartés). Les noms connus, la marque, les nombres, les emojis, les liens et la ponctuation coupent les expressions : un nom de combattant n'est jamais signalé comme expression à varier.
+3. **Noms connus** : nom complet, nom de famille et surnom des fiches combattants ; nom des événements, avec et sans numéro. « HEXAGONE MMA » suivi d'un numéro devient toujours {EVENT}. Les prénoms seuls ne sont pas remplacés (trop ambigus).
+4. **Profil avec démos non validable.** Il reste consultable, avec un bandeau, mais ne peut pas alimenter les moteurs (règle 1.2).
+5. **Onglet « Comparer »** : nouveau profil proposé face au profil actif du mode choisi, puis validation (section 8.8). Sans profil actif, rien n'est marqué « modifié ».
+6. **Historique des profils** : tous les profils validés sont gardés ; seules les 5 dernières propositions par mode sont conservées.
+7. **Valeurs par défaut** (`DEFAULT_STYLE_BY_MODE` dans `rules.ts`) : estimations de départ (LIVE : 160 caractères, 4 lignes, 2 emojis ; DAILY : 380 caractères, 7 lignes, 3 emojis), utilisées tant qu'aucun profil suffisant n'est validé.
+8. **Lexique CTA** stocké comme règle éditoriale (type « consigne »), pour être modifiable au même endroit que les autres listes. « En direct » en fait partie (section 8.7) : en fin de post, une ligne de diffusion compte donc comme un CTA.
+9. **Mots en capitales** : les mots de 3 lettres ou moins (KO, TKO, MMA) et la marque ne comptent pas, pour mesurer le ton « crié » et non les sigles.
+10. **Schéma** : `ctas.top` accepte un `categoryId` (CTA le plus fréquent par catégorie, utile au moteur natif en section 10.5), comme `structures`.
+11. **Écran sans navigation pour l'instant** : `/editorial` s'ouvre par son adresse. La barre latérale et le header arrivent en Phase 7.
+
+### Fichiers créés ou modifiés
+
+`lib/editorial/{stopwords-fr,stats,cta,structure,hook-pattern,style-extractor,profile-service,text-utils,rules}.ts`, `lib/platforms/counters.ts`, `lib/database/seed.ts`, `types/domain.ts`, `app/(workspace)/editorial/page.tsx`, `components/editorial/{EditorialPage,ProfilePanel,StyleProfileView,StatBlock,StatBar,CompareView,RulesSection,RuleEditor,ValuesEditor,index}.tsx`, `components/ui/{tabs,badge,input}.tsx`, `hooks/{useRepository,index}.ts`, `tests/fixtures/style-corpus.ts`, `tests/unit/editorial/{style-extractor,profile-service}.test.ts`, `tests/e2e/{helpers,phase3-editorial.spec}.ts`.
 
 ---
 

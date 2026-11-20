@@ -22,8 +22,9 @@ import { createWording, type WordingInput } from "./wording-factory";
  * - 1 : données initiales (Phase 1).
  * - 2 : règles intégrées réécrites (motifs complets, ordre d'application). L'activation
  *   choisie par l'administrateur est conservée.
+ * - 3 : nouvelles règles intégrées ajoutées si absentes (lexique des CTA).
  */
-export const SEED_VERSION = 2;
+export const SEED_VERSION = 3;
 
 export const DEMO_BADGE = "EXEMPLE FICTIF : À REMPLACER PAR UNE PUBLICATION OFFICIELLE";
 
@@ -235,7 +236,8 @@ export interface SeedResult {
 /**
  * Applique les étapes de seed manquantes, à chaque démarrage.
  * - étape 1 : données initiales (une seule fois, jamais après une restauration) ;
- * - étape 2 : règles intégrées remises à jour, activation conservée.
+ * - étape 2 : règles intégrées remises à jour, activation conservée ;
+ * - étape 3 : règles intégrées ajoutées depuis (lexique CTA), sans toucher aux existantes.
  * La vérification et l'écriture se font dans une même transaction :
  * deux onglets ouverts en même temps ne produisent pas de doublon.
  */
@@ -275,6 +277,12 @@ export async function runSeed(
         upgraded.push({ ...rule, enabled: existing?.enabled ?? rule.enabled });
       }
       await repository.rules.bulkPut(upgraded);
+    }
+
+    if (from < 3) {
+      for (const rule of data.rules) {
+        if (!(await repository.rules.get(rule.id))) await repository.rules.put(rule);
+      }
     }
 
     await repository.setMeta("schemaVersion", CURRENT_SCHEMA_VERSION);
