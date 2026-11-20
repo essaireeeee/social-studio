@@ -138,4 +138,23 @@ describe("seed", () => {
       ),
     ).toBe("la victoire de HEXAGONE MMA");
   });
+
+  it("étape 2 : met à jour les règles intégrées d'une base v1 sans toucher au reste", async () => {
+    await runSeed(repository, fixedNow());
+    // État v1 simulé : ancien motif, règle désactivée par l'admin, une démo supprimée.
+    await repository.rules.put({
+      ...(await repository.rules.get("rule-de-hexagone"))!,
+      pattern: "\\bd['’]HEXAGONE MMA\\b",
+      enabled: false,
+    });
+    await repository.wordings.delete("demo-live-ko");
+    await repository.setMeta("seedVersion", 1);
+
+    expect(await runSeed(repository, fixedNow())).toEqual({ ran: true, seedVersion: SEED_VERSION });
+    const rule = await repository.rules.get("rule-de-hexagone");
+    expect(rule?.pattern).toContain("ceintures?|titres?");
+    expect(rule?.enabled).toBe(false);
+    expect(await repository.wordings.get("demo-live-ko")).toBeUndefined();
+    expect(await repository.wordings.count()).toBe(5);
+  });
 });

@@ -7,7 +7,7 @@
  */
 import type { DataServices } from "./client";
 import { SnapshotSchema, type SnapshotCounts } from "./snapshot";
-import { runSeed, SEED_VERSION } from "./seed";
+import { runSeed } from "./seed";
 
 export interface RestoreOffer {
   name: string;
@@ -43,7 +43,11 @@ export async function prepareData(
   fetchImpl: typeof fetch = (...args) => globalThis.fetch(...args),
 ): Promise<BootResult> {
   const { repository } = services;
-  if (!(await repository.isEmpty())) return { kind: "ready" };
+  if (!(await repository.isEmpty())) {
+    // Étapes de seed ajoutées depuis le dernier lancement (ex. règles mises à jour).
+    await runSeed(repository);
+    return { kind: "ready" };
+  }
 
   const summary = await fetchSummary(fetchImpl);
   if (summary?.enabled && summary.found && summary.valid && summary.savedAt && summary.counts) {
@@ -71,10 +75,12 @@ export async function acceptRestore(
     throw new Error("Le fichier de sauvegarde n'a pas pu être relu.");
   }
   await services.importSnapshot(summary.snapshot, "replace");
-  // Un instantané sans version de seed ne doit pas réintroduire les exemples fictifs.
+  // Un instantané sans version de seed ne doit pas réintroduire les exemples fictifs :
+  // on le considère comme ayant déjà reçu les données initiales (étape 1).
   if ((await services.repository.getMeta("seedVersion")) === undefined) {
-    await services.repository.setMeta("seedVersion", SEED_VERSION);
+    await services.repository.setMeta("seedVersion", 1);
   }
+  await runSeed(services.repository);
 }
 
 /**

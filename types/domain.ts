@@ -311,6 +311,8 @@ export const EditorialRuleSchema = z.object({
   replacement: z.string().optional(),
   /** Liste éditable associée à la règle (formules interdites, qualificatifs, catégories...). */
   values: z.array(z.string()).optional(),
+  /** Ordre d'application des règles (croissant). */
+  order: z.number().int().default(0),
   enabled: z.boolean(),
   editableBy: z.literal("admin"),
 });

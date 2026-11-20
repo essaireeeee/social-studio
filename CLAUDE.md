@@ -75,6 +75,7 @@ Une génération ne devient une référence de style qu'après validation par le
 - Tests unitaires : `tests/unit/**/*.test.ts(x)` (Vitest, environnement `node` par défaut, `// @vitest-environment jsdom` pour les composants). E2E : `tests/e2e/*.spec.ts` (Playwright, `@playwright/test` épinglé sur la version du Chromium préinstallé).
 
 - Persistance : toute écriture passe par `DataRepository` (`lib/database/repository.ts`). Pas d'index IndexedDB sur un booléen (non indexable) : filtrer avec `list({ filter })`. Ne jamais importer `*.server.ts` depuis du code client.
+- Toute sortie texte (moteur natif, IA, édition CM) passe par `lintText` (`lib/editorial/linter.ts`) avec les règles en base (`loadRules`). Les catégories et leurs champs viennent uniquement de `lib/categories/registry.ts`.
 - Les outils d'écriture de fichiers transforment les séquences `\u…` en caractères bruts. Pour un caractère invisible dans le code : `new RegExp("\\u…")` ou `String.fromCodePoint(…)`.
 
 @AGENTS.md

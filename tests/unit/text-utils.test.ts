@@ -2,9 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   extractEmojis,
   extractHashtags,
+  extractHook,
+  jaccard,
   listEmojis,
+  literalPattern,
   normalizeText,
   stripAccents,
+  wordSet,
 } from "@/lib/editorial/text-utils";
 import { formatDateTime, plural } from "@/lib/format";
 
@@ -80,5 +84,34 @@ describe("formats", () => {
 
   it("retire les accents sans toucher au reste", () => {
     expect(stripAccents("Ça déménage à Évry !")).toBe("Ca demenage a Evry !");
+  });
+});
+
+describe("accroche et similarité", () => {
+  it("prend la première ligne non vide, avec sa position", () => {
+    const text = "\n\n  💥 KO AU R1 !\nSuite";
+    const hook = extractHook(text);
+    expect(hook?.text).toBe("💥 KO AU R1 !");
+    expect(text.slice(hook!.start, hook!.end)).toBe("💥 KO AU R1 !");
+  });
+
+  it("coupe à la première phrase si la première ligne dépasse 140 caractères", () => {
+    const long = `Première phrase courte. ${"suite ".repeat(30)}`;
+    expect(extractHook(long)?.text).toBe("Première phrase courte.");
+    expect(extractHook("   \n ")).toBeNull();
+  });
+
+  it("compare des ensembles de mots sans hashtags, liens ni accents", () => {
+    const a = wordSet("💥 KO éclair de Léo ! #HexagoneMMA https://x.fr");
+    expect([...a].sort()).toEqual(["de", "eclair", "ko", "leo"]);
+    expect(jaccard(a, wordSet("KO eclair de Leo"))).toBe(1);
+    expect(jaccard(new Set(["a", "b"]), new Set(["b", "c"]))).toBeCloseTo(1 / 3);
+    expect(jaccard(new Set(), new Set())).toBe(0);
+  });
+
+  it("retrouve une expression quelle que soit l'accentuation", () => {
+    const re = new RegExp(literalPattern("Préparez-vous à vivre"), "iu");
+    expect(re.test("PREPAREZ-VOUS A  VIVRE une soirée")).toBe(true);
+    expect(re.test("préparez-vous à vivres")).toBe(false);
   });
 });

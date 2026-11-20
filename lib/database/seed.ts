@@ -12,11 +12,18 @@ import {
   type UserProfile,
   type Wording,
 } from "@/types/domain";
+import { DEFAULT_EDITORIAL_RULES } from "@/lib/editorial/rules";
 import { CURRENT_SCHEMA_VERSION } from "./migrations";
 import type { DataRepository } from "./repository";
 import { createWording, type WordingInput } from "./wording-factory";
 
-export const SEED_VERSION = 1;
+/**
+ * Historique :
+ * - 1 : données initiales (Phase 1).
+ * - 2 : règles intégrées réécrites (motifs complets, ordre d'application). L'activation
+ *   choisie par l'administrateur est conservée.
+ */
+export const SEED_VERSION = 2;
 
 export const DEMO_BADGE = "EXEMPLE FICTIF : À REMPLACER PAR UNE PUBLICATION OFFICIELLE";
 
@@ -178,129 +185,6 @@ const SIGNATURES: Signature[] = [
   },
 ];
 
-/** Règles de la section 1.6. Le linter (Phase 2) s'appuie sur ces identifiants. */
-const RULES: EditorialRule[] = [
-  {
-    id: "rule-de-hexagone",
-    label: "Écrire « de HEXAGONE MMA », jamais « d'HEXAGONE MMA »",
-    description: "Sauf après « ceinture » ou « titre » (fenêtre de 3 mots).",
-    kind: "replace",
-    pattern: "\\bd['’]HEXAGONE MMA\\b",
-    flags: "gu",
-    replacement: "de HEXAGONE MMA",
-    enabled: true,
-    editableBy: "admin",
-  },
-  {
-    id: "rule-ceinture-titre",
-    label: "Exception : « la ceinture d'HEXAGONE MMA », « le titre d'HEXAGONE MMA »",
-    kind: "replace",
-    pattern: "\\b(ceinture|titre) de HEXAGONE MMA\\b",
-    flags: "gu",
-    replacement: "$1 d'HEXAGONE MMA",
-    enabled: true,
-    editableBy: "admin",
-  },
-  {
-    id: "rule-brand-case",
-    label: "Nom de la ligue toujours écrit HEXAGONE MMA (hors hashtags)",
-    kind: "replace",
-    pattern: "(?<!#)\\bhexagone mma\\b",
-    flags: "giu",
-    replacement: "HEXAGONE MMA",
-    enabled: true,
-    editableBy: "admin",
-  },
-  {
-    id: "rule-hashtag-duplicates",
-    label: "Pas de hashtag en double",
-    kind: "contextual",
-    enabled: true,
-    editableBy: "admin",
-  },
-  {
-    id: "rule-french-spacing",
-    label: "Espace insécable avant ! ? : ; et pas d'espace double",
-    kind: "contextual",
-    enabled: true,
-    editableBy: "admin",
-  },
-  {
-    id: "rule-samba-sima",
-    label: "Samba Sima présenté comme un crack en contexte positif, jamais en contexte de défaite",
-    description:
-      "Victoire, présentation, annonce, titre : il est présenté comme un crack, un jeune phénomène exceptionnel.",
-    kind: "contextual",
-    values: ["crack", "phénomène", "pépite", "prodige"],
-    enabled: true,
-    editableBy: "admin",
-  },
-  {
-    id: "rule-ai-formulas",
-    label: "Pas de formules typiques d'IA",
-    description: "« Véritable » est aussi interdit en ouverture de post.",
-    kind: "forbid",
-    values: [
-      "Dans un monde",
-      "Il est important de noter",
-      "Cette initiative vise à",
-      "Plongez dans",
-      "N'hésitez pas à",
-      "Préparez-vous à vivre",
-    ],
-    enabled: true,
-    editableBy: "admin",
-  },
-  {
-    id: "rule-ai-opening-veritable",
-    label: "Pas de « véritable » en ouverture",
-    kind: "forbid",
-    pattern: "^[^\\p{L}]*véritable\\b",
-    flags: "iu",
-    enabled: true,
-    editableBy: "admin",
-  },
-  {
-    id: "rule-emoji-overload",
-    label: "Pas de surcharge d'emojis",
-    description:
-      "Seuil : p90 du profil de style du mode, 6 par défaut si le profil est insuffisant.",
-    kind: "contextual",
-    enabled: true,
-    editableBy: "admin",
-  },
-  {
-    id: "rule-repetitive-hooks",
-    label: "Pas d'accroche répétitive",
-    description: "Alerte si l'accroche ressemble à l'une des 20 dernières générations validées.",
-    kind: "contextual",
-    enabled: true,
-    editableBy: "admin",
-  },
-  {
-    id: "rule-final-question",
-    label: "Pas de question finale sur les catégories factuelles",
-    kind: "forbid",
-    values: ["live_result", "live_ko", "live_sub", "live_decision", "live_defeat"],
-    enabled: true,
-    editableBy: "admin",
-  },
-  {
-    id: "rule-no-hashtag-spam",
-    label: "Pas de hashtags systématiques ni de ton publicitaire sur chaque post",
-    kind: "contextual",
-    enabled: true,
-    editableBy: "admin",
-  },
-  {
-    id: "rule-no-copy",
-    label: "Les références ne sont jamais recopiées textuellement",
-    kind: "contextual",
-    enabled: true,
-    editableBy: "admin",
-  },
-];
-
 const DEFAULT_USER: UserProfile = { id: DEFAULT_USER_ID, name: "Community Manager", role: "admin" };
 
 export interface SeedData {
@@ -338,7 +222,7 @@ export async function buildSeedData(now: Date = new Date()): Promise<SeedData> {
     fighters: [sambaSima],
     hashtagGroups: HASHTAG_GROUPS,
     signatures: SIGNATURES,
-    rules: RULES,
+    rules: DEFAULT_EDITORIAL_RULES.map((rule) => ({ ...rule })),
     users: [DEFAULT_USER],
   };
 }
@@ -349,9 +233,11 @@ export interface SeedResult {
 }
 
 /**
- * Écrit les données initiales si elles ne l'ont jamais été.
+ * Applique les étapes de seed manquantes, à chaque démarrage.
+ * - étape 1 : données initiales (une seule fois, jamais après une restauration) ;
+ * - étape 2 : règles intégrées remises à jour, activation conservée.
  * La vérification et l'écriture se font dans une même transaction :
- * deux onglets ouverts au premier lancement ne produisent pas de doublon.
+ * deux onglets ouverts en même temps ne produisent pas de doublon.
  */
 export async function runSeed(
   repository: DataRepository,
@@ -366,19 +252,31 @@ export async function runSeed(
   const data = await buildSeedData(now);
 
   return repository.transaction(async () => {
-    const again = await repository.getMeta("seedVersion");
-    if (again !== undefined && again >= SEED_VERSION) {
-      return { ran: false, seedVersion: again };
+    const from = (await repository.getMeta("seedVersion")) ?? 0;
+    if (from >= SEED_VERSION) {
+      return { ran: false, seedVersion: from };
     }
-    await repository.wordings.bulkPut(data.wordings);
-    await repository.fighters.bulkPut(data.fighters);
-    await repository.hashtagGroups.bulkPut(data.hashtagGroups);
-    await repository.signatures.bulkPut(data.signatures);
-    await repository.rules.bulkPut(data.rules);
-    await repository.users.bulkPut(data.users);
-    if ((await repository.getMeta("settings")) === undefined) {
-      await repository.setMeta("settings", SettingsSchema.parse({}));
+
+    if (from < 1) {
+      await repository.wordings.bulkPut(data.wordings);
+      await repository.fighters.bulkPut(data.fighters);
+      await repository.hashtagGroups.bulkPut(data.hashtagGroups);
+      await repository.signatures.bulkPut(data.signatures);
+      await repository.users.bulkPut(data.users);
+      if ((await repository.getMeta("settings")) === undefined) {
+        await repository.setMeta("settings", SettingsSchema.parse({}));
+      }
     }
+
+    if (from < 2) {
+      const upgraded: EditorialRule[] = [];
+      for (const rule of data.rules) {
+        const existing = await repository.rules.get(rule.id);
+        upgraded.push({ ...rule, enabled: existing?.enabled ?? rule.enabled });
+      }
+      await repository.rules.bulkPut(upgraded);
+    }
+
     await repository.setMeta("schemaVersion", CURRENT_SCHEMA_VERSION);
     await repository.setMeta("seedVersion", SEED_VERSION);
     return { ran: true, seedVersion: SEED_VERSION };

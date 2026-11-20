@@ -6,7 +6,7 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | ----- | ----------------------------------------------- | -------- |
 | 0     | Setup du projet                                 | Terminée |
 | 1     | Schéma de données, persistance, exemples        | Terminée |
-| 2     | Catégories, règles éditoriales, linter          | À faire  |
+| 2     | Catégories, règles éditoriales, linter          | Terminée |
 | 3     | Intelligence éditoriale (Brand Voice Extractor) | À faire  |
 | 4     | Recherche des références                        | À faire  |
 | 5     | Moteur natif                                    | À faire  |
@@ -18,7 +18,48 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | 11    | Historique, dashboard, paramètres, données      | À faire  |
 | 12    | Tests, QA, README                               | À faire  |
 
-**Prochaine étape : Phase 2.**
+**Prochaine étape : Phase 3.**
+
+---
+
+## Phase 2 : Catégories, règles éditoriales et linter (terminée le 20/11/2026)
+
+### Livré
+
+- **Registre des catégories** (`lib/categories/`) : 58 champs définis une seule fois (`fields.ts`), 12 catégories LIVE SHOW (`live.ts`) et 26 DAILY & MEDIA (`daily.ts`) conformes aux tableaux 7.2 et 7.3, avec libellé, emoji, raccourci (LIVE), champs requis et optionnels, présélections, consigne de ton et signature par défaut. Fonctions du registre (`registry.ts`) : disposition du formulaire (requis / affichés d'emblée / « Plus de détails »), visibilité conditionnelle (`showIf`), bascule du vainqueur entre les deux combattants, options lues dans les réglages ou la fight card, présélections, validation du brief avec message précis par champ, masque de temps m:ss (« 312 » → « 3:12 »).
+- **Règles éditoriales** (`lib/editorial/rules.ts`) : 13 règles intégrées (section 1.6), identifiants stables, ordre d'application, valeurs par défaut du style (seuil d'emojis 6, similarité d'accroche 0,7, fenêtre de 20 accroches).
+- **Service des règles** (`lib/editorial/rule-service.ts`) : lecture triée, validation (motif, options, champs obligatoires selon le type), activation et modification réservées au rôle administrateur (`RulePermissionError`).
+- **Linter** (`lib/editorial/linter.ts`), renvoie `{ text, fixes, warnings }` :
+  - corrections : casse de la marque, « de HEXAGONE MMA », exception « ceinture / titre d'HEXAGONE MMA », règles de remplacement personnalisées, hashtags en double, espace insécable avant ! ? : ; et espaces doubles ;
+  - avertissements (positionnés pour le surlignage) : surcharge d'emojis, accroche répétée, formules d'IA, « véritable » en ouverture, question finale sur catégorie factuelle, Samba Sima (suggestion), règles interdites ou exigées personnalisées, dépassement de limite plateforme et de nombre de hashtags ;
+  - `formatFixSummary` : « 1 correction éditoriale appliquée ».
+- **Plateformes** (`lib/platforms/`) : limites par réseau, compteur en graphèmes (`Intl.Segmenter`), comptage pondéré officiel de X (`twitter-text`).
+- **Seed v2** : les règles intégrées sont réécrites dans les bases existantes, l'activation choisie par l'administrateur est conservée. Les étapes de seed manquantes s'appliquent à chaque démarrage, y compris après une restauration.
+- `text-utils` complété : accroche, ensemble de mots, Jaccard, motif insensible aux accents et aux apostrophes.
+
+### Validation
+
+- `typecheck`, `lint`, `format:check`, `build` (sans avertissement) : OK.
+- `npm run test` : 174 tests (13 fichiers). Les trois cas imposés passent : « la victoire d'HEXAGONE MMA » → « la victoire de HEXAGONE MMA » ; « la ceinture de HEXAGONE MMA » → « la ceinture d'HEXAGONE MMA » ; « le titre d'HEXAGONE MMA » inchangé. Chaque règle a ses tests, le linter est idempotent. Le registre expose 12 catégories LIVE et 26 DAILY, chacune avec au moins un champ requis.
+- `npm run test:e2e` : 4 scénarios OK (inchangés).
+
+### Décisions et écarts
+
+1. **Règles de remplacement entièrement décrites par leur motif.** La fenêtre de 3 mots de l'exception « ceinture / titre » est exprimée par un lookbehind de longueur variable. Le linter applique donc les règles telles qu'elles sont stockées : un administrateur peut les modifier sans toucher au code. Champ `order` ajouté à `EditorialRule`.
+2. **Ordre d'application** : casse de la marque d'abord (« d'Hexagone MMA » devient « d'HEXAGONE MMA »), puis « de HEXAGONE MMA », puis l'exception ceinture / titre, puis les doublons de hashtags, enfin les espaces. La section 7.4 numérote les règles sans imposer d'ordre.
+3. **Majuscule conservée** : « D'HEXAGONE MMA » en début de phrase devient « De HEXAGONE MMA ». Le pluriel est couvert (« les ceintures d'HEXAGONE MMA »).
+4. **Espace insécable** : U+00A0 avant ! ? ; et avant : suivi d'une espace. Les heures (20:30), le temps de combat (3:12) et les liens ne sont jamais modifiés. U+00A0 plutôt que l'espace fine U+202F, mieux rendue partout.
+5. **Renommages de champs** : le titre d'article de `media_press` devient `articleTitle`, car `title` désigne déjà la bascule « combat pour le titre » de `daily_main_event` (un champ = une définition). Le champ `cta` de `daily_ticketing` n'est pas dupliqué : le CTA passe par le bloc CTA du brief (section 13.3, point 6).
+6. **Extensions de `FieldDef`** : `helpText`, `multiple`, `allowCustom` (« Autre » en soumission), `pickFrom` (bascule du vainqueur), `timeFormat` (durée m:ss ou heure 20h30, les deux de type `time`), `inputMode`, `maxLength`, source d'options `event.fightCard`. `promote` est posé sur méthode, round, type de décision, type de soumission et position sur la carte : le parcours KO (vainqueur, perdant, round) tient sans ouvrir « Plus de détails ».
+7. **Extensions de `CategoryDef`** : `fieldOptions` (KO / TKO seulement en `live_ko`, Main / Co-main en `daily_main_event`), `context` (positif, neutre, négatif), `disabledRules` (Samba Sima en `live_defeat`), `ticketingCta: false` (défaite, réaction). Présélections cachées transmises aux moteurs : méthode Soumission ou Décision pour `live_sub` et `live_decision`, type de média pour les 8 catégories médias.
+8. **Contexte de la règle Samba Sima** : catégorie de contexte positif, Samba Sima absent des rôles perdants (perdant, challenger en défense de titre, combattant non vainqueur en résultat), aucun mot de défaite dans le texte. Catégories neutres exclues (ambiance, réaction, partenaire, communiqué, remerciements, annonce institutionnelle, programme).
+9. **Formules d'IA** : la liste de la section 7.4 (« etc. ») est complétée de cinq formules courantes, modifiable par l'administrateur.
+10. **Limites plateformes** : Instagram 2 200 caractères et 30 hashtags, Facebook 63 206, X 280 en comptage pondéré, TikTok 4 000. Valeurs publiques au moment de l'écriture, regroupées dans `lib/platforms/rules.ts` pour être revérifiées facilement.
+11. **Écran des règles** : la section 7.4 renvoie à `/editorial`, détaillé en section 8.9 (Phase 3). La Phase 2 livre le stockage, la validation et le contrôle admin. L'écran arrive en Phase 3.
+
+### Fichiers créés ou modifiés
+
+`lib/categories/{types,fields,live,daily,registry,index}.ts`, `lib/editorial/{rules,rule-service,linter,text-utils}.ts`, `lib/platforms/{rules,counters}.ts`, `lib/database/{seed,bootstrap}.ts`, `types/domain.ts` (`EditorialRule.order`), `tests/unit/categories/registry.test.ts`, `tests/unit/editorial/{linter,rule-service}.test.ts`, `tests/unit/platforms/counters.test.ts`, `tests/unit/text-utils.test.ts`, `tests/unit/database/{seed,bootstrap}.test.ts`, `tests/fixtures/entities.ts`.
 
 ---
 

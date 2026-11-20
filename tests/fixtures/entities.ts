@@ -154,6 +154,7 @@ export async function sampleEntities(): Promise<{ [K in TableName]: EntityMap[K]
       label: "Règle de test",
       kind: "forbid",
       values: ["formule interdite"],
+      order: 500,
       enabled: true,
       editableBy: "admin",
     },

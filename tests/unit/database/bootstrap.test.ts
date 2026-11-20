@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { acceptRestore, declineRestore, prepareData } from "@/lib/database/bootstrap";
 import { createDataServices, type DataServices } from "@/lib/database/client";
 import type { DexieRepository } from "@/lib/database/dexie-repository";
-import { runSeed } from "@/lib/database/seed";
+import { SEED_VERSION, runSeed } from "@/lib/database/seed";
 import { countSnapshot, type Snapshot } from "@/lib/database/snapshot";
 import {
   createTestRepository,
@@ -95,7 +95,7 @@ describe("démarrage des données", () => {
     await acceptRestore(s, restoreRoute(snapshot) as unknown as typeof fetch);
     expect(await s.repository.wordings.count()).toBe(7);
     expect(await s.repository.wordings.get("real-1")).toBeDefined();
-    expect(await s.repository.getMeta("seedVersion")).toBe(1);
+    expect(await s.repository.getMeta("seedVersion")).toBe(SEED_VERSION);
   });
 
   it("Ignorer : copie d'abord le fichier existant, puis écrit les données initiales", async () => {
