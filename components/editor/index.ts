@@ -1,2 +1,2 @@
-// Édition des variantes : VariantCard, VariantEditor, RefineBar, RevisionTimeline, ReferencesPanel, FactGuardWarnings (Phase 8).
-export {};
+// Édition des variantes : ReferencesPanel (Phase 4) ; VariantCard, VariantEditor, RefineBar, RevisionTimeline, FactGuardWarnings (Phase 8).
+export { ReferencesPanel } from "./ReferencesPanel";

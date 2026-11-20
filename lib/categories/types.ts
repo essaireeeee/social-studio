@@ -57,6 +57,11 @@ export interface CategoryDef {
   id: string;
   mode: Mode;
   group?: CategoryGroup;
+  /**
+   * Famille des catégories LIVE (qui n'ont pas de groupe) : deux catégories de la même
+   * famille sont « voisines » pour la recherche des références (section 9.1).
+   */
+  family?: "finish" | "title" | "presence" | "atmosphere";
   label: string;
   emoji: string;
   /** Touche 1..9, 0, -, = (LIVE SHOW uniquement). */

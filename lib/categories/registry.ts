@@ -43,6 +43,20 @@ export function getCategoriesByMode(mode: Mode): CategoryDef[] {
   return CATEGORIES.filter((category) => category.mode === mode);
 }
 
+/**
+ * Proximité de deux catégories pour la recherche : 1 si identiques, 0,5 si même groupe
+ * (DAILY) ou même famille (LIVE), 0 sinon.
+ */
+export function categoryProximity(a: string, b: string): 0 | 0.5 | 1 {
+  if (a === b) return 1;
+  const first = BY_ID.get(a);
+  const second = BY_ID.get(b);
+  if (!first || !second || first.mode !== second.mode) return 0;
+  if (first.group && first.group === second.group) return 0.5;
+  if (first.family && first.family === second.family) return 0.5;
+  return 0;
+}
+
 export function getCategoriesByGroup(group: CategoryGroup): CategoryDef[] {
   return CATEGORIES.filter((category) => category.group === group);
 }

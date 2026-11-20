@@ -7,6 +7,7 @@ export const LIVE_CATEGORIES: readonly CategoryDef[] = [
   {
     id: "live_result",
     mode: "live",
+    family: "finish",
     label: "Résultat combat",
     emoji: "🏆",
     shortcut: "1",
@@ -18,6 +19,7 @@ export const LIVE_CATEGORIES: readonly CategoryDef[] = [
   {
     id: "live_ko",
     mode: "live",
+    family: "finish",
     label: "KO / TKO",
     emoji: "💥",
     shortcut: "2",
@@ -31,6 +33,7 @@ export const LIVE_CATEGORIES: readonly CategoryDef[] = [
   {
     id: "live_sub",
     mode: "live",
+    family: "finish",
     label: "Soumission",
     emoji: "🐍",
     shortcut: "3",
@@ -43,6 +46,7 @@ export const LIVE_CATEGORIES: readonly CategoryDef[] = [
   {
     id: "live_decision",
     mode: "live",
+    family: "finish",
     label: "Décision",
     emoji: "⚖️",
     shortcut: "4",
@@ -55,6 +59,7 @@ export const LIVE_CATEGORIES: readonly CategoryDef[] = [
   {
     id: "live_walkout",
     mode: "live",
+    family: "presence",
     label: "Entrée combattant",
     emoji: "🚶",
     shortcut: "5",
@@ -66,6 +71,7 @@ export const LIVE_CATEGORIES: readonly CategoryDef[] = [
   {
     id: "live_crowd",
     mode: "live",
+    family: "atmosphere",
     label: "Ambiance / Public",
     emoji: "🔥",
     shortcut: "6",
@@ -77,6 +83,7 @@ export const LIVE_CATEGORIES: readonly CategoryDef[] = [
   {
     id: "live_faceoff",
     mode: "live",
+    family: "presence",
     label: "Face-off / Coulisses",
     emoji: "👀",
     shortcut: "7",
@@ -88,6 +95,7 @@ export const LIVE_CATEGORIES: readonly CategoryDef[] = [
   {
     id: "live_champion",
     mode: "live",
+    family: "title",
     label: "Nouveau champion",
     emoji: "🥇",
     shortcut: "8",
@@ -99,6 +107,7 @@ export const LIVE_CATEGORIES: readonly CategoryDef[] = [
   {
     id: "live_defense",
     mode: "live",
+    family: "title",
     label: "Défense de titre",
     emoji: "🛡️",
     shortcut: "9",
@@ -135,6 +144,7 @@ export const LIVE_CATEGORIES: readonly CategoryDef[] = [
   {
     id: "live_moment",
     mode: "live",
+    family: "atmosphere",
     label: "Moment fort",
     emoji: "🎬",
     shortcut: "=",

@@ -8,7 +8,7 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | 1     | Schéma de données, persistance, exemples        | Terminée |
 | 2     | Catégories, règles éditoriales, linter          | Terminée |
 | 3     | Intelligence éditoriale (Brand Voice Extractor) | Terminée |
-| 4     | Recherche des références                        | À faire  |
+| 4     | Recherche des références                        | Terminée |
 | 5     | Moteur natif                                    | À faire  |
 | 6     | Moteur IA (Anthropic / OpenAI)                  | À faire  |
 | 7     | Shell de l'application                          | À faire  |
@@ -18,7 +18,40 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | 11    | Historique, dashboard, paramètres, données      | À faire  |
 | 12    | Tests, QA, README                               | À faire  |
 
-**Prochaine étape : Phase 4.**
+**Prochaine étape : Phase 5.**
+
+---
+
+## Phase 4 : Moteur de recherche des références (terminée le 20/11/2026)
+
+### Livré
+
+- **Index BM25 en mémoire** (`lib/retrieval/index.ts`) : ajout, mise à jour et suppression document par document, index inversé, IDF de Robertson-Spärck Jones (k1 = 1,2, b = 0,75). Un index par mode. Tokenizer dédié (`tokenizer.ts`) : mots normalisés sans mots vides.
+- **Score pondéré** (`lib/retrieval/scorer.ts`) : les 7 composantes de la section 9.1, poids lus dans `Settings.retrievalWeights`, raison principale (« Même catégorie », « Catégorie voisine », « Même combattant », « Mêmes combattants », « Même événement », « Contenu proche », « Même plateforme », « Publication récente ») et détail des contributions.
+- **Retriever** (`lib/retrieval/retriever.ts`) : interface `Retriever` et `LocalBm25Retriever` (filtre dur, score, sélection de 5 à 10 références, au plus 3 par empreinte de structure). `buildRetrievalQuery` construit la requête depuis le brief : combattants reliés à leur fiche ou gardés en nom libre, événement du brief ou de la Session Live, références des 5 dernières générations, exclusions du CM.
+- **Raccordement à la base** (`lib/retrieval/service.ts`) : `connectRetriever` construit l'index au chargement puis le met à jour à chaque écriture, y compris depuis un autre onglet (observation Dexie, réindexation des seuls posts modifiés). `findReferences` assemble le contexte stocké (fiches, événements, session active, générations récentes, poids).
+- **Panneau « RÉFÉRENCES UTILISÉES »** (`components/editor/ReferencesPanel.tsx`, `ReferenceSheet.tsx`) : repliable, extrait sur 2 lignes, catégorie, date, score, raison ; clic pour ouvrir le post complet dans un panneau latéral avec le détail du score ; « Exclure de cette génération » puis « Régénérer ». Composant `components/ui/sheet.tsx`.
+- README : fonctionnement de la recherche et évolution `PgVectorRetriever` (section 9.2).
+
+### Validation
+
+- `typecheck`, `lint`, `format:check`, `build` : OK, sans avertissement.
+- `npm run test` : 232 tests (18 fichiers). Critères de la section 9 : un brief `live_ko` avec le combattant X classe en premier le post `live_ko` qui mentionne X ; aucun post DAILY n'est jamais retourné pour un brief LIVE (60 briefs testés sur les 12 catégories), et inversement. Aussi : démos et non-références exclues, pénalité « déjà utilisée », poids des réglages, fraîcheur, diversité, mise à jour incrémentale identique à une reconstruction, index tenu à jour depuis la base, classement de 2 000 publications en moins de 50 ms, test du panneau (ouverture, panneau latéral, exclusion, Échap, Régénérer).
+- `npm run test:e2e` : 7 scénarios OK (inchangés).
+
+### Décisions et écarts
+
+1. **Familles de catégories LIVE.** Les catégories LIVE n'ont pas de groupe ; la note 0,5 « même groupe » restait donc inaccessible en LIVE. Champ `family` ajouté : fin de combat (résultat, KO, soumission, décision), titre (champion, défense), présence (entrée, face-off), ambiance (public, moment fort). Défaite et réaction restent seules.
+2. **Combattant présent** : fiche liée au post, ou nom (complet, nom de famille, surnom) cité dans le texte, délimité comme un mot. Une publication importée sans fiche liée reste donc trouvable.
+3. **Nombre de références** : jusqu'à 10 ; au-delà des 5 premières, une référence doit atteindre 40 % du meilleur score, pour ne pas compléter avec des posts sans rapport. Un score nul ou négatif n'est jamais retenu. Moins de 5 si le corpus est petit.
+4. **Diversité stricte** : une 4e référence de même structure est écartée, même s'il faut alors en rendre moins de 5.
+5. **BM25 normalisé** sur le meilleur score de la requête (le premier vaut 1), calculé uniquement sur les candidats qui passent le filtre dur.
+6. **Panneau sans écran hôte pour l'instant** : il sera monté dans la colonne Wording Studio en Phase 8. Il n'apparaît nulle part d'ici là ; il est couvert par un test de composant.
+7. **Nettoyage des tests de composants** : `tests/setup.ts` démonte les rendus entre deux tests en environnement jsdom.
+
+### Fichiers créés ou modifiés
+
+`lib/retrieval/{index,tokenizer,scorer,retriever,service}.ts`, `lib/categories/{types,live,registry}.ts`, `lib/format.ts`, `components/ui/sheet.tsx`, `components/editor/{ReferencesPanel,ReferenceSheet,index}.tsx`, `tests/setup.ts`, `tests/fixtures/retrieval-corpus.ts`, `tests/unit/retrieval/{retriever,service}.test.ts`, `tests/unit/components/references-panel.test.tsx`, `README.md`.
 
 ---
 
