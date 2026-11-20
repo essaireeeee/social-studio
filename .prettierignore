@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+build
+data
+playwright-report
+test-results
+package-lock.json
+PROMPT.md
