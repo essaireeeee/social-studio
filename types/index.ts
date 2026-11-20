@@ -1,2 +1,2 @@
-// Types de domaine partagés, dérivés des schémas Zod (Phase 1).
-export {};
+// Types de domaine partagés, dérivés des schémas Zod.
+export * from "./domain";

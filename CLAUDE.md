@@ -74,4 +74,7 @@ Une génération ne devient une référence de style qu'après validation par le
 - Composants shadcn/ui copiés à la main dans `components/ui` (le registre ui.shadcn.com n'est pas joignable depuis l'environnement de développement). Dans ces composants, `accent` / `primary` désignent la couleur du mode actif ; les surfaces de survol utilisent `subtle`.
 - Tests unitaires : `tests/unit/**/*.test.ts(x)` (Vitest, environnement `node` par défaut, `// @vitest-environment jsdom` pour les composants). E2E : `tests/e2e/*.spec.ts` (Playwright, `@playwright/test` épinglé sur la version du Chromium préinstallé).
 
+- Persistance : toute écriture passe par `DataRepository` (`lib/database/repository.ts`). Pas d'index IndexedDB sur un booléen (non indexable) : filtrer avec `list({ filter })`. Ne jamais importer `*.server.ts` depuis du code client.
+- Les outils d'écriture de fichiers transforment les séquences `\u…` en caractères bruts. Pour un caractère invisible dans le code : `new RegExp("\\u…")` ou `String.fromCodePoint(…)`.
+
 @AGENTS.md
