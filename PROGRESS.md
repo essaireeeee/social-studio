@@ -65,4 +65,5 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 
 ### Points d'attention pour la suite
 
-- L'application tourne pour l'instant dans un conteneur cloud éphémère, sans dépôt distant. Tant que le projet n'est pas poussé sur un dépôt GitHub, le travail ne survit pas à la fin de la session.
+- Dépôt distant : https://github.com/essaireeeee/social-studio (branche `main`). Chaque commit de fin de phase y est poussé : le conteneur cloud de développement est éphémère.
+- Le dossier local s'appelle `hexagone-social-studio`, le dépôt GitHub `social-studio`. Les deux désignent le même projet.
