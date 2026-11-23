@@ -13,12 +13,62 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | 6     | Moteur IA (Anthropic / OpenAI)                  | Terminée |
 | 7     | Shell de l'application                          | Terminée |
 | 8     | Social Studio                                   | Terminée |
-| 9     | Bibliothèque                                    | À faire  |
+| 9     | Bibliothèque                                    | Terminée |
 | 10    | Combattants, événements, hashtags, signatures   | À faire  |
 | 11    | Historique, dashboard, paramètres, données      | À faire  |
 | 12    | Tests, QA, README                               | À faire  |
 
-**Prochaine étape : Phase 9.**
+**Prochaine étape : Phase 10.**
+
+---
+
+## Phase 9 : Bibliothèque « BASE WORDINGS & ADN » (terminée le 23/11/2026)
+
+### Livré
+
+- **Page `/library`**, active dans la navigation, dans la palette et via l'icône du header.
+- **Liste et grille** (`WordingResults`, `WordingRow`, `WordingCard`) : une ligne dense par publication, ou des cartes de trois lignes. Choix de vue et de tri mémorisés (`stores/library.store.ts`). Rendu virtuel (`useWindowVirtual`, `lib/library/virtual.ts`) : seules les lignes visibles et une marge sont montées, la page défile normalement.
+- **Recherche et filtres** (`lib/library/query.ts`) : mots-clés classés par BM25, expression exacte entre guillemets droits ou français ; mode, catégorie, combattant, événement, plage de dates, plateforme, tag, statut, source, « Inclure les exemples fictifs » (décoché par défaut). Tri par date de publication, pertinence ou dernière modification. Compteur « 18 publications sur 24 · 6 exemples fictifs masqués ».
+- **Actions par publication** (menu « … ») : consulter (fiche détaillée : statut, source, référence, hashtags, CTA, tags, lien, commentaires, date de mise à jour), modifier, dupliquer, copier, basculer « Référence de style », supprimer avec confirmation. Badges `EXEMPLE FICTIF`, `Publié` / `Validé`, `Hors références`.
+- **Fiche publication** (`WordingForm`, `lib/library/form.ts`, `lib/library/actions.ts`) : texte intégral, mode, catégorie proposée par le classifieur avec sa confiance, combattants (recherche floue, création de fiche), événement, date, plateforme, statut, lien Instagram, hashtags extraits du texte, CTA détecté, tags, commentaires internes. Contrôle des doublons avant enregistrement : doublon exact bloqué, publication très proche enregistrée seulement après « Enregistrer quand même ».
+- **Studio** : « Enregistrer dans la bibliothèque » ouvre maintenant cette fiche complète, pré-remplie depuis le brief (catégorie, plateforme, combattants ayant une fiche, événement, statut `validated`, source `studio`). Clôt l'écart 4 de la Phase 8.
+- **Import en masse** (`BulkImportModal`) : Coller (compteur en direct « 20 publications détectées »), Vérifier, Confirmer.
+- **Étape Vérifier commune** (`ImportReviewFlow`, `ImportReviewTable`, `ImportBulkBar`) : extrait, mode, catégorie (« À catégoriser » mis en évidence), plateforme, statut `Nouveau` / `Doublon exact` / `Très proche de « … »`, case « Importer ». Actions groupées (mode, catégorie, plateforme), tout cocher, fusion avec la ligne suivante, scission à la première ligne vide. 50 lignes par page.
+- **Étape Confirmer** (`ImportConfirm`) : « N nouvelles publications », « M doublons ignorés », lignes cochées sans catégorie signalées, bouton unique « Importer N publications ». « Remplacer… » ouvre une confirmation explicite.
+- **Import CSV et Excel** (`TableImportModal`, `ColumnMappingStep`) : `.csv` (séparateur et BOM détectés) ou `.xlsx` (première feuille), écran de correspondance si un en-tête n'est pas reconnu, avec un exemple de valeur par colonne. Modèle CSV téléchargeable.
+- **Import Instagram** (`InstagramImportModal`) : légende collée avec lien et date facultatifs, ou fichier d'export JSON avec aperçu des légendes avant import et message clair si aucune n'est trouvée. `lib/import/instagram-api.README.md` décrit une connexion future à l'API officielle (rien d'implémenté).
+- **Logique d'import** (`lib/import/`) : découpage `===`, classifieur, doublons, lecture CSV et Excel, export Meta avec correction de l'encodage, lignes de vérification (`updateRow`, `applyToSelected`, `mergeRows`, `splitRow`, `withReplace`, `summarize`), enregistrement (`commitImport`) avec recalcul du profil de style proposé au-delà de 10 publications.
+
+### Validation
+
+- `typecheck`, `lint`, `format:check`, `build`, `check:bundle` : OK.
+- `npm run test` : 410 tests (34 fichiers), dont 32 nouveaux : découpage, classifieur (règles, seuil 0,4, vote BM25 à partir de 30 publications), doublons exacts et proches (lot et bibliothèque), CSV accentué, Excel, export Instagram avec mojibake, lignes de vérification, enregistrement et remplacement, requête de la bibliothèque, fiche, écritures, fenêtre virtuelle, pré-remplissage depuis le Studio.
+- `npm run test:e2e` : 27 scénarios OK, dont 7 nouveaux :
+  - **20 publications collées : 20 détectées, catégories proposées, 2 doublons volontaires détectés** (ligne 19 identique à la ligne 3, ligne 20 très proche de la ligne 8), décochés, 18 importées ; recollage : doublons de la bibliothèque, « Remplacer » confirmé ;
+  - **CSV de fixtures : correspondance correcte, accents préservés** (« Besançon », « Ça restera gravé ») ;
+  - en-têtes inconnus : écran de correspondance ;
+  - **export Instagram avec mojibake : emojis restaurés** (💥, 🔥, 🎟️, 🎙️) dans l'aperçu puis dans la bibliothèque ; fichier sans légende : message clair ;
+  - ajout manuel, catégorie proposée, doublon exact bloqué, référence de style, suppression confirmée ;
+  - **5 000 publications : moins de 60 lignes montées**, dernière publication atteinte au défilement, recherche exacte en moins de 2 s, vue grille conservée après actualisation ;
+  - Studio : fiche complète pré-remplie, enregistrée avec la source `studio`.
+- Revue visuelle à 1 440 et 390 px : liste, grille, filtres, fiche, import en trois étapes.
+
+### Décisions et écarts
+
+1. **Classifieur** : règles pondérées (mots-clés sur le texte normalisé, emojis sur le texte brut) et léger bonus aux catégories LIVE quand le texte évoque la soirée en cours. À partir de 30 publications réelles catégorisées, les 5 plus proches voisines BM25 votent pour leur catégorie, plutôt que la seule meilleure : un vote résiste mieux à une publication mal rangée. Confiance = meilleur score / (meilleur + second + 2), sous 0,4 : « À catégoriser ».
+2. **Catégorie obligatoire** : le modèle de données l'exige (profil de style, références). Le texte reste le seul champ à saisir : la catégorie est proposée ; si le classifieur ne peut pas trancher, la fiche demande de la choisir.
+3. **Statut dans la fiche** : ajouté (Publié par défaut, Validé), pour que le filtre par statut ait un sens. Les imports créent des publications `published`, le Studio des `validated`.
+4. **Dupliquer** ouvre une nouvelle fiche pré-remplie : l'enregistrement reste bloqué tant que le texte est identique (doublon exact).
+5. **Doublons à l'import** : un doublon exact interne au lot n'est jamais importable (case désactivée). Un doublon exact de la bibliothèque n'est écrit qu'après « Remplacer » confirmé (même identifiant, version importée). Une publication très proche peut être cochée à la main.
+6. **Exemples fictifs** : badge court `EXEMPLE FICTIF` dans la liste et la grille (texte complet en infobulle et dans la fiche). Ils ne peuvent pas devenir référence de style (option désactivée).
+7. **Combattants de la fiche** : chaque nom doit correspondre à une fiche ; sinon, message « Fiche introuvable » et création possible depuis les suggestions. Au pré-remplissage depuis le Studio, seuls les combattants ayant une fiche sont repris, comme avant.
+8. **Source des imports** : légende Instagram collée = `manual`, fichier d'export = `instagram_export`, CSV = `csv`, Excel = `excel`, collage = `bulk`.
+9. **Rendu virtuel écrit à la main** (aucune dépendance ajoutée), lignes de hauteur fixe (56 px en liste, 188 px en grille). Le tableau de vérification n'est pas virtualisé : 50 lignes par page.
+10. **Lien Instagram** : stocké tel quel et affiché en texte, jamais ouvert ni appelé par l'application.
+
+### Fichiers créés ou modifiés
+
+`app/(workspace)/library/page.tsx`, `components/library/{LibraryPage,LibraryToolbar,LibraryFilters,WordingResults,WordingRow,WordingCard,WordingBadges,WordingMenu,WordingForm,WordingFormFields,DeleteWordingDialog}.tsx`, `components/library/import/{ImportDialog,ImportStepper,ImportReviewFlow,ImportReviewTable,ImportBulkBar,ImportConfirm,BulkImportModal,TableImportModal,ColumnMappingStep,InstagramImportModal}.tsx`, `components/editor/LibraryDialog.tsx`, `components/layout/{Header,RecordSheet}.tsx`, `lib/import/{splitter,classifier,dedupe,table,csv,excel,instagram-export,rows,commit,index}.ts`, `lib/import/instagram-api.README.md`, `lib/library/{query,form,actions,labels,virtual}.ts`, `lib/studio/actions.ts`, `lib/shell/navigation.ts`, `hooks/{useLibraryData,useWindowVirtual}.ts`, `stores/library.store.ts`, `tests/fixtures/import/{paste-20.txt,wordings.csv,instagram-posts.json}`, `tests/unit/import/import.test.ts`, `tests/unit/library/{query,library}.test.ts`, `tests/unit/shell/shell.test.ts`, `tests/e2e/phase9-library.spec.ts`, `README.md`, `CLAUDE.md`.
 
 ---
 

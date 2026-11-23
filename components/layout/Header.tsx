@@ -4,7 +4,6 @@ import { Library, Menu, Search, Settings } from "lucide-react";
 import Link from "next/link";
 import { Kbd } from "@/components/ui/kbd";
 import { Tooltip } from "@/components/ui/tooltip";
-import { COMING_SOON } from "@/lib/shell/navigation";
 import { cn } from "@/lib/utils";
 import { useUiStore } from "@/stores/ui.store";
 import type { Mode } from "@/types/domain";
@@ -64,15 +63,14 @@ export function Header({ mode, onModeChange }: HeaderProps) {
           <Kbd className="ml-auto hidden lg:inline-flex">Ctrl K</Kbd>
           <span className="sr-only lg:hidden">Rechercher</span>
         </button>
-        <Tooltip content={`Bibliothèque : ${COMING_SOON}`} side="bottom">
-          <span
-            className={cn(iconButton, "hidden cursor-not-allowed opacity-50 sm:flex")}
-            aria-disabled="true"
-            aria-label={`Bibliothèque (${COMING_SOON.toLowerCase()})`}
-            role="link"
+        <Tooltip content="Bibliothèque" side="bottom">
+          <Link
+            href="/library"
+            className={cn(iconButton, "hidden sm:flex")}
+            aria-label="Bibliothèque"
           >
             <Library className="size-4" aria-hidden="true" />
-          </span>
+          </Link>
         </Tooltip>
         <span className="hidden md:flex">
           <EngineIndicator />

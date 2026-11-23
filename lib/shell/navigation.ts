@@ -81,7 +81,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
         label: "Bibliothèque de wordings",
         href: "/library",
         icon: "library",
-        available: false,
+        available: true,
       },
       {
         id: "fighters",

@@ -56,6 +56,24 @@ Next.js 16 (App Router), React 19, TypeScript strict, Tailwind CSS 4, Radix UI (
 | `Ctrl+K` (`Cmd+K` sur Mac) | Palette : actions, wordings, combattants, événements |
 | `Tab` au chargement        | Lien « Aller au contenu »                            |
 
+## Bibliothèque et imports (Phase 9)
+
+La bibliothèque (`/library`) rassemble les publications réelles de HEXAGONE MMA. Elle nourrit l'ADN éditorial et la recherche de références.
+
+- **Recherche** : mots-clés classés par BM25, ou expression exacte entre guillemets (`"premier round"` ou `« premier round »`). Filtres par mode, catégorie, combattant, événement, dates, plateforme, tag, statut, source. Les exemples fictifs sont masqués par défaut.
+- **Affichage** : liste dense ou grille, choix mémorisé. Seules les lignes visibles sont rendues : la page reste fluide à 5 000 publications.
+- **Fiche** : seul le texte est à saisir. La catégorie est proposée par le classifieur, les hashtags et l'appel à l'action sont extraits du texte. Un doublon exact bloque l'enregistrement ; une publication très proche demande une confirmation.
+
+Trois façons d'importer, qui passent toutes par les étapes « Vérifier » puis « Confirmer » :
+
+| Import                 | Format                                                                                                                                                                                                         |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Collage en masse       | Publications séparées par une ligne qui ne contient que `===`                                                                                                                                                  |
+| CSV ou Excel (`.xlsx`) | Colonnes `texte` (requise), `mode`, `categorie`, `combattants` (séparés par `;`), `evenement`, `date`, `reseau`, `lien`, `hashtags`, `cta`, `tags`, `commentaire`. Modèle CSV téléchargeable depuis la modale. |
+| Instagram              | Légende collée avec son lien, ou fichier `posts_1.json` de l'export « Télécharger vos informations » (format JSON)                                                                                             |
+
+Les doublons exacts sont ignorés par défaut ; « Remplacer » demande une confirmation. Aucun appel n'est fait à Instagram : seuls le texte et le fichier fournis sont lus. La connexion à l'API officielle est décrite dans `lib/import/instagram-api.README.md` (non implémentée).
+
 ## Moteurs IA : Claude et OpenAI (Phase 6)
 
 Le moteur natif fonctionne sans clé. Pour rédiger avec Claude ou OpenAI :

@@ -46,6 +46,7 @@ describe("navigation (section 12.1)", () => {
       "/studio",
       "/studio?mode=live",
       "/studio?mode=daily",
+      "/library",
       "/editorial",
       "/settings/ai",
     ]);
@@ -104,6 +105,7 @@ describe("palette de commandes", () => {
       "Passer en DAILY & MEDIA",
       "Démarrer une Session Live",
       "Ouvrir : Social Studio",
+      "Ouvrir : Bibliothèque de wordings",
       "Ouvrir : ADN éditorial",
       "Ouvrir : Intelligence artificielle",
       "Replier la barre latérale",
@@ -114,6 +116,7 @@ describe("palette de commandes", () => {
       "session-edit",
       "session-end",
       "nav:studio",
+      "nav:library",
       "nav:editorial",
       "nav:settings-ai",
       "sidebar-toggle",

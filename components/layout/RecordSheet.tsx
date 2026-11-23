@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { getCategory } from "@/lib/categories/registry";
 import { formatDate, isStale } from "@/lib/format";
+import { DEMO_BADGE, SOURCE_LABELS, STATUS_LABELS } from "@/lib/library/labels";
 import { eventLabelOf } from "@/lib/generation/native/context";
 import type { PaletteRecord } from "@/lib/shell/commands";
 import { MODE_LABELS } from "@/lib/shell/mode";
@@ -13,8 +14,6 @@ import { PLATFORM_RULES } from "@/lib/platforms/rules";
 import type { Fighter, HexEvent, Wording } from "@/types/domain";
 
 export type SheetRecord = PaletteRecord;
-
-const DEMO_BADGE = "EXEMPLE FICTIF : À REMPLACER PAR UNE PUBLICATION OFFICIELLE";
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -53,6 +52,27 @@ function WordingBody({ wording }: { wording: Wording }) {
       ) : null}
       <p className="rounded-md border border-border bg-background p-3 text-sm leading-relaxed whitespace-pre-wrap">
         {wording.text}
+      </p>
+      <dl className="flex flex-col gap-1.5">
+        <Row label="Statut">{STATUS_LABELS[wording.status]}</Row>
+        <Row label="Source">{SOURCE_LABELS[wording.source]}</Row>
+        <Row label="Référence de style">
+          {wording.isReference && !wording.isDemo ? "Oui" : "Non"}
+        </Row>
+        {wording.hashtags.length > 0 ? (
+          <Row label="Hashtags">{wording.hashtags.join(" ")}</Row>
+        ) : null}
+        {wording.cta ? <Row label="Appel à l'action">{wording.cta}</Row> : null}
+        {wording.tags.length > 0 ? <Row label="Tags">{wording.tags.join(", ")}</Row> : null}
+        {wording.instagramUrl ? (
+          <Row label="Lien">
+            <span className="break-all">{wording.instagramUrl}</span>
+          </Row>
+        ) : null}
+        {wording.internalNotes ? <Row label="Commentaires">{wording.internalNotes}</Row> : null}
+      </dl>
+      <p className="text-xs text-muted-foreground">
+        Mise à jour le {formatDate(wording.updatedAt)}
       </p>
     </>
   );

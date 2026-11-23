@@ -2,11 +2,12 @@
  * Actions du Studio sur une génération enregistrée : chaque fonction relit la génération,
  * applique une transition pure (`revisions.ts`) et l'enregistre.
  */
-import { getCategory, getField, categoryFieldKeys } from "@/lib/categories/registry";
+import { getCategory } from "@/lib/categories/registry";
 import type { DataRepository } from "@/lib/database/repository";
-import { createWording } from "@/lib/database/wording-factory";
+import { createWording, type WordingInput } from "@/lib/database/wording-factory";
 import { buildBriefContext, findFighter } from "@/lib/generation/native/context";
 import { saveHook } from "@/lib/generation/native/hooks";
+import { briefFighterNames } from "@/lib/library/form";
 import { activeSession } from "@/lib/shell/live-session";
 import type { Generation, Platform, SavedHook, Wording } from "@/types/domain";
 import {
@@ -102,39 +103,33 @@ export async function keepHook(
   });
 }
 
-export interface LibraryEntryInput {
+/**
+ * Fiche bibliothèque issue du Studio : le texte, plus les champs de la fiche complète
+ * (section 14.2). Ce qui n'est pas fourni vient du brief.
+ */
+export type LibraryEntryInput = Partial<Omit<WordingInput, "source" | "id" | "isDemo">> & {
   text: string;
-  /** Date de publication (AAAA-MM-JJ), facultative. */
-  date?: string;
-  instagramUrl?: string;
-}
+};
 
-/** Enregistre le texte dans la bibliothèque (statut `validated`) et relie la génération. */
 export async function saveToLibrary(
   repository: DataRepository,
   generation: Generation,
   input: LibraryEntryInput,
 ): Promise<Wording> {
   const { brief } = generation;
-  const category = getCategory(brief.categoryId);
   const fighters = await repository.fighters.list();
-  const fighterIds = category
-    ? categoryFieldKeys(category)
-        .filter((key) => getField(key).type === "fighter")
-        .flatMap((key) => {
-          const value = brief.fields[key];
-          return Array.isArray(value) ? value : typeof value === "string" ? [value] : [];
-        })
-        .map((name) => findFighter(name, fighters)?.id)
-        .filter((id): id is string => Boolean(id))
-    : [];
+  const fighterIds =
+    input.fighterIds ??
+    briefFighterNames(brief)
+      .map((name) => findFighter(name, fighters)?.id)
+      .filter((id): id is string => Boolean(id));
   const wording = await createWording({
-    text: input.text,
     mode: brief.mode,
     categoryId: brief.categoryId,
     platform: brief.platform,
-    source: "studio",
     status: "validated",
+    ...input,
+    source: "studio",
     fighterIds: [...new Set(fighterIds)],
     date: input.date || undefined,
     instagramUrl: input.instagramUrl || undefined,
