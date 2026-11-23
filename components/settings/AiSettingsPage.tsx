@@ -1,44 +1,17 @@
 "use client";
 
-import { useLiveQuery } from "dexie-react-hooks";
 import { Badge } from "@/components/ui/badge";
-import { useAiStatus, useSessionCredentials } from "@/hooks/useAiSettings";
-import { useRepository } from "@/hooks/useRepository";
-import { engineIndicator, providerView, type ProviderView } from "@/lib/ai/indicator";
-import type { ProviderId } from "@/lib/ai/types";
-import { useAiStore } from "@/stores/ai.store";
-import type { Engine } from "@/types/domain";
+import { useAiOverview } from "@/hooks/useAiOverview";
 import { EngineChoice } from "./EngineChoice";
 import { ProviderPanel } from "./ProviderPanel";
 
 /** Paramètres > Intelligence artificielle (section 11.5). */
 export function AiSettingsPage() {
-  const repository = useRepository();
-  const settings = useLiveQuery(() => repository?.getSettings(), [repository]);
-  const status = useAiStatus();
-  const { credentials, update, clear } = useSessionCredentials();
-  const health = useAiStore((state) => state.health);
-
-  const views: Partial<Record<ProviderId, ProviderView>> = Object.fromEntries(
-    (status?.providers ?? []).map((p) => [
-      p.id,
-      providerView(p, credentials[p.id], status?.clientKeysAllowed ?? false),
-    ]),
-  );
-  const engine: Engine = settings?.aiProvider ?? "native";
-  const indicator = engineIndicator(
-    engine,
-    engine === "native" ? undefined : views[engine],
-    engine === "native" ? "unknown" : health[engine],
-  );
-
-  const choose = async (next: Engine) => {
-    if (!repository || !settings || next === settings.aiProvider) return;
-    await repository.saveSettings({ ...settings, aiProvider: next });
-  };
+  const { settings, status, credentials, update, clear, views, engine, indicator, chooseEngine } =
+    useAiOverview();
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-6 sm:px-6">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-6 sm:px-6">
       <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1">
           <p className="font-mono text-xs tracking-[0.2em] text-muted-foreground">PARAMÈTRES</p>
@@ -58,7 +31,7 @@ export function AiSettingsPage() {
         </Badge>
       </header>
 
-      <EngineChoice value={engine} views={views} disabled={!settings} onChange={choose} />
+      <EngineChoice value={engine} views={views} disabled={!settings} onChange={chooseEngine} />
 
       <section className="flex flex-col gap-3" aria-labelledby="providers-title">
         <h2 id="providers-title" className="text-sm font-semibold">
@@ -86,6 +59,6 @@ export function AiSettingsPage() {
           </div>
         )}
       </section>
-    </main>
+    </div>
   );
 }

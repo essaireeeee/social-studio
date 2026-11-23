@@ -82,6 +82,8 @@ Une génération ne devient une référence de style qu'après validation par le
 - Couche IA (`lib/ai/`) : code serveur. Le client n'importe que des types de `lib/ai/*` et passe par `lib/generation/ai-client.ts` (routes locales, clé de session). Journaliser uniquement via `safeLog()` (`lib/ai/keys.ts`), jamais d'en-tête ni de corps. Une sortie IA passe par `processAiText` avant de quitter la route. Après un build : `npm run check:bundle`.
 - Retouches : chaque action ajoute une `Revision`, jamais d'écrasement. Une retouche native sans effet lève `RefineUnavailableError` (message affichable) au lieu de créer une révision identique.
 - `twitter-text` : import par défaut uniquement (`twitterText.parseTweet`), l'import nommé casse dans les routes Next (ESM).
+- Shell (`components/layout/`, `lib/shell/`) : une nouvelle page de l'espace de travail va dans `app/(workspace)/` et rend un `<div>` (le `<main>` est fourni par l'AppShell). Pour l'activer dans la navigation : `available: true` dans `lib/shell/navigation.ts`. Le mode se change via `useMode().setMode` (jamais en écrivant `data-mode` directement). Une action de palette n'est ajoutée que si elle fonctionne (`lib/shell/commands.ts`).
+- Jamais `new Date()` ni `Date.now()` pendant le rendu d'un composant client (Cache Components) : `useNow()` ou un gestionnaire d'événement.
 - Composants client qui lisent la base : `useRepository()` (null tant que les données ne sont pas prêtes) + `useLiveQuery`.
 - Les outils d'écriture de fichiers transforment les séquences `\u…` en caractères bruts. Pour un caractère invisible dans le code : `new RegExp("\\u…")` ou `String.fromCodePoint(…)`.
 

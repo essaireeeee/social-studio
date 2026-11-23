@@ -11,14 +11,58 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | 4     | Recherche des références                        | Terminée |
 | 5     | Moteur natif                                    | Terminée |
 | 6     | Moteur IA (Anthropic / OpenAI)                  | Terminée |
-| 7     | Shell de l'application                          | À faire  |
+| 7     | Shell de l'application                          | Terminée |
 | 8     | Social Studio                                   | À faire  |
 | 9     | Bibliothèque                                    | À faire  |
 | 10    | Combattants, événements, hashtags, signatures   | À faire  |
 | 11    | Historique, dashboard, paramètres, données      | À faire  |
 | 12    | Tests, QA, README                               | À faire  |
 
-**Prochaine étape : Phase 7.**
+**Prochaine étape : Phase 8.**
+
+---
+
+## Phase 7 : Shell de l'application (terminée le 23/11/2026)
+
+### Livré
+
+- **AppShell** (`components/layout/AppShell.tsx`, `app/(workspace)/layout.tsx`) : toutes les pages de l'espace de travail partagent le header, la barre latérale, la barre Session Live et la palette. Lien d'évitement « Aller au contenu », `main#contenu`.
+- **Barre latérale** (`Sidebar`, `SidebarNav`, `lib/shell/navigation.ts`) : les quatre sections de la section 12.1, 232 px ou 56 px repliée (icônes et infobulles), état mémorisé dans localStorage. Seuls les écrans livrés sont des liens (ADN éditorial, Intelligence artificielle) ; les autres restent visibles, désactivés, avec « Bientôt » et l'infobulle « Bientôt disponible ». Sur petit écran, la même navigation s'ouvre dans un panneau depuis le header (`MobileNav`).
+- **Header** de 52 px fixe : logo (image `logo` en base, sinon un hexagone sobre) et « SOCIAL STUDIO », sélecteur de mode au centre, puis recherche (`Ctrl/Cmd+K`), bibliothèque (désactivée, « Bientôt disponible »), indicateur moteur IA, indicateur de sauvegarde (« Sauvegardé · il y a 3 s »), paramètres et profil actif (nom et rôle).
+- **Sélecteur de mode** (`ModeSwitcher`) : groupe radio LIVE SHOW (rouge, pastille ON AIR à pulsation lente, coupée si `prefers-reduced-motion`) / DAILY & MEDIA (or). `Alt+L` / `Alt+D` partout. Le mode met à jour `data-mode`, est enregistré dans les réglages (`lastMode`) et recopié dans localStorage.
+- **Mémoire du Studio** (`lib/shell/mode.ts`, `stores/studio.store.ts`) : champs communs conservés d'un mode à l'autre (tous les champs combattant et l'événement), dernière catégorie de chaque mode retrouvée. Le Studio (Phase 8) s'y branche.
+- **Session Live** (`lib/shell/live-session.ts`, `LiveSessionBar`, `LiveSessionDialog`, `LiveSessionForm`, `EndSessionDialog`) : barre sous le header en LIVE SHOW uniquement. Sans session : « Démarrer une Session Live », modale avec choix d'un événement de la base (pré-remplit tout) ou saisie rapide ; seul le nom est obligatoire. Avec session : `● ÉVÉNEMENT ACTIF · HEXAGONE MMA 12 · Paris · Diffusion : RMC SPORT`, « Modifier », « Terminer » avec confirmation (archivage par `endedAt`). Une seule session active ; elle survit à l'actualisation.
+- **Palette de commandes** (`CommandSearch`, `CommandList`, `lib/shell/commands.ts`) : actions réellement disponibles (changer de mode, démarrer, modifier ou terminer la session, ouvrir un écran livré, replier la barre), puis recherche dans les wordings, combattants et événements. Un résultat ouvre une fiche en lecture seule (`RecordSheet`) : texte et badge « EXEMPLE FICTIF » pour un wording, date de mise à jour et badge « À vérifier » au-delà de 90 jours pour une fiche, et pour un événement « Démarrer une Session Live avec cet événement ».
+- **Script avant affichage** (`PREPAINT_SCRIPT`) : rétablit le mode et l'état de la barre avant le premier affichage, sans flash de couleur ni saut de mise en page.
+- Primitives `components/ui/{dialog,tooltip,kbd}.tsx`, utilitaires `formatRelative` et `isStale` (`lib/format.ts`), hooks `useMode`, `useSidebar`, `useShortcuts`, `useLiveSession`, `useNow`, `useAiOverview`.
+
+### Validation
+
+- `typecheck`, `lint`, `format:check`, `build`, `check:bundle` : OK.
+- `npm run test` : 353 tests (28 fichiers), dont navigation, raccourcis, mémoire du mode, palette, formats, et la Session Live branchée sur la base (une seule active, archivage, modification, validation des champs, pré-remplissage depuis une fiche).
+- `npm run test:e2e` : 14 scénarios OK, dont 5 nouveaux, stables sur trois passages :
+  - **navigation complète au clavier** : lien d'évitement, ordre de tabulation du header, de la barre latérale (écrans livrés seulement) et de la Session Live, flèches dans le sélecteur de mode, lien activé à l'Entrée avec `aria-current` ;
+  - **barre latérale repliable** : 232 px puis 56 px, état conservé après actualisation, infobulles une fois repliée ;
+  - **mode persistant après actualisation** : `Alt+D`, actualisation, DAILY & MEDIA toujours actif avec l'accent or ;
+  - Session Live : nom obligatoire, démarrage, survie à l'actualisation, modification, fin confirmée ;
+  - palette `Ctrl+K` : action au clavier, recherche d'un wording, fiche avec badge d'exemple fictif, message « Aucun résultat ».
+- Revue visuelle en 1 280 px et 390 px : LIVE, DAILY, barre repliée, palette, modale de session, menu mobile.
+
+### Décisions et écarts
+
+1. **Écrans à venir dans la navigation** : visibles, désactivés, non focalisables, annoncés « bientôt disponible » aux lecteurs d'écran. Passer `available` à `true` dans `lib/shell/navigation.ts` quand une phase livre l'écran. LIVE SHOW et DAILY & MEDIA de la barre latérale ouvriront le Studio (Phase 8) ; d'ici là, le sélecteur de mode change de mode.
+2. **Sélecteur de mode écrit à la main** : le `ToggleGroup` de Radix déplace le focus aux flèches sans changer la sélection, ce qui ne respecte pas le motif ARIA d'un groupe radio. Le composant suit ce motif : un seul arrêt de tabulation, les flèches changent le mode.
+3. **Mode enregistré à deux endroits** : les réglages font foi (sauvegardes, restauration) ; la copie dans localStorage sert uniquement au script avant affichage.
+4. **Palette** : les résultats ouvrent une fiche en lecture seule, faute d'écrans Bibliothèque, Combattants et Événements (Phases 9 et 10) ; ces fiches ne permettent aucune modification. Recherche à partir de 2 caractères, 5 résultats par groupe.
+5. **Accueil** (`/`) : déplacé dans l'espace de travail pour afficher le shell. Il n'affiche que des accès aux écrans livrés ; le Dashboard arrive en Phase 11.
+6. **Indicateur moteur** : désormais dans le header, comme prévu en Phase 6. L'état du serveur (`/api/ai/status`) n'est lu qu'une fois par chargement et partagé avec l'écran IA (`useAiOverview`).
+7. **Heure courante** : jamais lue pendant le pré-rendu (Next 16 avec Cache Components l'interdit) ; `useNow` renvoie `null` au premier rendu.
+8. **Indicateur de développement Next** déplacé en bas à droite (`devIndicators`) : en bas à gauche, il recouvrait le bouton de repli de la barre latérale. Sans effet en production.
+9. **Profil actif** : affiché (nom, rôle) ; le changement de profil arrive avec Paramètres > Utilisateurs (Phase 11).
+
+### Fichiers créés ou modifiés
+
+`app/layout.tsx` (script avant affichage), `app/(workspace)/{layout,page}.tsx` (`app/page.tsx` supprimé), `app/globals.css` (variante `sidebar-collapsed`), `next.config.ts`, `components/layout/{AppShell,Sidebar,SidebarNav,MobileNav,NavIcon,Header,Logo,ModeSwitcher,EngineIndicator,SyncIndicator,UserBadge,LiveSessionBar,LiveSessionDialog,LiveSessionForm,EndSessionDialog,CommandSearch,CommandList,RecordSheet}.tsx`, `components/ui/{dialog,tooltip,kbd}.tsx`, `components/settings/AiSettingsPage.tsx`, `components/editorial/EditorialPage.tsx`, `lib/shell/{navigation,shortcuts,mode,live-session,commands}.ts`, `lib/format.ts`, `hooks/{useMode,useSidebar,useShortcuts,useLiveSession,useNow,useAiOverview,useAiSettings}.ts`, `stores/{studio,ui}.store.ts`, `tests/unit/shell/{shell,live-session}.test.ts`, `tests/e2e/phase7-shell.spec.ts`.
 
 ---
 
@@ -64,7 +108,7 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 8. **Fact Guard sur une sortie IA** : un mot écrit en minuscules dans la sortie ou dans les références n'est pas un nom propre, même en capitales ailleurs (« QUELLE VICTOIRE »). Les noms inventés restent signalés.
 9. **Retouches natives sur texte modifié.** `shorten`, `punchier`, `institutional`, `new_hook` et `toggle_emojis` partent du texte affiché, donc des modifications du CM. `rephrase` retire le même modèle avec de nouvelles formulations (le modèle d'origine est désormais gardé dans la révision, champ optionnel `templateId`) ; pour un texte IA, il cherche un modèle de même structure, sinon propose « Régénérer ». `institutional` : il n'existe pas de modèles « ton institutionnel » ; la retouche limite les emojis à un, remplace les exclamations et ramène les capitales à la casse normale (les noms retrouvent la casse du brief).
 10. **Déclinaison** : la route et l'adaptateur sont livrés. Le bouton « Décliner sur les autres réseaux » et sa version native (section 13) arrivent avec le Social Studio (Phase 8).
-11. **Indicateur du header** : calculé (`lib/ai/indicator.ts`, `stores/ai.store.ts`) et affiché en haut de l'écran IA. Le header lui-même arrive en Phase 7 et réutilisera ce composant.
+11. **Indicateur du header** : calculé (`lib/ai/indicator.ts`, `stores/ai.store.ts`) et affiché en haut de l'écran IA ; repris dans le header en Phase 7.
 12. **`/settings/[section]`** : seule `ai` existe. Les autres sections (Phase 11) renvoient un 404 plutôt qu'un écran vide. `export const instant = false` : navigation bloquante assumée pour garantir le vrai 404 (Next 16.4 l'aurait sinon signalé).
 13. **Correctif `twitter-text`** : sa version ESM n'a qu'un export par défaut. L'import nommé passait en test (CommonJS) mais cassait dès qu'une route serveur chargeait le linter.
 

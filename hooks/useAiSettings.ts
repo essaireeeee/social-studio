@@ -12,12 +12,19 @@ import {
   type SessionCredentials,
 } from "@/lib/generation/ai-client";
 
+/** Une seule lecture par chargement de page : le header et l'écran IA la partagent. */
+let statusRequest: Promise<AiStatusResponse | undefined> | undefined;
+
 /** État des fournisseurs déclaré par le serveur. `undefined` : chargement ; `null` : échec. */
 export function useAiStatus(): AiStatusResponse | null | undefined {
   const [status, setStatus] = useState<AiStatusResponse | null | undefined>(undefined);
   useEffect(() => {
     let active = true;
-    fetchAiStatus().then((value) => {
+    statusRequest ??= fetchAiStatus().then((value) => {
+      if (!value) statusRequest = undefined; // échec : nouvelle tentative au prochain montage
+      return value;
+    });
+    statusRequest.then((value) => {
       if (active) setStatus(value ?? null);
     });
     return () => {

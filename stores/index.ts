@@ -1,2 +1,2 @@
-// Stores Zustand : studio.store, ui.store.
+// Stores Zustand : data (démarrage, synchro), studio (mode, mémoire du Studio), ui (shell), ai (état des fournisseurs).
 export {};

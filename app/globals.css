@@ -111,6 +111,9 @@ html[data-mode="daily"] {
   }
 }
 
+/* Barre latérale repliée : `data-sidebar="collapsed"` sur <html>, posé avant l'affichage. */
+@custom-variant sidebar-collapsed (&:where([data-sidebar="collapsed"] *));
+
 /* Transition de couleur au changement de mode : 150 ms, rien de plus */
 @utility accent-transition {
   transition-property: color, background-color, border-color, outline-color, fill, stroke;

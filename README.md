@@ -48,6 +48,14 @@ L'application tourne sur http://localhost:3000.
 
 Next.js 16 (App Router), React 19, TypeScript strict, Tailwind CSS 4, Radix UI (composants shadcn/ui copiés dans `components/ui`), Zustand, Dexie (IndexedDB), Zod, papaparse, exceljs, twitter-text, jsdiff, SDK Anthropic et OpenAI, Vitest, Playwright.
 
+## Raccourcis clavier
+
+| Raccourci                  | Action                                               |
+| -------------------------- | ---------------------------------------------------- |
+| `Alt+L` / `Alt+D`          | Passer en LIVE SHOW / en DAILY & MEDIA               |
+| `Ctrl+K` (`Cmd+K` sur Mac) | Palette : actions, wordings, combattants, événements |
+| `Tab` au chargement        | Lien « Aller au contenu »                            |
+
 ## Moteurs IA : Claude et OpenAI (Phase 6)
 
 Le moteur natif fonctionne sans clé. Pour rédiger avec Claude ou OpenAI :

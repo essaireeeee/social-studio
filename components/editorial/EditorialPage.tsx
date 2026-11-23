@@ -24,7 +24,7 @@ export function EditorialPage() {
   };
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6">
       <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-semibold tracking-tight">ADN éditorial</h1>
@@ -86,6 +86,6 @@ export function EditorialPage() {
           <RulesSection repository={repository} user={user} />
         </>
       )}
-    </main>
+    </div>
   );
 }

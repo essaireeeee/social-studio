@@ -1,2 +1,3 @@
-// Hooks React : useRepository, useActiveUser (Phase 3) ; useShortcuts, useAutosave, useMode, useLiveSession, useClipboard à venir.
+// Hooks React : données (useRepository, useActiveUser), shell (useMode, useSidebar,
+// useShortcuts, useLiveSession, useNow), IA (useAiStatus, useSessionCredentials).
 export { useActiveUser, useRepository } from "./useRepository";
