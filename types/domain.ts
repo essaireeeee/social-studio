@@ -270,6 +270,19 @@ export const GenerationSchema = z.object({
 });
 export type Generation = z.infer<typeof GenerationSchema>;
 
+/** Accroche gardée par le CM (« ⭐ Garder cette accroche »), généralisée en patron. */
+export const SavedHookSchema = z.object({
+  id: idSchema,
+  mode: ModeSchema,
+  categoryId: idSchema,
+  /** Texte d'origine, pour consultation. */
+  text: z.string().min(1),
+  /** Patron réutilisable : faits remplacés par des variables ({winner}), emojis par {E}. */
+  pattern: z.string().min(1),
+  createdAt: IsoDateSchema,
+});
+export type SavedHook = z.infer<typeof SavedHookSchema>;
+
 // ---------------------------------------------------------------------------
 // Hashtags, signatures, règles éditoriales
 // ---------------------------------------------------------------------------

@@ -1,2 +1,2 @@
-// Post-traitement commun, Fact Guard, anti-copie, variantes (Phase 5). Logique pure, sans React.
+// Moteurs de génération : natif (Phase 5), IA (Phase 6). Pas de barrel : importer le module précis.
 export {};

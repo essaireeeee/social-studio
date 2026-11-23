@@ -9,7 +9,7 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | 2     | Catégories, règles éditoriales, linter          | Terminée |
 | 3     | Intelligence éditoriale (Brand Voice Extractor) | Terminée |
 | 4     | Recherche des références                        | Terminée |
-| 5     | Moteur natif                                    | À faire  |
+| 5     | Moteur natif                                    | Terminée |
 | 6     | Moteur IA (Anthropic / OpenAI)                  | À faire  |
 | 7     | Shell de l'application                          | À faire  |
 | 8     | Social Studio                                   | À faire  |
@@ -18,7 +18,55 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | 11    | Historique, dashboard, paramètres, données      | À faire  |
 | 12    | Tests, QA, README                               | À faire  |
 
-**Prochaine étape : Phase 5.**
+**Prochaine étape : Phase 6.**
+
+---
+
+## Phase 5 : Moteur natif, sans clé API (terminée le 23/11/2026)
+
+### Livré
+
+- **DSL des modèles** (`lib/generation/native/types.ts`) : `Template` et `Segment` de la section 10.2, avec `{var}`, `{var|upper}`, `{var|lower}`, `{var|cap}`, `{VAR_UPPER}`, emplacement d'emoji `{E}` et `{?var}` (variable exigée mais non affichée). Option écartée si une variable manque, segment supprimé s'il ne reste aucune option, modèle inéligible sans accroche.
+- **Context builder** (`context.ts`) : variables dérivées du brief, de la Session Live, de l'événement et des fiches liées (`roundLabel` « 1er round », `methodPhrase`, `decisionLabel` « décision unanime », `eventLabel` « HEXAGONE MMA 12 », `dateLabel` « samedi 14 mars », `daysLeftLabel` « J-3 », `cardPositionPhrase`, `titlePhrase`, liste de la fight card, palmarès seulement si « Utiliser le palmarès » est coché...) et liste des faits autorisés.
+- **342 modèles** (`templates/`) : 3 par variante pour chacune des 38 catégories, produits par une fabrique à partir des formulations de chaque catégorie. Structures nominales : punchy `H-B(-T)`, signature `H-B-I-C-S-T` (ordre ajustable selon l'empreinte du profil), storytelling `H-B-B(-Q)(-C)(-S)(-T)`.
+- **Composeur** (`composer.ts`) : tirage pondéré des formulations, emojis, hashtags (en fin de post ou dans le texte selon le profil), paragraphes, empreinte de structure.
+- **Moteur** (`engine.ts`) : graine = hash du brief + compteur de régénération (déterministe) ; score de la section 10.6 ; combinaison des trois variantes avec accroches mutuelles sous 0,5 de Jaccard et structures différentes, jusqu'à 5 re-tirages ; anti-copie (une variante qui recopie une référence est écartée) ; post-traitement commun.
+- **Fact Guard** (`fact-guard.ts`), **anti-copie** (`anti-copy.ts`), **post-traitement** (`post-process.ts`), **rendu des signatures** (`signature.ts`) : utilisables aussi par le moteur IA (Phase 6) et l'édition CM.
+- **Banque d'accroches** (`hooks.ts`) : « Garder cette accroche » généralise l'accroche en patron (`{WINNER_UPPER} frappe fort face à {loser}`), stocké dans `meta.hookBank` et inclus dans les sauvegardes ; les patrons enrichissent les options d'accroche de la catégorie.
+- **Service** (`service.ts`) : rassemble le contexte stocké (réglages, règles, profil validé, références, session active, événement, signature, hashtags cochés, accroches validées récentes et gardées), lance le moteur et enregistre la génération en brouillon (`variants.ts`, section 13.7).
+- Table des emojis par catégorie (`lib/editorial/emoji.ts`).
+
+### Validation
+
+- `typecheck`, `lint`, `format:check`, `build` : OK, sans avertissement.
+- `npm run test` : 268 tests (21 fichiers), dont :
+  - propriété sur 200 briefs aléatoires couvrant les 38 catégories : aucun nombre, horaire, date, diffuseur ou nom propre absent du brief, contrôle doublé d'une vérification indépendante des nombres ;
+  - trois structures différentes et des accroches non similaires sur ces 200 briefs ;
+  - génération native (recherche des références incluse) en moins de 50 ms pour un corpus de 2 000 wordings (médiane de 5 mesures après préchauffage ; 5 à 15 ms en pratique) ;
+  - déterminisme, régénération, ordre des variantes, emojis, hashtags, règle Samba Sima, question finale, anti-copie, banque d'accroches, élision, service branché sur la base.
+- Tests de charge hors suite : 1 520 briefs aléatoires (4 graines) donnent 0 fait inventé et 0 accroche trop proche ; 912 briefs réduits aux seuls champs requis (38 catégories, avec et sans session, avec et sans hashtags, 6 régénérations) donnent 0 fait inventé et 0 collision de structure.
+- `npm run test:e2e` : 7 scénarios OK (inchangés).
+
+### Décisions et écarts
+
+1. **Modèles produits par une fabrique.** Chaque catégorie fournit ses formulations (accroches par variante, corps, détail, contexte, récit, clôture, question). La fabrique en tire 3 squelettes par variante. Aucun modèle n'est partagé entre catégories (0 %, sous le plafond de 30 %).
+2. **Structures toujours distinctes.** Si deux variantes tombent sur la même empreinte (brief très court), le moteur ajoute un paragraphe de clôture neutre (« La soirée continue. », « Bonne lecture. »). Un seul cas résiduel relevé sur 1 520 briefs : sur X, avec des saisies très longues, le raccourcissement à 280 caractères retire des paragraphes et deux structures peuvent alors coïncider.
+3. **Ajouts au score de la section 10.6** : −0,5 par fait essentiel absent du texte (le vainqueur d'un KO, les deux combattants d'une annonce...), +0,1 en signature pour une accroche proche d'un patron fréquent du profil (« patron d'accroche fréquent du profil » sans recopie), départage déterministe de ±0,06 pour qu'une régénération explore aussi les autres modèles.
+4. **Qualité du français** : jamais deux fois la même ligne ; une suite de 3 mots déjà écrite est évitée quand une autre formulation existe ; élision automatique (« en faveur d'Ali ») sauf devant HEXAGONE (règle de la ligue) ; majuscule en début de ligne, sauf dans une citation et après un chiffre.
+5. **Neutralité de genre** : les fiches combattants n'ont pas de genre. Les formulations évitent tout accord (« s'empare de la ceinture » plutôt que « nouveau champion », « au micro de » plutôt que « l'invité de »).
+6. **Règle Samba Sima appliquée par le moteur** : en contexte positif, et si Samba Sima n'est ni perdant, ni challenger, ni adversaire, une ligne le présente comme un crack ou un jeune phénomène. Rien en défaite.
+7. **Emojis** : emplacements `{E}` remplis avec les emojis du profil pertinents pour la catégorie, puis la table par défaut ; budget 1 à 2 en punchy, médiane du profil sinon ; 0 pour un communiqué, 1 au plus pour une défaite. Les icônes des lignes d'information (📍 🗓️ 📺) sont fixes.
+8. **Question finale** : seulement en storytelling, pour les catégories DAILY qui en déclarent une, et une génération sur trois au plus (graine).
+9. **CTA** : celui du brief, sinon le CTA le plus fréquent du profil pour la catégorie à condition qu'il passe le Fact Guard (« Rendez-vous samedi prochain. » apporterait une date non fournie), sinon aucun. Jamais de CTA billetterie sur une défaite ou une réaction. Punchy n'a ni CTA ni signature (structure `H-B(-T)`).
+10. **Signature** : rendue seulement si ses champs requis sont présents (sinon le service renvoie la liste des champs manquants pour l'affichage « Signature incomplète ») ; les lignes d'information sont alors retirées pour ne pas répéter date et lieu.
+11. **Fact Guard** : les mots du texte fixe des modèles ne sont jamais des faits (vocabulaire exempté pour les mots en capitales) ; un mot collé à un chiffre (« 2E ») fait partie du nombre. Trois faux positifs trouvés en test de charge, corrigés et couverts par des tests.
+12. **Ordre du post-traitement** : nettoyage, linter, adaptation plateforme, Fact Guard, anti-copie. L'adaptation passe avant le Fact Guard pour que les passages surlignés correspondent au texte final (la section 10.7 la place en dernier).
+13. **Adaptation plateforme** : retrait de paragraphes entiers par la fin, jamais l'accroche, jamais une phrase coupée.
+14. **Retouches natives (section 11.4)** : prévues en Phase 6, comme le prompt les y range.
+
+### Fichiers créés ou modifiés
+
+`lib/generation/{fact-guard,anti-copy,post-process,signature,random,variants,service,index}.ts`, `lib/generation/native/{types,context,composer,engine,hooks}.ts`, `lib/generation/native/templates/{factory,live,daily,media,index}.ts`, `lib/editorial/emoji.ts`, `lib/format.ts`, `types/domain.ts` (`SavedHook`), `lib/database/{repository,dexie-repository,snapshot}.ts` (méta `hookBank`), `tests/fixtures/random-briefs.ts`, `tests/unit/generation/{fact-guard,native-engine,service}.test.ts`.
 
 ---
 

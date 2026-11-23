@@ -268,11 +268,11 @@ export class DexieRepository implements DataRepository {
       const entries = await Promise.all(
         TABLE_NAMES.map(async (name) => [name, await this.db.table(name).toArray()] as const),
       );
-      const meta: SnapshotMeta = {
-        seedVersion: await this.getMeta("seedVersion"),
-        lastBackupAt: await this.getMeta("lastBackupAt"),
-        settings: await this.getMeta("settings"),
-      };
+      const meta: SnapshotMeta = {};
+      for (const key of ["seedVersion", "lastBackupAt", "settings", "hookBank"] as const) {
+        const value = await this.getMeta(key);
+        if (value !== undefined) Object.assign(meta, { [key]: value });
+      }
       return SnapshotSchema.parse({
         app: APP_ID,
         schemaVersion: CURRENT_SCHEMA_VERSION,
@@ -346,7 +346,7 @@ export class DexieRepository implements DataRepository {
   /** En fusion, les méta existantes (réglages, version de seed) sont conservées. */
   private async writeMeta(meta: SnapshotMeta, { overwrite }: { overwrite: boolean }) {
     await this.db.meta.put({ key: "schemaVersion", value: CURRENT_SCHEMA_VERSION });
-    for (const key of ["seedVersion", "lastBackupAt", "settings"] as const) {
+    for (const key of ["seedVersion", "lastBackupAt", "settings", "hookBank"] as const) {
       const value = meta[key];
       if (value === undefined) continue;
       if (overwrite || (await this.db.meta.get(key)) === undefined) {

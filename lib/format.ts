@@ -40,3 +40,14 @@ const SCORE_FORMAT = new Intl.NumberFormat("fr-FR", {
 export function formatScore(value: number): string {
   return SCORE_FORMAT.format(value);
 }
+
+/** « samedi 14 mars » (date d'un événement ou d'une diffusion, sans l'année). */
+export function formatDayLabel(iso: string): string {
+  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(iso);
+  return new Intl.DateTimeFormat("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: dateOnly ? "UTC" : undefined,
+  }).format(new Date(iso));
+}

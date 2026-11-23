@@ -13,6 +13,7 @@ import {
   HexEventSchema,
   IsoDateSchema,
   LiveSessionSchema,
+  SavedHookSchema,
   SettingsSchema,
   SignatureSchema,
   StyleProfileSchema,
@@ -60,6 +61,7 @@ export const SnapshotMetaSchema = z.object({
   seedVersion: z.number().int().nonnegative().optional(),
   lastBackupAt: IsoDateSchema.optional(),
   settings: SettingsSchema.optional(),
+  hookBank: z.array(SavedHookSchema).optional(),
 });
 export type SnapshotMeta = z.infer<typeof SnapshotMetaSchema>;
 

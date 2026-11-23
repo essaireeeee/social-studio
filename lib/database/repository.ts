@@ -10,6 +10,7 @@ import type {
   HashtagGroup,
   HexEvent,
   LiveSession,
+  SavedHook,
   Settings,
   Signature,
   StyleProfile,
@@ -64,6 +65,7 @@ export interface MetaValues {
   seedVersion: number;
   lastBackupAt: string;
   settings: Settings;
+  hookBank: SavedHook[];
 }
 export type MetaKey = keyof MetaValues;
 
