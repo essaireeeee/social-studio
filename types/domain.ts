@@ -267,6 +267,9 @@ export const GenerationSchema = z.object({
   finalText: z.string().optional(),
   finalPlatform: PlatformSchema.optional(),
   status: GenerationStatusSchema,
+  /** Déclaré publié par le CM (action manuelle) : date et lien éventuel. */
+  publishedAt: IsoDateSchema.optional(),
+  publishedUrl: z.url().optional(),
   savedToLibraryId: idSchema.optional(),
   declinations: z.partialRecord(PlatformSchema, z.string()).optional(),
 });

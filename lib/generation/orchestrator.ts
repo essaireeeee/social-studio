@@ -15,6 +15,7 @@ import type {
   Brief,
   Engine,
   Generation,
+  Platform,
   RefineAction,
   Revision,
   StyleProfile,
@@ -28,6 +29,8 @@ import {
   type LoadOptions,
   type SignatureIssue,
 } from "./context-loader";
+import { declineNative } from "./native/decline";
+import { prepareNative } from "./native/engine";
 import { CUSTOM_NATIVE_MESSAGE, RefineUnavailableError, refineNative } from "./native/refine";
 import type { PostProcessResult } from "./post-process";
 import { generateNativeForBrief } from "./service";
@@ -288,4 +291,68 @@ export async function refineVariant(
   };
   await repository.generations.put(updated);
   return { generation: updated, revision, result, notice };
+}
+
+// ---------------------------------------------------------------------------
+// Déclinaison
+// ---------------------------------------------------------------------------
+
+export const declineFallbackNotice = (reason: string) =>
+  `Déclinaison IA indisponible (${reason}). Versions produites par le moteur natif.`;
+
+export interface DeclineOutcome {
+  generation: Generation;
+  versions: Partial<Record<Platform, PostProcessResult>>;
+  notice?: string;
+}
+
+/**
+ * Une version par plateforme autre que la principale, depuis le texte courant de la variante.
+ * Les versions sont enregistrées dans la génération (`declinations`).
+ */
+export async function declineVariant(
+  repository: DataRepository,
+  retriever: Retriever,
+  generationId: string,
+  variantId: string,
+  options: { transport?: AiTransport; now?: Date } = {},
+): Promise<DeclineOutcome> {
+  const generation = await repository.generations.get(generationId);
+  const variant = generation?.variants.find((v) => v.id === variantId);
+  if (!generation || !variant) throw new Error("Génération introuvable.");
+  const loaded = await loadGenerationContext(repository, retriever, generation.brief, {
+    now: options.now,
+  });
+  const text = currentText(variant);
+  const targets = (["instagram", "facebook", "x", "tiktok"] as const).filter(
+    (p) => p !== generation.brief.platform,
+  );
+  const engine = loaded.settings.aiProvider;
+
+  let versions: Partial<Record<Platform, PostProcessResult>> | undefined;
+  let notice: string | undefined;
+  if (engine !== "native") {
+    const transport = options.transport ?? fetchTransport;
+    const response = await transport.decline({ ...commonBody(loaded, engine), text, targets });
+    if (response.fallback) notice = declineFallbackNotice(response.reason);
+    else versions = response.versions;
+  }
+  if (!versions) {
+    const source = prepareNative(nativeInput(loaded));
+    versions = declineNative(text, targets, {
+      vars: loaded.context.vars,
+      process: (raw, platform) => source.processText(raw, platform),
+    });
+  }
+
+  const declinations = Object.fromEntries(
+    Object.entries(versions).map(([platform, result]) => [platform, result!.text]),
+  ) as Partial<Record<Platform, string>>;
+  const updated: Generation = {
+    ...generation,
+    declinations,
+    updatedAt: (options.now ?? new Date()).toISOString(),
+  };
+  await repository.generations.put(updated);
+  return { generation: updated, versions, notice };
 }

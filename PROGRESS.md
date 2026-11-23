@@ -12,13 +12,63 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | 5     | Moteur natif                                    | Terminée |
 | 6     | Moteur IA (Anthropic / OpenAI)                  | Terminée |
 | 7     | Shell de l'application                          | Terminée |
-| 8     | Social Studio                                   | À faire  |
+| 8     | Social Studio                                   | Terminée |
 | 9     | Bibliothèque                                    | À faire  |
 | 10    | Combattants, événements, hashtags, signatures   | À faire  |
 | 11    | Historique, dashboard, paramètres, données      | À faire  |
 | 12    | Tests, QA, README                               | À faire  |
 
-**Prochaine étape : Phase 8.**
+**Prochaine étape : Phase 9.**
+
+---
+
+## Phase 8 : Le Social Studio (terminée le 23/11/2026)
+
+### Livré
+
+- **Page `/studio`** (`?mode=live|daily` ouvre le Studio dans ce mode), entrées Social Studio, LIVE SHOW et DAILY & MEDIA actives dans la navigation.
+- **Mise en page** (`StudioLayout`) : à partir de 1 280 px, trois colonnes 32 / 40 / 28 dont chacune défile seule, en-têtes collants, hauteur ajustée au header et à la barre Session Live (`--session-bar`). De 1 024 à 1 279 px, l'aperçu devient un panneau escamotable à droite. Sous 1 024 px, trois onglets « 1. Saisie · 2. Résultats · 3. Aperçu », pastille sur Résultats, bascule automatique après Générer, bouton Générer collant de 52 px.
+- **Colonne Brief** (`BriefColumn`, `components/forms/`) : plateforme principale mémorisée par mode ; catégories LIVE en grille avec raccourcis `1` à `=`, DAILY en quatre groupes repliables avec filtre ; formulaire généré depuis le registre (combattant avec recherche floue, fight card de l'événement en premier, « Utiliser “Xxx” » ou « Créer la fiche » ; puces rapides ; temps `m:ss` ; bascule du vainqueur ; liste, date, lien, événement, case à cocher) ; champs requis marqués d'un point ; hashtags avec aperçu de ce qui sera ajouté ; signature avec « Signature incomplète : … manquantes » ; CTA du profil et saisie libre ; consigne particulière en DAILY ; Générer (`Ctrl/Cmd+Entrée`, aussi depuis un champ) ; Réinitialiser (la Session Live reste).
+- **Brouillon automatique** (`stores/studio.store.ts`, `lib/studio/draft.ts`) : un brief par mode, mémorisé localement (écriture différée de 300 ms) ; les champs communs passent d'un mode à l'autre, la catégorie de chaque mode est retrouvée ; préréglages et contexte de la Session Live appliqués au choix de la catégorie.
+- **Colonne Wording Studio** (`WordingColumn`, `components/editor/`) : état vide avec le parcours et les raccourcis, trois squelettes pendant la génération, bandeau de bascule si l'IA échoue. Chaque carte : type et badge « Recommandée », moteur, statut (Générée, Modifiée, Validée, Publiée), compteur de la plateforme principale (anneau X orange à 260, rouge au-delà de 280), choix de la variante de l'aperçu ; éditeur auto-dimensionné ; passages à vérifier cliquables ; avertissements éditoriaux ; corrections appliquées (repliées) ; sept retouches avec chargement propre à la carte ; consigne particulière (désactivée et expliquée en natif) ; versions v1, v2… avec retour à une version et différences mot à mot ; Copier, Garder l'accroche, Enregistrer dans la bibliothèque, Valider, et dans « … » : Marquer comme publié (date, lien), Retirer la validation.
+- **Déclinaison** : « DÉCLINER SUR LES AUTRES RÉSEAUX » produit une version par plateforme non principale (IA via `/api/decline`, sinon `lib/generation/native/decline.ts`), affichée en onglets, éditable, copiable, enregistrée avec la génération. Panneau « RÉFÉRENCES UTILISÉES » sous les cartes, avec exclusion et régénération.
+- **Colonne Aperçu** (`components/preview/`) : choix de la plateforme indépendant, bandeau permanent « Simulation éditoriale : le rendu réel varie selon l'appareil et l'application. », cadre téléphone de 375 px mis à l'échelle. Instagram : média 4:5 (image déposée ou choisie, stockée en base), option Reel, actions sans chiffre, légende avec hashtags et mentions en couleur, coupure « … plus » / « moins » (`lib/platforms/truncation.ts`), « Accroche visible : 98 / 125 caractères », alerte si l'accroche est coupée, réglage du seuil de 60 à 300, « Afficher uniquement la partie visible avant PLUS ». Facebook (« Voir plus » au seuil des réglages, média 1:1 ou 16:9), X (compteur pondéré, partie au-delà de 280 en rouge), TikTok (9:16, légende sur deux lignes avec « plus »). « Retour à la modification » remet le focus dans l'éditeur.
+- **Raccourcis** (`useStudioShortcuts`, aide « ? ») : `Ctrl/Cmd+Entrée`, `Ctrl/Cmd+Maj+C` (ou `Ctrl/Cmd+Alt+C` selon le réglage), `Alt+1/2/3`, `1…=` hors des champs, plus ceux du shell.
+- **Persistance des générations** (`lib/studio/revisions.ts`, `lib/studio/actions.ts`) : chaque Générer crée une génération `draft` ; la première édition la passe à `editing` ; toutes les versions sont gardées ; la génération affichée et son brief sont rouverts après actualisation. `Generation` reçoit `publishedAt` et `publishedUrl` (facultatifs).
+- Primitives `components/ui/{segmented,textarea,toaster}.tsx`, notifications (`stores/toast.store.ts`).
+
+### Validation
+
+- `typecheck`, `lint`, `format:check`, `build`, `check:bundle` : OK.
+- `npm run test` : 378 tests (31 fichiers), dont la coupure Instagram, Facebook, TikTok et la zone X, le brouillon (préréglages, champs communs, hashtags par défaut, signature par défaut, brief envoyé), la recherche de combattants, les révisions et les quatre statuts, la déclinaison native, et les actions branchées sur la base.
+- `npm run test:e2e` : 20 scénarios OK, dont 6 nouveaux, stables sur deux passages :
+  - **parcours LIVE KO en 5 interactions** (touche `2`, vainqueur, Tab, perdant, `Ctrl+Entrée`), génération native affichée en moins de 1 s (environ 200 ms) ;
+  - **trois colonnes qui défilent indépendamment à 1 440 px** ;
+  - **390 × 844 : onglets à la place des colonnes**, bascule sur Résultats ;
+  - **l'aperçu suit l'édition à chaque frappe, la coupure respecte le seuil réglé** (60) ;
+  - versions, restauration, validation, brouillon et génération conservés après actualisation ;
+  - brief incomplet : message sous le champ, focus dessus, aucune génération.
+- Revue visuelle à 1 440, 1 180 et 390 px.
+
+### Décisions et écarts
+
+1. **Brouillon dans localStorage** : le « store persistant » de la section 13.3 est un store Zustand persisté localement (aucune donnée sensible). Les générations, elles, sont dans IndexedDB et dans les sauvegardes.
+2. **Éditions du CM** : le Fact Guard contrôle les sorties des moteurs ; une révision `cm_edit` n'a pas de passages surlignés (le CM écrit ce qu'il sait). Les avertissements éditoriaux s'affichent en direct ; les corrections du linter (« de HEXAGONE MMA », espaces insécables…) s'appliquent quand le CM quitte le champ, pour ne pas déplacer le curseur pendant la frappe.
+3. **Corrections appliquées et références** : gardées pour la session en cours. Après actualisation, la génération et ses versions reviennent ; la ligne des corrections et le panneau des références réapparaissent à la génération suivante.
+4. **Enregistrer dans la bibliothèque** : fiche courte pré-remplie (texte, date, lien), statut `validated`, source `studio`, combattants reliés. La fiche complète arrive avec la Bibliothèque (Phase 9).
+5. **Créer la fiche** (combattant inconnu) : fiche minimale (prénom, nom, date de mise à jour), à compléter dans Combattants (Phase 10).
+6. **Coupure Instagram** : une ligne vide compte comme une ligne, comme dans l'application. TikTok : environ deux lignes (80 caractères). Le seuil Facebook se règlera dans Préférences (Phase 11) ; le seuil Instagram se règle dans la colonne, comme demandé.
+7. **Image de l'aperçu** : une seule image courante (5 Mo au plus), stockée en base et donc incluse dans les sauvegardes.
+8. **Aperçu et déclinaisons** : si une version déclinée existe pour la plateforme affichée, l'aperçu la montre, avec la mention « Version déclinée ».
+9. **Régénérer le même brief** : chaque clic sur Générer avec un brief identique change la graine, donc les formulations.
+10. **Ajouts** : « Retirer la validation » (menu « … ») pour revenir en édition ; les CTA de billetterie ne sont pas proposés sur une défaite ou une réaction ; l'indicateur IA du header suit le résultat réel des générations.
+11. **Mémoire du mode** : le brouillon par mode remplace la mémoire de la Phase 7 (`lib/shell/mode.ts` simplifié, mêmes règles).
+12. **Indicateur de développement Next désactivé** (`devIndicators: false`) : il recouvrait des contrôles du Studio. Les erreurs restent affichées. Remplace l'écart 8 de la Phase 7.
+13. **Parcours LIVE** : 5 interactions mesurées pour un KO, sous la limite de 6.
+
+### Fichiers créés ou modifiés
+
+`app/(workspace)/studio/page.tsx`, `components/studio/{StudioPage,StudioLayout,StudioContext,BriefColumn,WordingColumn,ShortcutsDialog,choose-category}`, `components/forms/{CategoryPills,DynamicForm,FieldControl,HashtagPicker,SignaturePicker,CtaPicker}.tsx`, `components/forms/fields/{FighterCombobox,MultiFighterField,QuickChips,WinnerToggle}.tsx`, `components/editor/{VariantCard,VariantEditor,CharCounter,RefineBar,RevisionTimeline,DiffDialog,VariantActions,LibraryDialog,PublishDialog,DeclinePanel}.tsx`, `components/preview/{PreviewColumn,PhoneFrame,PreviewMedia,PreviewAvatar,CaptionText,InstagramPreview,FacebookPreview,XPreview,TikTokPreview}.tsx`, `components/ui/{segmented,textarea,toaster}.tsx`, `components/layout/{AppShell,LiveSessionBar,SidebarNav}.tsx`, `lib/studio/{draft,fighter-search,revisions,actions}.ts`, `lib/platforms/{truncation,counters}.ts`, `lib/generation/native/{decline,engine}.ts`, `lib/generation/{orchestrator,context-loader}.ts`, `lib/shell/{navigation,commands,mode}.ts`, `hooks/{useStudioActions,useStudioData,useStudioShortcuts}.ts`, `stores/{studio,studio-session,toast}.store.ts`, `types/domain.ts` (`publishedAt`, `publishedUrl`), `next.config.ts`, `tests/unit/platforms/truncation.test.ts`, `tests/unit/studio/{studio-logic,actions}.test.ts`, `tests/unit/shell/shell.test.ts`, `tests/e2e/{phase7-shell,phase8-studio}.spec.ts`.
 
 ---
 
@@ -57,7 +107,7 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 5. **Accueil** (`/`) : déplacé dans l'espace de travail pour afficher le shell. Il n'affiche que des accès aux écrans livrés ; le Dashboard arrive en Phase 11.
 6. **Indicateur moteur** : désormais dans le header, comme prévu en Phase 6. L'état du serveur (`/api/ai/status`) n'est lu qu'une fois par chargement et partagé avec l'écran IA (`useAiOverview`).
 7. **Heure courante** : jamais lue pendant le pré-rendu (Next 16 avec Cache Components l'interdit) ; `useNow` renvoie `null` au premier rendu.
-8. **Indicateur de développement Next** déplacé en bas à droite (`devIndicators`) : en bas à gauche, il recouvrait le bouton de repli de la barre latérale. Sans effet en production.
+8. **Indicateur de développement Next** déplacé en bas à droite (`devIndicators`) : en bas à gauche, il recouvrait le bouton de repli de la barre latérale. Sans effet en production. (Désactivé en Phase 8.)
 9. **Profil actif** : affiché (nom, rôle) ; le changement de profil arrive avec Paramètres > Utilisateurs (Phase 11).
 
 ### Fichiers créés ou modifiés

@@ -1,9 +1,11 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useMode, useModeSync } from "@/hooks/useMode";
 import { useShortcuts } from "@/hooks/useShortcuts";
+import { useStudioStore } from "@/stores/studio.store";
 import { CommandSearch } from "./CommandSearch";
 import { EndSessionDialog } from "./EndSessionDialog";
 import { Header } from "./Header";
@@ -20,6 +22,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { mode, setMode } = useMode();
   useModeSync();
   useShortcuts(setMode);
+  // Brouillon du Studio relu une fois, après le montage (rendus serveur et client identiques).
+  useEffect(() => {
+    void useStudioStore.persist.rehydrate();
+  }, []);
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -41,6 +47,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <CommandSearch mode={mode} onModeChange={setMode} />
       <LiveSessionDialog />
       <EndSessionDialog />
+      <Toaster />
     </TooltipProvider>
   );
 }

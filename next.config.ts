@@ -4,8 +4,9 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
-  // En développement, l'indicateur Next masquerait le bouton de repli de la barre latérale.
-  devIndicators: { position: "bottom-right" },
+  // L'indicateur de développement Next recouvrait des contrôles du shell et du Studio ;
+  // les erreurs de compilation et d'exécution restent affichées sans lui.
+  devIndicators: false,
   turbopack: {
     rules: {
       "*.css": {

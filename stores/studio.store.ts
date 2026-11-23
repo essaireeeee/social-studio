@@ -1,21 +1,116 @@
 import { create } from "zustand";
-import { rememberCategory, switchMode, type BriefFields, type ModeMemory } from "@/lib/shell/mode";
-import type { Mode } from "@/types/domain";
+import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
+import { EMPTY_DRAFTS, carryCommon, type Drafts, type StudioDraft } from "@/lib/studio/draft";
+import type { Mode, Platform } from "@/types/domain";
 
-interface StudioStoreState extends ModeMemory {
+export type MobileTab = "brief" | "results" | "preview";
+
+interface StudioStoreState {
+  mode: Mode;
+  /** Brouillon du brief, un par mode (persisté). */
+  drafts: Drafts;
+  /** Génération affichée dans chaque mode (persistée). */
+  generationIds: Partial<Record<Mode, string>>;
+  /** Plateforme de l'aperçu, un réglage par mode (persisté). */
+  previewPlatforms: Partial<Record<Mode, Platform>>;
+  mobileTab: MobileTab;
+  /** Pastille « nouvelle génération » sur l'onglet Résultats. */
+  resultsBadge: boolean;
+  /** Entre 1 024 et 1 279 px : panneau d'aperçu ouvert. */
+  previewPanelOpen: boolean;
+  setPreviewPanelOpen: (open: boolean) => void;
   setMode: (mode: Mode) => void;
-  /** Appelé par le Studio (Phase 8) à chaque choix de catégorie ou saisie. */
-  remember: (categoryId: string, fields?: BriefFields) => void;
+  updateDraft: (fn: (draft: StudioDraft) => StudioDraft) => void;
+  setGeneration: (id: string | undefined) => void;
+  setPreviewPlatform: (platform: Platform) => void;
+  setMobileTab: (tab: MobileTab) => void;
+  setResultsBadge: (value: boolean) => void;
+}
+
+const DRAFT_KEY = "hex-studio-draft";
+const SAVE_DELAY_MS = 300;
+
+/** localStorage avec écriture différée (300 ms) : une rafale de frappes, une écriture. */
+function debouncedStorage(): StateStorage {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return {
+    getItem: (name) => {
+      try {
+        return window.localStorage.getItem(name);
+      } catch {
+        return null;
+      }
+    },
+    setItem: (name, value) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        try {
+          window.localStorage.setItem(name, value);
+        } catch {
+          // Stockage plein ou indisponible : le brouillon reste en mémoire.
+        }
+      }, SAVE_DELAY_MS);
+    },
+    removeItem: (name) => {
+      try {
+        window.localStorage.removeItem(name);
+      } catch {
+        // Rien à faire.
+      }
+    },
+  };
 }
 
 /**
- * Mode actif et mémoire du Studio. Le mode est aussi enregistré dans les réglages
- * (`lastMode`, persistant) et recopié dans localStorage pour l'affichage avant hydratation.
+ * Mode actif et brouillon du Studio. Le mode est aussi enregistré dans les réglages
+ * (`lastMode`) ; le brouillon est mémorisé localement (aucune donnée sensible, aucune clé).
+ * Réhydratation explicite (`useStudioStore.persist.rehydrate()`) après le montage, pour que
+ * le rendu serveur et le premier rendu client restent identiques.
  */
-export const useStudioStore = create<StudioStoreState>((set) => ({
-  mode: "live",
-  categoryByMode: {},
-  common: {},
-  setMode: (mode) => set((state) => switchMode(state, mode)),
-  remember: (categoryId, fields) => set((state) => rememberCategory(state, categoryId, fields)),
-}));
+export const useStudioStore = create<StudioStoreState>()(
+  persist(
+    (set) => ({
+      mode: "live",
+      drafts: EMPTY_DRAFTS,
+      generationIds: {},
+      previewPlatforms: {},
+      mobileTab: "brief",
+      resultsBadge: false,
+      previewPanelOpen: false,
+      setPreviewPanelOpen: (previewPanelOpen) => set({ previewPanelOpen }),
+      setMode: (mode) =>
+        set((state) =>
+          state.mode === mode
+            ? state
+            : { mode, drafts: carryCommon(state.drafts, state.mode, mode) },
+        ),
+      updateDraft: (fn) =>
+        set((state) => ({
+          drafts: { ...state.drafts, [state.mode]: fn(state.drafts[state.mode]) },
+        })),
+      setGeneration: (id) =>
+        set((state) => ({ generationIds: { ...state.generationIds, [state.mode]: id } })),
+      setPreviewPlatform: (platform) =>
+        set((state) => ({
+          previewPlatforms: { ...state.previewPlatforms, [state.mode]: platform },
+        })),
+      setMobileTab: (mobileTab) =>
+        set((state) => ({
+          mobileTab,
+          resultsBadge: mobileTab === "results" ? false : state.resultsBadge,
+        })),
+      setResultsBadge: (resultsBadge) => set({ resultsBadge }),
+    }),
+    {
+      name: DRAFT_KEY,
+      version: 1,
+      storage: createJSONStorage(debouncedStorage),
+      skipHydration: true,
+      partialize: (state) => ({
+        drafts: state.drafts,
+        generationIds: state.generationIds,
+        previewPlatforms: state.previewPlatforms,
+      }),
+    },
+  ),
+);

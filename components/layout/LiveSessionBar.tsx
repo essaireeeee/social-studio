@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useLiveSession } from "@/hooks/useLiveSession";
 import { sessionSummary } from "@/lib/shell/live-session";
@@ -8,6 +9,21 @@ import { useUiStore } from "@/stores/ui.store";
 /** Barre Session Live (section 12.3), sous le header, en LIVE SHOW uniquement. */
 export function LiveSessionBar() {
   const session = useLiveSession();
+  const ref = useRef<HTMLElement | null>(null);
+  // Hauteur publiée dans `--session-bar` : le Studio s'en sert pour tenir dans l'écran.
+  useEffect(() => {
+    const root = document.documentElement;
+    const node = ref.current;
+    if (!node) return;
+    const observer = new ResizeObserver(() =>
+      root.style.setProperty("--session-bar", `${node.offsetHeight}px`),
+    );
+    observer.observe(node);
+    return () => {
+      observer.disconnect();
+      root.style.setProperty("--session-bar", "0px");
+    };
+  }, [session]);
   const openDialog = () => useUiStore.getState().setSessionDialogOpen(true);
 
   if (session === undefined) {
@@ -16,6 +32,7 @@ export function LiveSessionBar() {
 
   return (
     <section
+      ref={ref}
       aria-label="Session Live"
       className="sticky top-13 z-20 flex min-h-10 flex-wrap items-center gap-x-3 gap-y-1 border-b border-border bg-elevated px-4 py-1.5 sm:px-6"
     >

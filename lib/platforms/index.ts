@@ -1,2 +1,2 @@
-// Règles par plateforme, compteurs, troncature des légendes (Phase 8).
+// Règles par plateforme (rules.ts), compteurs (counters.ts), coupure des légendes (truncation.ts).
 export {};

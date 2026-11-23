@@ -24,7 +24,7 @@ import { renderSignature, signatureValues } from "./signature";
 import { generationHook } from "./variants";
 
 /** CTA de billetterie : jamais sur une défaite ni une réaction (section 10.5). */
-const TICKETING = /billet|places|r[ée]serv/i;
+export const TICKETING_CTA = /billet|places|r[ée]serv/i;
 
 export interface LoadOptions {
   /** Références écartées par le CM pour cette génération. */
@@ -143,7 +143,7 @@ export async function loadGenerationContext(
   // Contexte une première fois sans CTA, pour vérifier le CTA du profil contre les faits.
   const baseContext = buildBriefContext(brief, category, sources);
   let cta = brief.cta?.trim() || profileCta(profile, category.id, baseContext.facts);
-  if (cta && category.ticketingCta === false && TICKETING.test(cta)) cta = undefined;
+  if (cta && category.ticketingCta === false && TICKETING_CTA.test(cta)) cta = undefined;
   const context = cta ? buildBriefContext(brief, category, { ...sources, cta }) : baseContext;
 
   const references = await findReferences(repository, retriever, brief, {

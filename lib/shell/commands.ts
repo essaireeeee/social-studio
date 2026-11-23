@@ -66,7 +66,8 @@ export function actionCommands(ctx: ActionContext): ActionCommand[] {
       keywords: "session live evenement soiree",
     });
   }
-  for (const item of NAV_ITEMS.filter((i) => i.available)) {
+  // Les entrées LIVE SHOW / DAILY & MEDIA du Studio doublonneraient le changement de mode.
+  for (const item of NAV_ITEMS.filter((i) => i.available && !i.mode)) {
     actions.push({
       id: `nav:${item.id}`,
       label: `Ouvrir : ${item.label}`,

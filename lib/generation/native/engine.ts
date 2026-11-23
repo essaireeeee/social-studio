@@ -20,7 +20,14 @@ import {
   tokenizeWords,
   wordSet,
 } from "@/lib/editorial/text-utils";
-import type { Brief, EditorialRule, SavedHook, StyleProfile, VariantKind } from "@/types/domain";
+import type {
+  Brief,
+  EditorialRule,
+  Platform,
+  SavedHook,
+  StyleProfile,
+  VariantKind,
+} from "@/types/domain";
 import { copyCheck, type CopySource } from "../anti-copy";
 import { buildAllowedFacts } from "../fact-guard";
 import { postProcess, type PostProcessResult } from "../post-process";
@@ -232,8 +239,8 @@ export interface NativeSource {
   ): Candidate[];
   /** Post-traitement d'un rendu retenu (section 10.7). */
   finalize(kind: VariantKind, composition: Composition, score: number): NativeVariant;
-  /** Même post-traitement pour un texte transformé (retouches natives). */
-  processText(text: string): PostProcessResult;
+  /** Même post-traitement pour un texte transformé (retouches, déclinaisons). */
+  processText(text: string, platform?: Platform): PostProcessResult;
 }
 
 export function prepareNative(input: NativeEngineInput): NativeSource {
@@ -314,7 +321,7 @@ export function prepareNative(input: NativeEngineInput): NativeSource {
     ...context.facts,
     ...(context.vars.hashtags?.split(" ") ?? []),
   ]);
-  const processText = (text: string): PostProcessResult =>
+  const processText = (text: string, platform: Platform = brief.platform): PostProcessResult =>
     postProcess(text, {
       lint: {
         rules: input.rules,
@@ -324,7 +331,7 @@ export function prepareNative(input: NativeEngineInput): NativeSource {
         emojiThreshold: style.params.emojiThreshold,
         recentHooks: input.recentHooks,
       },
-      platform: brief.platform,
+      platform,
       allowed,
       vocabulary: TEMPLATE_VOCABULARY,
       broadcasters: input.broadcasters,

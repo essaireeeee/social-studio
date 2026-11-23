@@ -1,15 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { CATEGORIES } from "@/lib/categories/registry";
 import { formatRelative, isStale } from "@/lib/format";
 import { actionCommands, filterActions, paletteEntries } from "@/lib/shell/commands";
-import {
-  COMMON_FIELD_KEYS,
-  commonFields,
-  currentCategory,
-  rememberCategory,
-  switchMode,
-  type ModeMemory,
-} from "@/lib/shell/mode";
+import { COMMON_FIELD_KEYS, commonFields } from "@/lib/shell/mode";
 import { COMING_SOON, NAV_ITEMS, NAV_SECTIONS, isActive, navItem } from "@/lib/shell/navigation";
 import {
   PREPAINT_SCRIPT,
@@ -51,6 +43,9 @@ describe("navigation (section 12.1)", () => {
 
   it("seuls les écrans livrés sont actifs, les autres portent « Bientôt disponible »", () => {
     expect(NAV_ITEMS.filter((i) => i.available).map((i) => i.href)).toEqual([
+      "/studio",
+      "/studio?mode=live",
+      "/studio?mode=daily",
       "/editorial",
       "/settings/ai",
     ]);
@@ -63,7 +58,10 @@ describe("navigation (section 12.1)", () => {
     expect(isActive(editorial, "/editorial")).toBe(true);
     expect(isActive(editorial, "/editorial/regles")).toBe(true);
     expect(isActive(editorial, "/editorialx")).toBe(false);
-    expect(isActive(navItem("studio-live")!, "/studio")).toBe(true);
+    // Dans le Studio, seule l'entrée du mode actif est marquée.
+    expect(isActive(navItem("studio-live")!, "/studio", "live")).toBe(true);
+    expect(isActive(navItem("studio-daily")!, "/studio", "live")).toBe(false);
+    expect(isActive(navItem("studio")!, "/studio", "live")).toBe(false);
   });
 });
 
@@ -90,31 +88,12 @@ describe("raccourcis (section 12.2)", () => {
 });
 
 describe("changement de mode (section 12.2)", () => {
-  const start: ModeMemory = { mode: "live", categoryByMode: {}, common: {} };
-
   it("garde les champs communs, jamais les autres", () => {
     expect(COMMON_FIELD_KEYS).toEqual(expect.arrayContaining(["winner", "fighterA", "event"]));
     expect(COMMON_FIELD_KEYS).not.toContain("round");
     expect(
       commonFields({ winner: "Karim Fictif", round: "R2", event: "HEXAGONE MMA 12", loser: "" }),
     ).toEqual({ winner: "Karim Fictif", event: "HEXAGONE MMA 12" });
-  });
-
-  it("retrouve la dernière catégorie de chaque mode", () => {
-    let memory = rememberCategory(start, "live_ko", { winner: "Karim Fictif", method: "KO" });
-    expect(currentCategory(memory)).toBe("live_ko");
-    memory = switchMode(memory, "daily");
-    expect(currentCategory(memory)).toBeUndefined();
-    expect(memory.common).toEqual({ winner: "Karim Fictif" });
-    memory = rememberCategory(memory, "daily_fight_announce", { fighterA: "Tom Essai" });
-    memory = switchMode(memory, "live");
-    expect(currentCategory(memory)).toBe("live_ko");
-    expect(memory.common).toEqual({ winner: "Karim Fictif", fighterA: "Tom Essai" });
-  });
-
-  it("une catégorie de l'autre mode n'est jamais mémorisée", () => {
-    const daily = CATEGORIES.find((c) => c.mode === "daily")!;
-    expect(rememberCategory(start, daily.id)).toBe(start);
   });
 });
 
@@ -124,6 +103,7 @@ describe("palette de commandes", () => {
     expect(live.map((a) => a.label)).toEqual([
       "Passer en DAILY & MEDIA",
       "Démarrer une Session Live",
+      "Ouvrir : Social Studio",
       "Ouvrir : ADN éditorial",
       "Ouvrir : Intelligence artificielle",
       "Replier la barre latérale",
@@ -133,6 +113,7 @@ describe("palette de commandes", () => {
       "mode-live",
       "session-edit",
       "session-end",
+      "nav:studio",
       "nav:editorial",
       "nav:settings-ai",
       "sidebar-toggle",

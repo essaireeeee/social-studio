@@ -13,6 +13,20 @@ export function xWeightedLength(text: string): number {
   return twitterText.parseTweet(text).weightedLength;
 }
 
+/** Partie valide d'un texte pour X, et la partie au-delà de 280 (affichée en rouge). */
+export function xSplit(text: string): { valid: string; overflow: string; weightedLength: number } {
+  const parsed = twitterText.parseTweet(text);
+  if (parsed.valid || parsed.weightedLength <= 280) {
+    return { valid: text, overflow: "", weightedLength: parsed.weightedLength };
+  }
+  const end = parsed.validRangeEnd + 1;
+  return {
+    valid: text.slice(0, end),
+    overflow: text.slice(end),
+    weightedLength: parsed.weightedLength,
+  };
+}
+
 export function countForPlatform(text: string, platform: Platform): number {
   return PLATFORM_RULES[platform].counter === "twitter"
     ? xWeightedLength(text)

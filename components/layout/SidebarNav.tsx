@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Tooltip } from "@/components/ui/tooltip";
 import { COMING_SOON, NAV_SECTIONS, isActive, type NavItem } from "@/lib/shell/navigation";
 import { cn } from "@/lib/utils";
+import { useStudioStore } from "@/stores/studio.store";
 import { NavIcon } from "./NavIcon";
 
 interface SidebarNavProps {
@@ -87,6 +88,7 @@ function Item({
 /** Sections de navigation (section 12.1), communes à la barre latérale et au menu mobile. */
 export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
   const pathname = usePathname();
+  const mode = useStudioStore((s) => s.mode);
   return (
     <div className="flex flex-col gap-4">
       {NAV_SECTIONS.map((section) => (
@@ -108,7 +110,7 @@ export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
                 <Item
                   item={item}
                   collapsed={collapsed}
-                  active={isActive(item, pathname)}
+                  active={isActive(item, pathname, mode)}
                   onNavigate={onNavigate}
                 />
               </li>

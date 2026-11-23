@@ -53,13 +53,13 @@ export const NAV_SECTIONS: readonly NavSection[] = [
         icon: "dashboard",
         available: false,
       },
-      { id: "studio", label: "Social Studio", href: "/studio", icon: "studio", available: false },
+      { id: "studio", label: "Social Studio", href: "/studio", icon: "studio", available: true },
       {
         id: "studio-live",
         label: "LIVE SHOW",
         href: "/studio?mode=live",
         icon: "live",
-        available: false,
+        available: true,
         mode: "live",
       },
       {
@@ -67,7 +67,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
         label: "DAILY & MEDIA",
         href: "/studio?mode=daily",
         icon: "daily",
-        available: false,
+        available: true,
         mode: "daily",
       },
     ],
@@ -163,8 +163,13 @@ export function navItem(id: string): NavItem | undefined {
   return NAV_ITEMS.find((item) => item.id === id);
 }
 
-/** Entrée active : même chemin, ou sous-chemin (`/settings/ai` pour une future `/settings`). */
-export function isActive(item: NavItem, pathname: string): boolean {
+/**
+ * Entrée active : même chemin, ou sous-chemin. Dans le Studio, c'est l'entrée du mode actif
+ * (LIVE SHOW ou DAILY & MEDIA) qui est marquée, pas « Social Studio ».
+ */
+export function isActive(item: NavItem, pathname: string, mode?: Mode): boolean {
   const path = item.href.split("?")[0]!;
+  if (path === "/studio" && pathname === "/studio")
+    return item.mode !== undefined && item.mode === mode;
   return pathname === path || pathname.startsWith(`${path}/`);
 }
