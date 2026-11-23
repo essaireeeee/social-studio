@@ -240,6 +240,8 @@ export const RevisionSchema = z.object({
   action: RevisionActionSchema.optional(),
   instruction: z.string().optional(),
   factWarnings: z.array(FactWarningSchema).default(() => []),
+  /** Modèle natif d'origine : sert à « Reformuler » (même structure, nouvelles options). */
+  templateId: z.string().optional(),
 });
 export type Revision = z.infer<typeof RevisionSchema>;
 

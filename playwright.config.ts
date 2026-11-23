@@ -24,6 +24,15 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
-    env: { STORAGE_DIR: E2E_STORAGE_DIR, FILE_SYNC_ENABLED: "true" },
+    // Aucune clé ni modèle venant de l'environnement : l'écran IA part de « Non configuré ».
+    env: {
+      STORAGE_DIR: E2E_STORAGE_DIR,
+      FILE_SYNC_ENABLED: "true",
+      ANTHROPIC_API_KEY: "",
+      ANTHROPIC_MODEL: "",
+      OPENAI_API_KEY: "",
+      OPENAI_MODEL: "",
+      AI_PROVIDER: "native",
+    },
   },
 });

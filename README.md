@@ -42,10 +42,32 @@ L'application tourne sur http://localhost:3000.
 | `npm run format`                  | Prettier (avec tri des classes Tailwind)                                              |
 | `npm run test`                    | Tests unitaires Vitest (`tests/unit`)                                                 |
 | `npm run test:e2e`                | Tests Playwright (`tests/e2e`), serveur de dev lancé automatiquement sur le port 3100 |
+| `npm run check:bundle`            | Après un build : vérifie qu'aucune clé ni SDK IA n'est dans le bundle client          |
 
 ## Stack
 
 Next.js 16 (App Router), React 19, TypeScript strict, Tailwind CSS 4, Radix UI (composants shadcn/ui copiés dans `components/ui`), Zustand, Dexie (IndexedDB), Zod, papaparse, exceljs, twitter-text, jsdiff, SDK Anthropic et OpenAI, Vitest, Playwright.
+
+## Moteurs IA : Claude et OpenAI (Phase 6)
+
+Le moteur natif fonctionne sans clé. Pour rédiger avec Claude ou OpenAI :
+
+1. Renseigner la clé dans `.env.local` (recommandé) :
+
+```bash
+ANTHROPIC_API_KEY=...
+ANTHROPIC_MODEL=claude-sonnet-5-5
+```
+
+Pour OpenAI, `OPENAI_API_KEY` et `OPENAI_MODEL` (aucun modèle par défaut). `AI_PROVIDER` fixe le moteur choisi au premier lancement, `AI_TIMEOUT_MS` le délai maximal d'un appel (30 s par défaut).
+
+2. Ou, en développement, coller la clé dans **Paramètres > Intelligence artificielle** (`/settings/ai`). Elle reste dans `sessionStorage` (l'onglet courant), part vers la route locale dans l'en-tête `x-hex-provider-key` et n'est jamais enregistrée. En production, cette saisie est désactivée sauf `ALLOW_CLIENT_KEYS=true`.
+
+3. Choisir le moteur dans le même écran, puis **Tester la connexion** : vrai appel au fournisseur, latence et modèle, ou l'erreur exacte.
+
+Les appels passent uniquement par les routes serveur (`/api/generate`, `/api/refine`, `/api/decline`, `/api/ai/test`). En cas d'échec (clé refusée, quota, délai, réponse illisible), le moteur natif prend le relais avec le message « Génération IA indisponible (motif). Propositions produites par le moteur natif. ». Les sorties IA passent par le même linter, Fact Guard et anti-copie que le moteur natif : une information absente du brief est surlignée.
+
+Ajouter un fournisseur : un pilote dans `lib/ai/adapters/`, une ligne dans `lib/ai/registry.ts`, son identifiant dans `EngineSchema` (`types/domain.ts`).
 
 ## Recherche des références (Phase 4)
 

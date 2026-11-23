@@ -5,6 +5,7 @@
  * 2. Base vide et fichier local valide trouvé : on propose de le restaurer.
  * 3. Base vide sans fichier : données initiales (seed).
  */
+import { EngineSchema } from "@/types/domain";
 import type { DataServices } from "./client";
 import { SnapshotSchema, type SnapshotCounts } from "./snapshot";
 import { runSeed } from "./seed";
@@ -28,6 +29,27 @@ interface RestoreSummary {
 }
 
 const RESTORE_ENDPOINT = "/api/storage/restore";
+const AI_STATUS_ENDPOINT = "/api/ai/status";
+
+/**
+ * Premier lancement : moteur initial lu dans `AI_PROVIDER` (.env), via la route d'état IA.
+ * Le CM peut ensuite le changer dans Paramètres > IA. Sans réponse valide : moteur natif.
+ */
+async function applyInitialEngine(
+  repository: DataServices["repository"],
+  fetchImpl: typeof fetch,
+): Promise<void> {
+  try {
+    const response = await fetchImpl(AI_STATUS_ENDPOINT, { cache: "no-store" });
+    const body = (await response.json()) as { defaultEngine?: unknown };
+    const engine = EngineSchema.safeParse(body.defaultEngine);
+    if (!engine.success || engine.data === "native") return;
+    const settings = await repository.getSettings();
+    await repository.saveSettings({ ...settings, aiProvider: engine.data });
+  } catch {
+    // Serveur injoignable : le moteur natif reste sélectionné.
+  }
+}
 
 async function fetchSummary(fetchImpl: typeof fetch, query = ""): Promise<RestoreSummary | null> {
   try {
@@ -62,6 +84,7 @@ export async function prepareData(
   }
 
   await runSeed(repository);
+  await applyInitialEngine(repository, fetchImpl);
   return { kind: "ready" };
 }
 
@@ -100,4 +123,5 @@ export async function declineRestore(
     }
   }
   await runSeed(services.repository);
+  await applyInitialEngine(services.repository, fetchImpl);
 }

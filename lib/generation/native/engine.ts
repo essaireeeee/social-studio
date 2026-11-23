@@ -73,7 +73,7 @@ export interface NativeResult {
   durationMs: number;
 }
 
-interface Candidate {
+export interface Candidate {
   kind: VariantKind;
   composition: Composition;
   enriched?: Composition;
@@ -221,8 +221,22 @@ function bestEach(
   ) as Record<VariantKind, { candidate: Candidate; composition: Composition }>;
 }
 
-export function generateNative(input: NativeEngineInput): NativeResult {
-  const started = performance.now();
+/** Préparation commune à la génération et aux retouches : graine, candidats, finition. */
+export interface NativeSource {
+  seed: number;
+  /** Meilleurs rendus d'une variante ; `only` restreint les modèles essayés. */
+  candidatesFor(
+    kind: VariantKind,
+    attempt: number,
+    only?: (template: Template) => boolean,
+  ): Candidate[];
+  /** Post-traitement d'un rendu retenu (section 10.7). */
+  finalize(kind: VariantKind, composition: Composition, score: number): NativeVariant;
+  /** Même post-traitement pour un texte transformé (retouches natives). */
+  processText(text: string): PostProcessResult;
+}
+
+export function prepareNative(input: NativeEngineInput): NativeSource {
   const { brief, category, context, style } = input;
   const seed = seedFor(brief, input.regenerationCount);
   const profileTop = style.profile?.emojis.top.map((e) => e.emoji) ?? [];
@@ -246,7 +260,11 @@ export function generateNative(input: NativeEngineInput): NativeResult {
     references: input.references,
   };
 
-  const candidatesFor = (kind: VariantKind, attempt: number): Candidate[] => {
+  const candidatesFor = (
+    kind: VariantKind,
+    attempt: number,
+    only?: (template: Template) => boolean,
+  ): Candidate[] => {
     const target = lengthTarget(kind, style.params);
     const drop = new Set<SegmentRole>(OPTIONAL_ROLES);
     if (kind === "storytelling" && questionAllowed) drop.delete("question");
@@ -267,7 +285,8 @@ export function generateNative(input: NativeEngineInput): NativeResult {
     };
 
     const candidates: Candidate[] = [];
-    for (const template of templatesFor(category.id, kind).map((t) => withSavedHooks(t, saved))) {
+    const templates = templatesFor(category.id, kind).filter((t) => !only || only(t));
+    for (const template of templates.map((t) => withSavedHooks(t, saved))) {
       const rngSeed = hashString(`${seed}:${kind}:${attempt}:${template.id}`);
       const composition = compose(template, { ...base, rng: createRng(rngSeed), dropRoles: drop });
       if (!composition) continue;
@@ -290,6 +309,50 @@ export function generateNative(input: NativeEngineInput): NativeResult {
     }
     return candidates.sort((a, b) => b.score - a.score).slice(0, POOL);
   };
+
+  const allowed = buildAllowedFacts([
+    ...context.facts,
+    ...(context.vars.hashtags?.split(" ") ?? []),
+  ]);
+  const processText = (text: string): PostProcessResult =>
+    postProcess(text, {
+      lint: {
+        rules: input.rules,
+        categoryId: category.id,
+        fields: brief.fields,
+        frenchSpacing: input.frenchSpacing,
+        emojiThreshold: style.params.emojiThreshold,
+        recentHooks: input.recentHooks,
+      },
+      platform: brief.platform,
+      allowed,
+      vocabulary: TEMPLATE_VOCABULARY,
+      broadcasters: input.broadcasters,
+      references: input.references,
+    });
+  const finalize = (kind: VariantKind, composition: Composition, score: number): NativeVariant => {
+    const processed = processText(composition.text);
+    const paragraphs = processed.text.split(/\n\s*\n/).length;
+    const blocks = processed.adapted
+      ? collapseBlocks(composition.paragraphBlocks.slice(0, paragraphs))
+      : composition.blocks;
+    return {
+      ...processed,
+      kind,
+      hook: processed.text.split("\n")[0] ?? "",
+      structure: blocks.join("-"),
+      templateId: composition.templateId,
+      score: Math.round(score * 1000) / 1000,
+    };
+  };
+
+  return { seed, candidatesFor, finalize, processText };
+}
+
+export function generateNative(input: NativeEngineInput): NativeResult {
+  const started = performance.now();
+  const { category } = input;
+  const { seed, candidatesFor, finalize } = prepareNative(input);
 
   type Pick = Record<VariantKind, { candidate: Candidate; composition: Composition }>;
   const combine = (
@@ -350,40 +413,9 @@ export function generateNative(input: NativeEngineInput): NativeResult {
     );
   }
 
-  const allowed = buildAllowedFacts([
-    ...context.facts,
-    ...(context.vars.hashtags?.split(" ") ?? []),
-  ]);
-  const variants = (input.variantOrder ?? DEFAULT_VARIANT_ORDER).map((kind): NativeVariant => {
-    const { candidate, composition } = pick[kind];
-    const processed = postProcess(composition.text, {
-      lint: {
-        rules: input.rules,
-        categoryId: category.id,
-        fields: brief.fields,
-        frenchSpacing: input.frenchSpacing,
-        emojiThreshold: style.params.emojiThreshold,
-        recentHooks: input.recentHooks,
-      },
-      platform: brief.platform,
-      allowed,
-      vocabulary: TEMPLATE_VOCABULARY,
-      broadcasters: input.broadcasters,
-      references: input.references,
-    });
-    const paragraphs = processed.text.split(/\n\s*\n/).length;
-    const blocks = processed.adapted
-      ? collapseBlocks(composition.paragraphBlocks.slice(0, paragraphs))
-      : composition.blocks;
-    return {
-      ...processed,
-      kind,
-      hook: processed.text.split("\n")[0] ?? "",
-      structure: blocks.join("-"),
-      templateId: composition.templateId,
-      score: Math.round(candidate.score * 1000) / 1000,
-    };
-  });
+  const variants = (input.variantOrder ?? DEFAULT_VARIANT_ORDER).map((kind) =>
+    finalize(kind, pick[kind].composition, pick[kind].candidate.score),
+  );
 
   return { variants, seed, attempts, durationMs: performance.now() - started };
 }

@@ -1,5 +1,7 @@
 /** Compteurs de caractères par plateforme. Logique pure. */
-import { parseTweet } from "twitter-text";
+// L'export nommé n'existe que dans la version CommonJS : la version ESM (routes Next) n'a
+// qu'un export par défaut.
+import twitterText from "twitter-text";
 import type { Platform } from "@/types/domain";
 import { countGraphemes, hashtagRegex } from "@/lib/editorial/text-utils";
 import { PLATFORM_RULES } from "./rules";
@@ -8,7 +10,7 @@ export { countGraphemes };
 
 /** Comptage pondéré officiel de X (emojis et caractères CJK comptent double, liens 23). */
 export function xWeightedLength(text: string): number {
-  return parseTweet(text).weightedLength;
+  return twitterText.parseTweet(text).weightedLength;
 }
 
 export function countForPlatform(text: string, platform: Platform): number {

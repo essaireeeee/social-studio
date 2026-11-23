@@ -66,6 +66,26 @@ describe("démarrage des données", () => {
     expect(await s.repository.wordings.count()).toBe(6);
   });
 
+  it("premier lancement : moteur initial lu dans AI_PROVIDER (route d'état IA)", async () => {
+    const { services: s } = services();
+    const route = vi.fn(async (url: string) =>
+      url.includes("/api/ai/status")
+        ? Response.json({ defaultEngine: "anthropic" })
+        : Response.json({ enabled: true, found: false }),
+    );
+    await prepareData(s, route as unknown as typeof fetch);
+    expect((await s.repository.getSettings()).aiProvider).toBe("anthropic");
+
+    const { services: other } = services();
+    const invalid = vi.fn(async (url: string) =>
+      url.includes("/api/ai/status")
+        ? Response.json({ defaultEngine: "gpt" })
+        : Response.json({ enabled: true, found: false }),
+    );
+    await prepareData(other, invalid as unknown as typeof fetch);
+    expect((await other.repository.getSettings()).aiProvider).toBe("native");
+  });
+
   it("base vide, fichier trouvé : propose la restauration sans rien écrire", async () => {
     const snapshot = await savedSnapshot();
     const { services: s } = services();

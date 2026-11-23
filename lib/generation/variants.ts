@@ -9,7 +9,9 @@ import type { NativeVariant } from "./native/engine";
 export interface BuildGenerationInput {
   brief: Brief;
   engine: Engine;
-  variants: readonly Pick<NativeVariant, "kind" | "text" | "factWarnings">[];
+  variants: readonly (Pick<NativeVariant, "kind" | "text" | "factWarnings"> & {
+    templateId?: string;
+  })[];
   referenceIds: readonly string[];
   fallbackReason?: string;
   now?: Date;
@@ -30,6 +32,7 @@ export function buildGeneration(input: BuildGenerationInput): Generation {
         createdAt: timestamp,
         origin: input.engine,
         factWarnings: variant.factWarnings,
+        ...(variant.templateId ? { templateId: variant.templateId } : {}),
       },
     ],
   }));

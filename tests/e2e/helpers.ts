@@ -34,3 +34,31 @@ export function idbPut(page: Page, store: string, records: unknown[]): Promise<v
     [store, records] as const,
   );
 }
+
+/** Contenu complet d'IndexedDB, sérialisé (vérifier qu'aucune clé n'y est écrite). */
+export function idbDump(page: Page): Promise<string> {
+  return page.evaluate(
+    () =>
+      new Promise<string>((resolve, reject) => {
+        const request = indexedDB.open("hexagone-social-studio");
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const db = request.result;
+          const names = [...db.objectStoreNames];
+          const tx = db.transaction(names, "readonly");
+          const dump: Record<string, unknown> = {};
+          for (const name of names) {
+            const all = tx.objectStore(name).getAll();
+            all.onsuccess = () => {
+              dump[name] = all.result;
+            };
+          }
+          tx.oncomplete = () => {
+            db.close();
+            resolve(JSON.stringify(dump));
+          };
+          tx.onerror = () => reject(tx.error);
+        };
+      }),
+  );
+}

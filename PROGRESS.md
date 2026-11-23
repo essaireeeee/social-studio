@@ -10,7 +10,7 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | 3     | Intelligence éditoriale (Brand Voice Extractor) | Terminée |
 | 4     | Recherche des références                        | Terminée |
 | 5     | Moteur natif                                    | Terminée |
-| 6     | Moteur IA (Anthropic / OpenAI)                  | À faire  |
+| 6     | Moteur IA (Anthropic / OpenAI)                  | Terminée |
 | 7     | Shell de l'application                          | À faire  |
 | 8     | Social Studio                                   | À faire  |
 | 9     | Bibliothèque                                    | À faire  |
@@ -18,7 +18,59 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | 11    | Historique, dashboard, paramètres, données      | À faire  |
 | 12    | Tests, QA, README                               | À faire  |
 
-**Prochaine étape : Phase 6.**
+**Prochaine étape : Phase 7.**
+
+---
+
+## Phase 6 : Moteur IA avancé, Anthropic et OpenAI (terminée le 23/11/2026)
+
+### Livré
+
+- **Interface d'adaptateur** (`lib/ai/types.ts`) : `AIProviderAdapter` de la section 11.1 (`isConfigured`, `generate`, `refine`, `decline`, `test`). Chaque fournisseur est un pilote court (`adapters/anthropic.ts`, `adapters/openai.ts`) qui sait envoyer une requête et vérifier la connexion ; `createAdapter` (`adapter.ts`) en tire l'adaptateur complet. Le registre (`registry.ts`) les branche : ajouter un fournisseur = un fichier, une ligne, et son identifiant dans `EngineSchema`.
+- **Sortie structurée native** chez les deux fournisseurs : `output_config.format` (Anthropic, SDK 1.11) et `text.format` de l'API Responses (OpenAI 7.62, avec `store: false`). Validation Zod après coup (`schema.ts`) : exactement trois variantes, une par type. JSON illisible ou incomplet : une nouvelle tentative, puis bascule.
+- **Prompts** (`prompts.ts`) : prompt système et message utilisateur de la section 11.3, construits depuis le registre des catégories, les règles actives (une règle désactivée n'est plus transmise), le profil validé et les contraintes de plateforme. Balises `<faits>`, `<brief>`, `<references>` datées, `<hashtags_autorises>`, `<signature>`. Un contenu ne peut pas refermer une balise.
+- **Routes serveur** : `POST /api/generate`, `/api/refine`, `/api/decline`, `/api/ai/test`, et `GET /api/ai/status` (état des fournisseurs sans aucune clé). Logique dans `lib/ai/service.ts`, testable sans serveur. Délai `AI_TIMEOUT_MS` sur tout l'appel, annulation si le CM quitte la page. Toute erreur donne `{ fallback: true, reason }` avec un motif précis (« clé refusée par le fournisseur (401) », « limite de requêtes atteinte (429) », « délai dépassé (30 s) »...).
+- **Clés** (`keys.ts`) : `.env.local` d'abord, puis l'en-tête `x-hex-provider-key` si `NODE_ENV !== "production"` ou `ALLOW_CLIENT_KEYS=true`. Même règle pour le modèle (`x-hex-provider-model`) : celui du .env s'impose. `safeLog()` masque tout champ `key`, `token`, `authorization`, `secret`, `password` et toute chaîne en forme de clé ; c'est la seule voie de journalisation de la couche IA, et elle n'écrit que des métadonnées. Les journaux internes des SDK sont coupés (`logLevel: "off"`).
+- **Post-traitement des sorties IA** (`lib/ai/post-process.ts`) : celui du natif (nettoyage, linter, adaptation plateforme, Fact Guard, anti-copie), précédé du retrait des hashtags non cochés. Pour l'IA, Fact Guard et anti-copie signalent sans réécrire.
+- **Retouches natives** (`lib/generation/native/refine.ts`, `text-refine.ts`) : les huit actions de la section 11.4 ont une implémentation locale réelle, `custom` excepté (« Consigne libre disponible avec un moteur IA connecté »). Une retouche qui ne changerait rien est refusée avec un message, au lieu de créer une révision identique.
+- **Orchestrateur client** (`lib/generation/orchestrator.ts`, `ai-client.ts`) : choisit le moteur selon les réglages, appelle la route, bascule sur le natif avec le message « Génération IA indisponible ({reason}). Propositions produites par le moteur natif. » ; chaque retouche ajoute une `Revision` (origine, action, consigne), rien n'est écrasé.
+- **Contexte commun** (`lib/generation/context-loader.ts`) : natif, IA et retouches partent exactement des mêmes faits, références, CTA, signature et hashtags. `generateNativeForBrief` est réécrit dessus, sans changement de comportement.
+- **Écran Paramètres > Intelligence artificielle** (`/settings/ai`, `components/settings/`) : choix Natif / Claude / OpenAI, statut par fournisseur (« Configuré via .env », « Clé de session », « Non configuré »), clé en champ masqué avec la mention « Conservée uniquement pour cette session de navigateur. Jamais enregistrée. », modèle lu depuis le serveur (non modifiable s'il est défini en .env), « Tester la connexion » par un vrai appel (latence et modèle, ou l'erreur exacte, clé masquée). Indicateur « Natif », « Claude · connecté », « OpenAI · erreur ».
+- **`AI_PROVIDER`** : lu par `/api/ai/status` et appliqué comme moteur initial au premier lancement (base neuve). Une restauration garde le choix sauvegardé.
+- **`npm run check:bundle`** (`scripts/check-bundle.mjs`) : contrôle du bundle client après build (voir écart 1).
+
+### Validation
+
+- `typecheck`, `lint`, `format:check`, `build` : OK.
+- `npm run test` : 334 tests (26 fichiers). Critères de la phase :
+  - `/api/generate` sans clé renvoie `fallback: true` (« aucune clé Claude (Anthropic) configurée »), sans aucun appel réseau ;
+  - aucun log ne contient la clé passée en en-tête : espions sur `console.log/info/warn/error/debug`, erreur 401 dont le corps répète la clé, sur les quatre routes ; ni les journaux ni les réponses ne la contiennent ;
+  - une sortie IA contenant « samedi », absent des faits, produit un `FactWarning` de type `date`, positionné sur le mot exact.
+- Les SDK sont réellement exécutés dans les tests : seul `fetch` est remplacé. Couverts aussi : en-tête d'autorisation transmis, priorité de la clé .env, clé d'en-tête refusée en production, JSON invalide puis nouvelle tentative, deux variantes au lieu de trois, erreurs 401/404/429/529, délai dépassé, `new_hook` qui touche au corps (refusé), consigne « Ne modifie que ce qui est demandé » transmise, OpenAI sans modèle (« Non configuré ») puis avec modèle (API Responses, `store: false`).
+- Retouches natives : propriété sur 100 briefs aléatoires × 3 variantes × 7 actions, zéro fait inventé.
+- Vérification manuelle sur le serveur de dev avec une fausse clé : vrai appel au fournisseur, 401 renvoyé, bascule propre, clé absente des journaux.
+- `npm run test:e2e` : 9 scénarios OK, dont 2 nouveaux (choix du moteur ; clé de session présente dans `sessionStorage` et absente de `localStorage`, d'IndexedDB, de la sauvegarde fichier et d'un autre contexte de navigateur ; section inconnue en 404).
+- `grep -r "sk-" .next/static` : voir écart 1. `npm run check:bundle` : conforme.
+
+### Décisions et écarts
+
+1. **Critère `grep -r "sk-" .next/static`.** Le grep littéral remonte 121 lignes, toutes des noms de classes CSS `mask-` (mask-image, mask-size...) de `tailwind-merge`, utilisé par tous les composants. Aucune chaîne ne commence par `sk-` hors d'un mot, aucun SDK ni hôte de fournisseur n'est dans le bundle client. Retirer `tailwind-merge` casserait la fusion des classes des composants : `npm run check:bundle` fait le contrôle sans ces faux positifs, et échoue si une clé apparaît (vérifié en plantant une fausse clé dans le bundle).
+2. **Clé Anthropic dans `Authorization`.** Le SDK 1.11 envoie la clé en `Authorization: Bearer`, plus en `x-api-key`. Rien à faire côté application ; les tests vérifient l'en-tête réel.
+3. **Modèle par défaut.** Anthropic : `claude-sonnet-5-5` si `ANTHROPIC_MODEL` est vide (valeur de `.env.example`). OpenAI : aucun défaut, le nom des modèles change trop souvent ; sans `OPENAI_MODEL` ni modèle saisi, OpenAI reste « Non configuré ». Quand le .env ne fixe pas le modèle, l'écran permet d'en saisir un, gardé en `sessionStorage` avec la clé (section 11.5 : « non modifiable dans l'UI si défini en .env »).
+4. **Pas de bascule côté fournisseur.** Un refus du modèle (`stop_reason: refusal`) déclenche la bascule vers le moteur natif, qui est le repli prévu par la spec. Pas de repli serveur vers un autre modèle Claude : le modèle est choisi par l'administrateur dans le .env.
+5. **Effort de réflexion** : `medium` pour la génération, `low` pour retouches et déclinaisons, pour tenir dans `AI_TIMEOUT_MS` (30 s). Un modèle ancien qui n'accepte pas ce paramètre renverra une erreur 400, affichée telle quelle par le test de connexion.
+6. **Test de connexion** : lecture de la fiche du modèle (`models.retrieve`) chez les deux fournisseurs. C'est un vrai appel qui vérifie la clé et l'existence du modèle, sans générer de texte ni consommer de jetons.
+7. **Post-traitement côté serveur.** La route renvoie des variantes déjà passées au linter, au Fact Guard et à l'anti-copie : un client ne peut pas recevoir une sortie IA brute. Le corps de `/api/generate` reprend les champs de la section 11.2 et ajoute ce dont le post-traitement a besoin (`hashtags`, `broadcasters`, `lint`, `signature`, `provider`).
+8. **Fact Guard sur une sortie IA** : un mot écrit en minuscules dans la sortie ou dans les références n'est pas un nom propre, même en capitales ailleurs (« QUELLE VICTOIRE »). Les noms inventés restent signalés.
+9. **Retouches natives sur texte modifié.** `shorten`, `punchier`, `institutional`, `new_hook` et `toggle_emojis` partent du texte affiché, donc des modifications du CM. `rephrase` retire le même modèle avec de nouvelles formulations (le modèle d'origine est désormais gardé dans la révision, champ optionnel `templateId`) ; pour un texte IA, il cherche un modèle de même structure, sinon propose « Régénérer ». `institutional` : il n'existe pas de modèles « ton institutionnel » ; la retouche limite les emojis à un, remplace les exclamations et ramène les capitales à la casse normale (les noms retrouvent la casse du brief).
+10. **Déclinaison** : la route et l'adaptateur sont livrés. Le bouton « Décliner sur les autres réseaux » et sa version native (section 13) arrivent avec le Social Studio (Phase 8).
+11. **Indicateur du header** : calculé (`lib/ai/indicator.ts`, `stores/ai.store.ts`) et affiché en haut de l'écran IA. Le header lui-même arrive en Phase 7 et réutilisera ce composant.
+12. **`/settings/[section]`** : seule `ai` existe. Les autres sections (Phase 11) renvoient un 404 plutôt qu'un écran vide. `export const instant = false` : navigation bloquante assumée pour garantir le vrai 404 (Next 16.4 l'aurait sinon signalé).
+13. **Correctif `twitter-text`** : sa version ESM n'a qu'un export par défaut. L'import nommé passait en test (CommonJS) mais cassait dès qu'une route serveur chargeait le linter.
+
+### Fichiers créés ou modifiés
+
+`lib/ai/{types,schema,prompts,keys,errors,adapter,registry,post-process,service,http,indicator,index}.ts`, `lib/ai/adapters/{anthropic,openai}.ts`, `app/api/{generate,refine,decline}/route.ts`, `app/api/ai/{test,status}/route.ts`, `app/(workspace)/settings/[section]/page.tsx`, `components/settings/{AiSettingsPage,EngineChoice,ProviderPanel}.tsx`, `hooks/useAiSettings.ts`, `stores/ai.store.ts`, `lib/generation/{context-loader,orchestrator,ai-client,service,variants}.ts`, `lib/generation/native/{engine,refine,text-refine}.ts`, `lib/database/bootstrap.ts`, `lib/platforms/counters.ts`, `types/domain.ts` (`Revision.templateId`), `scripts/check-bundle.mjs`, `package.json`, `playwright.config.ts`, `tests/fixtures/ai.ts`, `tests/unit/ai/{routes,keys-prompts}.test.ts`, `tests/unit/generation/{refine,orchestrator}.test.ts`, `tests/unit/components/provider-panel.test.tsx`, `tests/unit/database/bootstrap.test.ts`, `tests/e2e/{helpers,phase6-ai-settings.spec}.ts`.
 
 ---
 
@@ -62,7 +114,7 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 11. **Fact Guard** : les mots du texte fixe des modèles ne sont jamais des faits (vocabulaire exempté pour les mots en capitales) ; un mot collé à un chiffre (« 2E ») fait partie du nombre. Trois faux positifs trouvés en test de charge, corrigés et couverts par des tests.
 12. **Ordre du post-traitement** : nettoyage, linter, adaptation plateforme, Fact Guard, anti-copie. L'adaptation passe avant le Fact Guard pour que les passages surlignés correspondent au texte final (la section 10.7 la place en dernier).
 13. **Adaptation plateforme** : retrait de paragraphes entiers par la fin, jamais l'accroche, jamais une phrase coupée.
-14. **Retouches natives (section 11.4)** : prévues en Phase 6, comme le prompt les y range.
+14. **Retouches natives (section 11.4)** : livrées en Phase 6, comme le prompt les y range.
 
 ### Fichiers créés ou modifiés
 
