@@ -21,6 +21,7 @@ import { PLATFORMS, PLATFORM_RULES } from "@/lib/platforms/rules";
 import {
   hashtagIdsOf,
   resetDraft,
+  setEventField,
   setField,
   signatureIdOf,
   signaturesFor,
@@ -95,7 +96,7 @@ export function BriefColumn({ data }: { data: StudioData }) {
     useStudioSession.getState().patch({ errors: rest });
   };
 
-  const choose = (categoryId: string) => chooseCategory(categoryId, liveSession);
+  const choose = (categoryId: string) => chooseCategory(categoryId, liveSession, data.events);
 
   return (
     <div className="flex min-h-full flex-col">
@@ -140,7 +141,11 @@ export function BriefColumn({ data }: { data: StudioData }) {
                   fightCard,
                 }}
                 onChange={(key, value) => {
-                  updateDraft((d) => setField(d, key, value));
+                  updateDraft((d) =>
+                    key === "event"
+                      ? setEventField(d, value, data.events)
+                      : setField(d, key, value),
+                  );
                   clearError(key);
                 }}
               />

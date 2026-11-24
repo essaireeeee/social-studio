@@ -12,8 +12,17 @@ import {
   validateBriefFields,
   type CategoryDef,
 } from "@/lib/categories/registry";
+import { findEvent } from "@/lib/generation/native/context";
 import { commonFields, type BriefFields } from "@/lib/shell/mode";
-import type { Brief, HashtagGroup, LiveSession, Mode, Platform, Signature } from "@/types/domain";
+import type {
+  Brief,
+  HashtagGroup,
+  HexEvent,
+  LiveSession,
+  Mode,
+  Platform,
+  Signature,
+} from "@/types/domain";
 
 export interface StudioDraft {
   platform: Platform;
@@ -63,11 +72,65 @@ export function sessionPrefill(
   return next;
 }
 
-/** Choix d'une catégorie : préréglages, champs déjà saisis, contexte de la session. */
+/** Valeur d'un champ tirée d'une fiche événement (`fromEvent`), au format du formulaire. */
+function eventValue(event: HexEvent | undefined, key: string): string | undefined {
+  const source = getField(key).fromEvent;
+  const value = event && source ? event[source] : undefined;
+  if (typeof value !== "string" || !value.trim()) return undefined;
+  return key === "date" ? value.slice(0, 10) : value;
+}
+
+const eventOf = (value: BriefFields[string], events: readonly HexEvent[]) =>
+  typeof value === "string" && value.trim() ? findEvent(value, events) : undefined;
+
+/**
+ * Événement choisi dans le brief (section 15.2) : date, salle, ville et billetterie de la
+ * fiche remplissent les champs de la catégorie encore vides, ou ceux qui portaient encore
+ * les valeurs de l'événement précédent. Une saisie du CM n'est jamais écrasée.
+ */
+export function setEventField(
+  draft: StudioDraft,
+  value: BriefFields[string],
+  events: readonly HexEvent[],
+): StudioDraft {
+  const previous = eventOf(draft.fields.event, events);
+  const next = eventOf(value, events);
+  const fields: BriefFields = { ...draft.fields, event: value };
+  const category = getCategory(draft.categoryId ?? "");
+  for (const key of category ? categoryFieldKeys(category) : []) {
+    if (!getField(key).fromEvent) continue;
+    const before = eventValue(previous, key);
+    const current = fields[key];
+    if (hasValue(current) && current !== before) continue;
+    const after = eventValue(next, key);
+    if (after !== undefined) fields[key] = after;
+    else delete fields[key];
+  }
+  return { ...draft, fields };
+}
+
+/** Champs `fromEvent` encore vides, remplis depuis l'événement déjà choisi. */
+export function eventPrefill(
+  category: CategoryDef,
+  fields: BriefFields,
+  events: readonly HexEvent[],
+): BriefFields {
+  const event = eventOf(fields.event, events);
+  if (!event) return fields;
+  const next = { ...fields };
+  for (const key of categoryFieldKeys(category)) {
+    const value = eventValue(event, key);
+    if (value !== undefined && !hasValue(next[key])) next[key] = value;
+  }
+  return next;
+}
+
+/** Choix d'une catégorie : préréglages, champs déjà saisis, contexte de la session et de l'événement. */
 export function selectCategory(
   draft: StudioDraft,
   categoryId: string,
   session?: LiveSession | null,
+  events: readonly HexEvent[] = [],
 ): StudioDraft {
   const category = getCategory(categoryId);
   if (!category) return draft;
@@ -82,7 +145,11 @@ export function selectCategory(
   return {
     ...draft,
     categoryId,
-    fields: sessionPrefill(category, applyPresets(category, kept), session),
+    fields: eventPrefill(
+      category,
+      sessionPrefill(category, applyPresets(category, kept), session),
+      events,
+    ),
     signatureId: sameCategory ? draft.signatureId : undefined,
   };
 }

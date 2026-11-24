@@ -88,15 +88,15 @@ export const NAV_SECTIONS: readonly NavSection[] = [
         label: "Combattants",
         href: "/fighters",
         icon: "fighters",
-        available: false,
+        available: true,
       },
-      { id: "events", label: "Événements", href: "/events", icon: "events", available: false },
+      { id: "events", label: "Événements", href: "/events", icon: "events", available: true },
       {
         id: "hashtags",
         label: "Hashtags & signatures",
         href: "/hashtags",
         icon: "hashtags",
-        available: false,
+        available: true,
       },
       {
         id: "editorial",

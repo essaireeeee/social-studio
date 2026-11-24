@@ -23,7 +23,8 @@ import {
 import { MODE_LABELS } from "@/lib/shell/mode";
 import { toast } from "@/stores/toast.store";
 import type { Mode, Wording } from "@/types/domain";
-import { FormField, WordingFormFields } from "./WordingFormFields";
+import { FormField } from "@/components/ui/form-field";
+import { WordingFormFields } from "./WordingFormFields";
 import { excerptOf } from "./WordingRow";
 
 const FIELD_IDS: Record<Field, string> = {

@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { MultiFighterField } from "@/components/forms/fields/MultiFighterField";
+import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Segmented } from "@/components/ui/segmented";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,38 +14,6 @@ import type { Platform, Wording } from "@/types/domain";
 
 const selectClass =
   "h-8 w-full rounded-md border border-input bg-background px-2 text-13 text-foreground";
-
-export function FormField({
-  id,
-  label,
-  hint,
-  error,
-  children,
-}: {
-  id: string;
-  label: string;
-  hint?: string;
-  error?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="flex min-w-0 flex-col gap-1">
-      <label htmlFor={id} className="text-xs text-muted-foreground">
-        {label}
-      </label>
-      {children}
-      {error ? (
-        <p id={`${id}-error`} className="text-xs text-danger">
-          {error}
-        </p>
-      ) : hint ? (
-        <p id={`${id}-hint`} className="text-xs text-muted-foreground">
-          {hint}
-        </p>
-      ) : null}
-    </div>
-  );
-}
 
 interface WordingFormFieldsProps {
   values: WordingFormValues;

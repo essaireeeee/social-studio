@@ -74,6 +74,13 @@ Trois façons d'importer, qui passent toutes par les étapes « Vérifier » pui
 
 Les doublons exacts sont ignorés par défaut ; « Remplacer » demande une confirmation. Aucun appel n'est fait à Instagram : seuls le texte et le fichier fournis sont lus. La connexion à l'API officielle est décrite dans `lib/import/instagram-api.README.md` (non implémentée).
 
+## Combattants, événements, hashtags et signatures (Phase 10)
+
+- **Combattants** (`/fighters`) : fiche complète, palmarès toujours daté, historique de combats en tableau, publications et événements liés. Une fiche non mise à jour depuis 90 jours porte « À vérifier ». Le palmarès n'est utilisé dans un texte que si « Utiliser le palmarès » est coché dans le brief.
+- **Événements** (`/events`) : à venir puis passés, fight card construite par glisser-déposer (ou au clavier), diffuseurs avec horaires et case « Horaires confirmés ». Sans confirmation, aucun horaire n'apparaît dans les textes ni dans les signatures. Bouton « Démarrer la Session Live pour cet événement ».
+- **Dans le Studio** : choisir un événement de la base dans le brief remplit la date, la salle, la ville et le lien billetterie de la catégorie. Une valeur saisie à la main n'est jamais écrasée.
+- **Hashtags & signatures** (`/hashtags`) : groupes (le `#` est ajouté et les espaces retirés à la saisie), ordre, modes, état par défaut ; signatures avec variables `{date}`, `{venue}`, `{city}`, `{broadcaster}`, `{prelimsTime}`, `{prelimsChannel}`, `{mainTime}`, `{mainChannel}`, `{ticketLink}`, champs requis et aperçu rendu avec un événement. Une ligne dont une variable est vide n'est pas affichée.
+
 ## Moteurs IA : Claude et OpenAI (Phase 6)
 
 Le moteur natif fonctionne sans clé. Pour rédiger avec Claude ou OpenAI :

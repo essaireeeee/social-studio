@@ -14,11 +14,50 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | 7     | Shell de l'application                          | Terminée |
 | 8     | Social Studio                                   | Terminée |
 | 9     | Bibliothèque                                    | Terminée |
-| 10    | Combattants, événements, hashtags, signatures   | À faire  |
+| 10    | Combattants, événements, hashtags, signatures   | Terminée |
 | 11    | Historique, dashboard, paramètres, données      | À faire  |
 | 12    | Tests, QA, README                               | À faire  |
 
-**Prochaine étape : Phase 10.**
+**Prochaine étape : Phase 11.**
+
+---
+
+## Phase 10 : Combattants, événements, hashtags, signatures (terminée le 24/11/2026)
+
+### Livré
+
+- **Combattants** (`/fighters`, `components/fighters/`, `lib/fighters/`) : liste filtrable par nom (surnom et club compris), catégorie de poids et club ; fiche avec tous les champs du type `Fighter` ; palmarès toujours daté (« Exact au » obligatoire dès qu'un chiffre est saisi) ; historique de combats éditable en tableau (date, adversaire, résultat, méthode, événement) ; onglets « Publications associées » et « Événements » ; date de mise à jour et badge « À vérifier » au-delà de 90 jours ; création et suppression confirmée.
+- **Événements** (`/events`, `components/events/`, `lib/events/`) : liste « À venir » (sans date à la fin) puis « Passés » ; fiche avec tous les champs du type `HexEvent` ; diffuseurs avec chaîne, horaire et partie diffusée ; case « Horaires confirmés » et avertissement si elle est cochée sans horaire ; liens ; fight card construite par glisser-déposer depuis la liste des combattants (vers un coin ou vers « Nouveau combat »), réordonnable par glisser-déposer ou boutons, entièrement utilisable au clavier (listes déroulantes) ; « Démarrer la Session Live pour cet événement » (passe en LIVE SHOW, modale pré-remplie).
+- **Hashtags & signatures** (`/hashtags`, `components/hashtags/`, `lib/hashtags/`) : groupes créés, renommés, réordonnés, avec type, modes et état par défaut (basculable dans la liste) ; normalisation à la saisie (`#` ajouté, espaces retirés) avec aperçu « Sera enregistré : … ». Signatures : éditeur avec insertion des variables au curseur, champs requis, « uniquement si les horaires sont confirmés », modes, activation, aperçu rendu avec l'événement de la Session Live ou le prochain (modifiable). Variable inconnue refusée.
+- **Studio** : choisir un événement de la base dans le brief remplit la date, la salle, la ville et le lien billetterie prévus par la catégorie (`fromEvent`, `setEventField`, `eventPrefill`), y compris si la catégorie est choisie après l'événement. Changer d'événement remplace les valeurs automatiques, jamais une saisie du CM.
+- **Palmarès** : case « Utiliser le palmarès » dans « Présentation combattant ». Cochée, le chiffre entre dans le texte et le fait autorisé est formulé avec sa date (« Palmarès de Karim Fictif au 01/11/2026 : 10-2-0 »).
+- Navigation : Combattants, Événements, Hashtags & signatures actifs (barre latérale et palette).
+- Briques partagées : `components/ui/form-field.tsx`, `components/directory/{UpdatedNote,ConfirmDialog}.tsx`, `hooks/useDirectoryData.ts`.
+
+### Validation
+
+- `typecheck`, `lint`, `format:check`, `build`, `check:bundle` : OK.
+- `npm run test` : 425 tests (36 fichiers), dont 15 nouveaux : fiche combattant (palmarès daté, historique, conversion), filtres et liens, fight card (un combattant dans un seul combat, ordre, combats incomplets), fiche événement (contrôles, avertissement), chronologie, normalisation des hashtags, réordonnancement, signatures (variables, ligne vide supprimée, horaires seulement si confirmés), pré-remplissage du brief, palmarès daté, suppressions, écriture différée du brouillon.
+- `npm run test:e2e` : 31 scénarios OK, dont 4 nouveaux :
+  - **événement choisi dans le brief : date, salle et ville pré-remplies ; signature rendue (« 🗓️ Samedi 14 décembre - Micropolis, Besançon ») ; aucune ligne horaire sans horaires confirmés**, « Diffusion détaillée » refusée ; une fois les horaires confirmés dans la fiche, la ligne « à partir de 19h00 … 21h00 » apparaît ;
+  - combattant : palmarès refusé sans date, historique, filtre par club, fiche relue après actualisation ;
+  - événement : fight card par glisser-déposer, liste à venir / passés, fiche relue après actualisation, Session Live pré-remplie ;
+  - hashtags et signatures : normalisation, ordre, variable inconnue, insertion de variable, aperçu.
+- Revue visuelle à 1 440 et 390 px (un débordement de la fight card sur mobile corrigé).
+
+### Décisions et écarts
+
+1. **Événement du brief** : seule une fiche de la base pré-remplit les champs. Un nom libre reste un nom libre : rien n'est déduit.
+2. **« Utiliser le palmarès »** : ajouté à la seule catégorie dont les modèles utilisent le palmarès (« Présentation combattant »). Ailleurs, la case n'aurait aucun effet avec le moteur natif.
+3. **Suppressions** : un combattant présent sur une fight card ne peut pas être supprimé (le retirer d'abord). Supprimer une fiche retire le lien des publications et des historiques, jamais leur texte. Une Session Live déjà démarrée garde ses informations.
+4. **Glisser-déposer** en HTML natif, sans dépendance. Chaque coin est aussi une liste déroulante, et l'ordre des combats se change aussi par boutons : tout se fait au clavier.
+5. **Aperçu des signatures** : rendu brut du modèle. Dans le Studio, les corrections éditoriales s'appliquent en plus (majuscule en début de ligne, par exemple).
+6. **Correctif du Studio (phase 8)** : le brouillon, écrit avec 300 ms de délai, pouvait se perdre si le CM changeait de page dans ce délai. L'écriture en attente part désormais quand la page est quittée ou masquée.
+7. **Correctif du Studio (phase 8)** : `/studio?mode=daily` ouvert par un chargement complet pouvait revenir en LIVE SHOW (le mode mémorisé reprenait la main). Le mode demandé est appliqué une fois la base prête.
+
+### Fichiers créés ou modifiés
+
+`app/(workspace)/{fighters,events,hashtags}/page.tsx`, `components/fighters/{FightersPage,FighterList,FighterDetail,FighterForm,FighterFields,FightHistoryTable,FighterWordings,FighterEvents}.tsx`, `components/events/{EventsPage,EventList,EventDetail,EventForm,EventInfoFields,BroadcastersEditor,LinksEditor,FightCardBuilder,FightSlotRow,FighterDropSlot}.tsx`, `components/hashtags/{HashtagsPage,GroupList,GroupDialog,SignatureList,SignatureDialog,SignaturePreview,ModeChecks,OrderButtons}.tsx`, `components/directory/{UpdatedNote,ConfirmDialog}.tsx`, `components/ui/form-field.tsx`, `components/library/{WordingForm,WordingFormFields}.tsx`, `components/studio/{BriefColumn,StudioPage,choose-category}`, `lib/fighters/{form,query,actions}.ts`, `lib/events/{form,fight-card,query,actions}.ts`, `lib/hashtags/{groups,signatures,actions}.ts`, `lib/studio/draft.ts`, `lib/categories/{fields,daily}.ts`, `lib/generation/native/context.ts`, `lib/shell/navigation.ts`, `hooks/useDirectoryData.ts`, `stores/studio.store.ts`, `tests/unit/directory/directory.test.ts`, `tests/unit/studio/draft-storage.test.ts`, `tests/unit/shell/shell.test.ts`, `tests/e2e/{phase10-directory,phase7-shell}.spec.ts`, `README.md`, `CLAUDE.md`.
 
 ---
 

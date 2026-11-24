@@ -5,7 +5,7 @@
  */
 import { categoryFieldKeys, getField, type CategoryDef } from "@/lib/categories/registry";
 import { normalizeText } from "@/lib/editorial/text-utils";
-import { formatDayLabel } from "@/lib/format";
+import { formatDate, formatDayLabel } from "@/lib/format";
 import type { Brief, BriefFieldValue, Fighter, HexEvent, LiveSession } from "@/types/domain";
 import type { VariableMap } from "./types";
 
@@ -127,7 +127,12 @@ export function buildBriefContext(
         const record = first.fiche.record;
         // Palmarès : seulement si le CM coche « Utiliser le palmarès » (section 15.1).
         if (record && fields.useRecord === true) {
-          set(`${key}Record`, `${record.wins}-${record.losses}-${record.draws}`);
+          const figures = `${record.wins}-${record.losses}-${record.draws}`;
+          set(`${key}Record`, figures);
+          // Formulation datée, en interne seulement : le texte n'affiche que le chiffre.
+          facts.push(
+            `Palmarès de ${fullName(first.fiche)} au ${formatDate(record.asOf)} : ${figures}`,
+          );
         }
       }
     } else if (def.type === "event") {

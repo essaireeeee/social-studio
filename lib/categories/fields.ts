@@ -84,6 +84,11 @@ const FIELD_LIST: FieldDef[] = [
     multiple: true,
   }),
   field("title", { label: "Combat pour le titre", type: "toggle" }),
+  field("useRecord", {
+    label: "Utiliser le palmarès",
+    type: "toggle",
+    helpText: "Palmarès de la fiche, à la date indiquée sur la fiche.",
+  }),
   field("stakes", { label: "Enjeu", type: "textarea" }),
   field("priceInfo", {
     label: "Tarifs",

@@ -30,9 +30,31 @@ interface StudioStoreState {
 const DRAFT_KEY = "hex-studio-draft";
 const SAVE_DELAY_MS = 300;
 
-/** localStorage avec écriture différée (300 ms) : une rafale de frappes, une écriture. */
+/**
+ * localStorage avec écriture différée (300 ms) : une rafale de frappes, une écriture.
+ * Une écriture en attente est faite tout de suite si la page est quittée ou masquée
+ * (navigation, onglet fermé) : le brouillon n'est jamais perdu.
+ */
 function debouncedStorage(): StateStorage {
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let pending: [string, string] | undefined;
+  const write = () => {
+    clearTimeout(timer);
+    if (!pending) return;
+    const [name, value] = pending;
+    pending = undefined;
+    try {
+      window.localStorage.setItem(name, value);
+    } catch {
+      // Stockage plein ou indisponible : le brouillon reste en mémoire.
+    }
+  };
+  if (typeof window !== "undefined") {
+    window.addEventListener("pagehide", write);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") write();
+    });
+  }
   return {
     getItem: (name) => {
       try {
@@ -42,16 +64,13 @@ function debouncedStorage(): StateStorage {
       }
     },
     setItem: (name, value) => {
+      pending = [name, value];
       clearTimeout(timer);
-      timer = setTimeout(() => {
-        try {
-          window.localStorage.setItem(name, value);
-        } catch {
-          // Stockage plein ou indisponible : le brouillon reste en mémoire.
-        }
-      }, SAVE_DELAY_MS);
+      timer = setTimeout(write, SAVE_DELAY_MS);
     },
     removeItem: (name) => {
+      pending = undefined;
+      clearTimeout(timer);
       try {
         window.localStorage.removeItem(name);
       } catch {

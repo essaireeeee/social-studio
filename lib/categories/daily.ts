@@ -23,7 +23,7 @@ const SPORT: CategoryDef[] = [
     label: "Présentation combattant",
     emoji: "🥊",
     required: ["fighter"],
-    optional: ["event", "angle", "extra"],
+    optional: ["event", "useRecord", "angle", "extra"],
     tone: "Présenter le combattant à partir de sa fiche uniquement : parcours, style, ambitions s'ils sont renseignés.",
     context: "positive",
   },

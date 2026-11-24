@@ -24,12 +24,15 @@ export function StudioPage() {
   const openHelp = useCallback(() => setHelp(true), []);
   useStudioShortcuts(data?.settings, data?.session, openHelp);
 
+  // Le mode demandé n'est appliqué qu'une fois la base prête : il est alors enregistré dans
+  // les réglages, qui font foi au démarrage (sinon le mode mémorisé reprendrait la main).
   const requested = params.get("mode");
+  const repositoryReady = Boolean(data);
   useEffect(() => {
-    if (requested !== "live" && requested !== "daily") return;
+    if (!repositoryReady || (requested !== "live" && requested !== "daily")) return;
     void setMode(requested);
     router.replace("/studio", { scroll: false });
-  }, [requested, setMode, router]);
+  }, [requested, repositoryReady, setMode, router]);
 
   // Références, messages et déclinaisons appartiennent à un mode : jamais affichés dans l'autre.
   useEffect(() => {
