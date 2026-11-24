@@ -1,2 +1,2 @@
-// Aperçus réseaux : PlatformSwitcher, InstagramPreview, FacebookPreview, XPreview, TikTokPreview, CaptionTruncator (Phase 8).
+// Aperçus réseaux : PreviewColumn, InstagramPreview, FacebookPreview, XPreview, TikTokPreview, PhoneFrame (Phase 8).
 export {};

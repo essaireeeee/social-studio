@@ -16,9 +16,79 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | 9     | Bibliothèque                                    | Terminée |
 | 10    | Combattants, événements, hashtags, signatures   | Terminée |
 | 11    | Historique, dashboard, paramètres, données      | Terminée |
-| 12    | Tests, QA, README                               | À faire  |
+| 12    | Tests, QA, README                               | Terminée |
 
-**Prochaine étape : Phase 12 (dernière).**
+**Toutes les phases sont terminées.** Définition du « terminé » (annexe B) vérifiée par `tests/e2e/annexe-b-termine.spec.ts`.
+
+---
+
+## Phase 12 : Tests, QA et README (terminée le 24/11/2026)
+
+### Livré
+
+- **Tests unitaires obligatoires (17.1)**, tous présents :
+
+  | Exigence                                | Fichier                                                   |
+  | --------------------------------------- | --------------------------------------------------------- |
+  | Linter éditorial                        | `tests/unit/editorial/linter.test.ts`                     |
+  | Troncature Instagram                    | `tests/unit/platforms/truncation.test.ts`                 |
+  | Compteur X                              | `tests/unit/platforms/counters.test.ts`                   |
+  | Séparateur `===`, classifieur, doublons | `tests/unit/import/import.test.ts`                        |
+  | Extracteur de style                     | `tests/unit/editorial/style-extractor.test.ts`            |
+  | Recherche des références                | `tests/unit/retrieval/{retriever,service}.test.ts`        |
+  | Moteur natif : structures, invention    | `tests/unit/generation/native-engine.test.ts`             |
+  | Moteur natif : anti-répétition          | `tests/unit/generation/anti-repetition.test.ts` (nouveau) |
+  | Fact Guard, anti-copie, signatures      | `tests/unit/generation/fact-guard.test.ts`                |
+  | Aller-retour export / import            | `tests/unit/database/snapshot.test.ts`                    |
+  | Masquage des clés dans les journaux     | `tests/unit/ai/keys-prompts.test.ts`                      |
+
+- **15 scénarios de recette (17.2)**, un fichier par scénario dans `tests/e2e/scenarios/` (`npm run test:scenarios`) : KO avec Session Live (5 interactions, moins de 30 s), décision partagée, nouveau champion (« la ceinture d'HEXAGONE MMA »), annonce de combat depuis une fiche événement, passage TV, import de 20 posts avec 2 doublons, recherche d'un ancien wording, références utilisées (même mode, ni démo ni publication écartée), révisions et retour arrière, copie et bibliothèque, export puis réimport JSON, parcours mobile par onglets, persistance (brief, génération, Session Live, fichier local), contraintes éditoriales (« de HEXAGONE MMA » corrigé, Samba Sima, aucune date inventée), sécurité (bundle, export, repli natif sans clé). Étapes partagées dans `steps.ts`.
+- **Annexe B** (`tests/e2e/annexe-b-termine.spec.ts`) : 50 anciens posts collés, analysés séparément (25 LIVE, 25 DAILY), profils validés, KO généré à partir des références LIVE sans recopier une seule ligne, puis travail entier retrouvé dans un nouveau navigateur depuis `data/hexagone-studio.json`.
+- **Accessibilité** : Lighthouse sur le build de production, catégorie accessibilité. Studio 100, Bibliothèque 100 ; Dashboard, Historique, Combattants, Événements, Hashtags, ADN éditorial, Publications validées et les quatre pages de Paramètres : 100. Corrections faites pour y arriver : titre de colonne gardé pour les lecteurs d'écran sur mobile (ordre des titres), profil du header annoncé par un texte masqué au lieu d'un `aria-label` sur un `span`, contraste du bouton destructif (rouge plus sombre), du badge LIVE et des titres LIVE / DAILY du dashboard.
+- **README** réécrit selon 17.4 : installation, lancement, écrans, structure, base locale, sauvegarde et restauration, imports, moteur natif et ses limites, clés API, ajout d'un fournisseur IA, ajout d'une catégorie ou d'un modèle, recherche des références, Supabase et pgvector, tests, raccourcis.
+- Nettoyage : dossier vide `lib/export/` retiré (les exports vivent dans `lib/data/`), commentaires d'index mis à jour, script `test:scenarios`.
+
+### Validation
+
+- `typecheck`, `lint`, `format:check`, `check:bundle` : OK. `npm run build` : aucun avertissement.
+- `npm run test` : 437 tests (38 fichiers).
+- `npm run test:e2e` : 51 scénarios OK (35 par phase, 15 de recette, 1 pour l'annexe B). Les 15 scénarios de recette passent deux fois de suite.
+
+### Audit des boutons (17.3)
+
+Aucun bouton décoratif, aucune mention « Bientôt disponible » restante. Les éléments ci-dessous peuvent être désactivés, toujours pour une raison fonctionnelle, affichée ou évidente :
+
+| Élément                                                     | Désactivé quand                                                   |
+| ----------------------------------------------------------- | ----------------------------------------------------------------- |
+| Studio : GÉNÉRER LES WORDINGS                               | aucune catégorie choisie, ou données pas encore prêtes            |
+| Studio : édition et retouches d'une variante                | génération validée ou publiée (« Retirer la validation » rouvre)  |
+| Studio : consigne particulière                              | moteur natif (message : il faut un fournisseur IA)                |
+| Studio : retouches, déclinaison                             | une action est déjà en cours sur la variante                      |
+| Studio : version affichée dans la frise des versions        | c'est la version courante                                         |
+| Aperçu Instagram : « … plus »                               | option « partie visible avant PLUS » active                       |
+| ADN éditorial : modifier les règles, valider un profil      | profil actif non administrateur, ou profil calculé avec les démos |
+| IA : Tester la connexion                                    | aucune clé (ni `.env.local` ni clé de session)                    |
+| Événements : Démarrer la Session Live                       | une Session Live est déjà en cours                                |
+| Bibliothèque : Enregistrer la fiche                         | doublon exact d'une publication existante                         |
+| Bibliothèque : Référence de style                           | exemple fictif (jamais référence)                                 |
+| Import : Vérifier, Continuer, Importer N publications       | rien à importer, ou colonne texte non choisie                     |
+| Import : case « Importer », Scinder, Fusionner              | doublon exact dans le lot, texte sans ligne vide, dernière ligne  |
+| Import : actions groupées                                   | aucune ligne cochée                                               |
+| Données : Supprimer les exemples fictifs                    | aucun exemple fictif                                              |
+| Données : dernière confirmation de la réinitialisation      | « RÉINITIALISER » pas encore recopié                              |
+| Utilisateurs : Supprimer                                    | profil actif                                                      |
+| Listes ordonnées : Monter, Descendre ; pagination           | premier ou dernier élément, première ou dernière page             |
+| Ajouter (options, valeurs), filtre Tag, aperçu de signature | champ vide, aucun tag, aucun événement                            |
+
+### Décisions et écarts
+
+1. **Scénarios de recette en plus des tests par phase** : les tests de chaque phase restent (ils couvrent des critères plus fins) ; les 15 scénarios demandés ont chacun leur fichier.
+2. **Lighthouse** n'est pas une dépendance du projet : il a été lancé ponctuellement sur `npm run build` + `npm run start`, Chromium préinstallé, sauvegarde fichier coupée (sinon un nouveau profil de navigateur reçoit la proposition de restauration).
+3. **Messages d'erreur IA** : le libellé réel est « clé refusée par le fournisseur (401) », dans le message de bascule ou le test de connexion, plutôt que la formulation d'exemple du cahier des charges.
+
+### Fichiers créés ou modifiés
+
+`tests/e2e/scenarios/{steps.ts,01…15-*.spec.ts}`, `tests/e2e/annexe-b-termine.spec.ts`, `tests/unit/generation/anti-repetition.test.ts`, `components/studio/StudioLayout.tsx`, `components/layout/UserBadge.tsx`, `components/ui/{button,badge}.tsx`, `components/dashboard/DashboardPage.tsx`, index de `components/{preview,studio,forms}` et `stores`, `lib/export/` (supprimé), `package.json` (`test:scenarios`), `README.md`, `CLAUDE.md`.
 
 ---
 

@@ -1,2 +1,2 @@
-// Social Studio : StudioLayout, BriefColumn, WordingColumn, PreviewColumn, MobileStudioTabs (Phase 8).
+// Social Studio : StudioPage, StudioLayout (colonnes et onglets mobiles), BriefColumn, WordingColumn (Phase 8).
 export {};

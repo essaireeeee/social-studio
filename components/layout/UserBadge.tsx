@@ -14,7 +14,10 @@ export function UserBadge() {
     .slice(0, 2)
     .toUpperCase();
   return (
-    <span className="flex items-center gap-2" aria-label={`Profil actif : ${user.name}, ${role}`}>
+    <span className="flex items-center gap-2">
+      <span className="sr-only">
+        Profil actif : {user.name}, {role}
+      </span>
       <span
         className="flex size-7 items-center justify-center rounded-full border border-border bg-elevated text-[11px] font-semibold"
         aria-hidden="true"

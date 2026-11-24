@@ -12,7 +12,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --trace off",
+    "test:scenarios": "playwright test tests/e2e/scenarios --trace off",
     "check:bundle": "node scripts/check-bundle.mjs"
   },
   "dependencies": {

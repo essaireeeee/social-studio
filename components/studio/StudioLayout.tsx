@@ -14,10 +14,14 @@ const TABS: { id: MobileTab; label: string }[] = [
 
 function ColumnHeader({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <div className="sticky top-0 z-20 hidden h-10 shrink-0 items-center justify-between border-b border-border bg-background/95 px-4 lg:flex">
-      <h2 className="font-mono text-[11px] tracking-[0.18em] text-muted-foreground">{title}</h2>
-      {children}
-    </div>
+    <>
+      {/* Sous 1 024 px, l'en-tête visuel disparaît ; le titre reste pour la structure des titres. */}
+      <h2 className="sr-only lg:hidden">{title}</h2>
+      <div className="sticky top-0 z-20 hidden h-10 shrink-0 items-center justify-between border-b border-border bg-background/95 px-4 lg:flex">
+        <h2 className="font-mono text-[11px] tracking-[0.18em] text-muted-foreground">{title}</h2>
+        {children}
+      </div>
+    </>
   );
 }
 

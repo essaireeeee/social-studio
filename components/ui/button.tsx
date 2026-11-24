@@ -17,7 +17,8 @@ export const buttonVariants = cva(
         secondary:
           "border border-border bg-elevated text-foreground hover:bg-subtle active:bg-subtle/70",
         ghost: "text-foreground hover:bg-subtle active:bg-subtle/70",
-        destructive: "bg-danger text-white hover:bg-danger/90 active:bg-danger/80",
+        // Rouge plus sombre que --danger : contraste ≥ 4,5:1 avec le texte blanc.
+        destructive: "bg-[#dc2626] text-white hover:bg-[#b91c1c] active:bg-[#991b1b]",
       },
       size: {
         sm: "h-7 px-2.5 text-xs",

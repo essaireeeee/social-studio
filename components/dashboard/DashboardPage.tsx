@@ -55,7 +55,7 @@ export function DashboardPage() {
           href="/studio?mode=live"
           className="flex flex-col gap-1 rounded-lg border border-live/50 bg-live/10 p-5 hover:bg-live/15"
         >
-          <span className="text-lg font-semibold tracking-wide text-live">LIVE SHOW</span>
+          <span className="text-xl font-bold tracking-wide text-live">LIVE SHOW</span>
           <span className="text-13 text-muted-foreground">
             Pendant la soirée : résultats, ambiance, réactions.
           </span>
@@ -64,7 +64,7 @@ export function DashboardPage() {
           href="/studio?mode=daily"
           className="flex flex-col gap-1 rounded-lg border border-daily/50 bg-daily/10 p-5 hover:bg-daily/15"
         >
-          <span className="text-lg font-semibold tracking-wide text-daily">DAILY & MEDIA</span>
+          <span className="text-xl font-bold tracking-wide text-daily">DAILY & MEDIA</span>
           <span className="text-13 text-muted-foreground">
             Le reste du temps : annonces, billetterie, médias.
           </span>
