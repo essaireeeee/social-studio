@@ -15,10 +15,52 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | 8     | Social Studio                                   | Terminée |
 | 9     | Bibliothèque                                    | Terminée |
 | 10    | Combattants, événements, hashtags, signatures   | Terminée |
-| 11    | Historique, dashboard, paramètres, données      | À faire  |
+| 11    | Historique, dashboard, paramètres, données      | Terminée |
 | 12    | Tests, QA, README                               | À faire  |
 
-**Prochaine étape : Phase 11.**
+**Prochaine étape : Phase 12 (dernière).**
+
+---
+
+## Phase 11 : Historique, dashboard, paramètres, données (terminée le 24/11/2026)
+
+### Livré
+
+- **Dashboard** (`/`, `components/dashboard/`, `lib/dashboard/stats.ts`) : « Bienvenue dans votre Social Studio. », bouton **NOUVEAU WORDING** (Studio dans le dernier mode), raccourcis LIVE SHOW (rouge) et DAILY & MEDIA (or), cinq dernières générations avec leur statut, cinq derniers wordings, références réelles et fictives, répartition LIVE / DAILY sur une seule barre, Session Live, état du moteur IA et de la sauvegarde. Aucun graphique décoratif.
+- **Historique** (`/history`, `components/history/`, `lib/history/history.ts`) : tableau date, mode, catégorie, plateforme, moteur, statut, extrait du texte final ; filtres par statut et mode ; 50 lignes par page. Détail : brief initial, trois variantes avec toutes leurs révisions et leur origine (moteur ou CM), différence entre texte initial et final, références utilisées. Actions : rouvrir dans le Studio, enregistrer dans la bibliothèque (fiche complète), valider, retirer la validation, marquer comme publié.
+- **Quatre statuts distincts** (`GenerationStatusBadge`) : Brouillon (pointillés), En cours de modification (orange), Validé (vert), Publié (vert plein), chacun avec son icône.
+- **Publications validées** (`/validated`) : générations validées ou publiées pas encore versées dans la bibliothèque, bouton « Ajouter comme référence ». Rien n'entre automatiquement dans le corpus de style.
+- **Préférences** (`/settings/preferences`) : logo (512 Ko au plus, stocké en base, affiché dans le header et l'aperçu), nom de compte, coupures Instagram et Facebook, options rapides (rounds, méthodes, diffuseurs) éditables et réordonnables, ordre des variantes, raccourci de copie, espaces insécables, poids de la recherche (section avancée, avec retour aux valeurs par défaut).
+- **Gestion des données** (`/settings/data`, `lib/data/`) : export JSON intégral, CSV de la bibliothèque (BOM UTF-8, réimportable), Excel (une feuille par table) ; import JSON avec aperçu des volumes, « Fusionner » par défaut ou « Remplacer » (double confirmation, sauvegarde automatique) ; restauration depuis le fichier local ou `data/backups/` ; suppression des exemples fictifs ; réinitialisation (triple confirmation dont la saisie de « RÉINITIALISER », export téléchargé automatiquement avant).
+- **Utilisateurs** (`/settings/users`, `lib/users/users.ts`) : profils locaux (nom, rôle CM ou administrateur), profil actif, mention « Contrôle de rôle local, sans authentification. » Il reste toujours au moins un administrateur ; le profil actif ne peut pas être supprimé.
+- **Micro-interactions** : notifications avec action « Réessayer » (génération, retouche, déclinaison, export, import) ; squelettes de chargement sur les nouvelles listes. Transition de couleur de 150 ms et respect de `prefers-reduced-motion` déjà en place depuis la Phase 0.
+- **Navigation complète** : toutes les entrées sont actives, plus aucune mention « Bientôt disponible ».
+
+### Validation
+
+- `typecheck`, `lint`, `format:check`, `build`, `check:bundle` : OK.
+- `npm run test` : 434 tests (37 fichiers), dont 9 nouveaux : statuts, texte initial et final, filtres, publications en attente ; statistiques du dashboard ; CSV (BOM, accents, emojis, réimport sans correspondance, démos exclues) ; JSON (relecture, champ interdit refusé, fichier étranger refusé) ; Excel (une feuille par table, images non recopiées) ; suppression des démos ; réinitialisation (sauvegarde d'abord, état initial ensuite) ; préférences ; profils.
+- `npm run test:e2e` : 35 scénarios OK, dont 4 nouveaux :
+  - **export JSON → réinitialisation → import JSON : données identiques** (tables triées et réglages comparés entre les deux exports) ;
+  - **export CSV : BOM UTF-8 (EF BB BF), accents et emojis corrects**, exemples fictifs exclus ; Excel valide ; suppression des exemples fictifs ;
+  - historique : brouillon, détail, validation, « Ajouter comme référence », dashboard à jour ;
+  - profils : création, profil actif dans le header, refus de supprimer le dernier administrateur.
+- Revue visuelle à 1 440 et 390 px (débordement du dashboard sur mobile corrigé).
+
+### Décisions et écarts
+
+1. **Sauvegarde avant remplacement** : copie dans `data/backups/` par la synchro fichier ; si elle est désactivée, un export JSON est téléchargé à la place. La réinitialisation télécharge toujours un export en plus.
+2. **Réinitialisation** : retour à l'état du premier lancement (exemples fictifs, règles, profil par défaut, réglages par défaut), puis rechargement complet de la page pour repartir d'états en mémoire vides.
+3. **CSV de la bibliothèque** : exemples fictifs exclus (ils ne sont pas des publications officielles), colonnes identiques à l'import pour pouvoir le réimporter tel quel.
+4. **Excel** : les images ne sont pas recopiées (une cellule est limitée à 32 767 caractères) ; leur taille est indiquée.
+5. **Restauration depuis le fichier local** : le fichier principal suit la base en continu, il sert surtout après un changement de navigateur. Les sauvegardes de `data/backups/` couvrent le retour en arrière.
+6. **Changer le statut** depuis l'historique : les transitions du Studio (valider, retirer la validation, publier) ; un texte publié ne revient pas en arrière.
+7. **Profils** : comme annoncé, le contrôle de rôle est local ; tout profil peut activer un autre profil.
+8. **Dashboard** : l'entrée « Dashboard » pointe vers `/` (accueil), plutôt que vers une adresse séparée.
+
+### Fichiers créés ou modifiés
+
+`app/(workspace)/{page,history/page,validated/page}.tsx`, `app/(workspace)/settings/[section]/page.tsx`, `components/dashboard/{DashboardPage,DashboardBlock}.tsx`, `components/history/{HistoryPage,HistoryDetail,GenerationStatusBadge,RevisionHistory,BriefSummary}.tsx`, `components/validated/ValidatedPage.tsx`, `components/settings/preferences/{PreferencesPage,PreferencesForm,OptionListEditor,OrderList,LogoField}.tsx`, `components/settings/data/{DataPage,DataBlock,ExportPanel,ImportJsonPanel,RestorePanel,DemoPanel,ResetPanel,StepConfirm,CountsTable,download}`, `components/settings/users/{UsersPage,UserDialog}.tsx`, `components/editor/DiffDialog.tsx`, `components/layout/SyncIndicator.tsx`, `components/ui/toaster.tsx`, `lib/data/{export,excel-export,import-json,maintenance}.ts`, `lib/history/history.ts`, `lib/dashboard/stats.ts`, `lib/settings/preferences.ts`, `lib/users/users.ts`, `lib/shell/{navigation,sync-label}.ts`, `hooks/{useHistoryData,useReopenInStudio,useStudioActions}.ts`, `stores/toast.store.ts`, `tests/unit/phase11/data.test.ts`, `tests/unit/shell/shell.test.ts`, `tests/e2e/{phase11-data,phase7-shell}.spec.ts`, `README.md`, `CLAUDE.md`.
 
 ---
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { LintFix } from "@/lib/editorial/linter";
 import { RefineUnavailableError } from "@/lib/generation/native/refine";
 import { declineVariant, generateForBrief, refineVariant } from "@/lib/generation/orchestrator";
@@ -37,6 +37,13 @@ function reportHealth(engine: Engine, failed: boolean): void {
 export function useStudioActions() {
   const repository = useRepository();
   const { retriever } = useStudioContext();
+  // Dernières versions des actions, pour « Réessayer » depuis une notification d'erreur.
+  const latest = useRef<{
+    generate?: (options?: { withExclusions?: boolean }) => Promise<void>;
+    refine?: (g: string, v: string, a: RefineAction, i?: string) => Promise<void>;
+    decline?: (g: string, v: string) => Promise<void>;
+  }>({});
+  const retry = (run: () => void) => ({ label: "Réessayer", onClick: run });
 
   const generate = useCallback(
     async (options: { withExclusions?: boolean } = {}) => {
@@ -84,7 +91,11 @@ export function useStudioActions() {
         store.setGeneration(outcome.generation.id);
         store.setMobileTab("results");
       } catch (error) {
-        toast(message(error), "danger");
+        toast(
+          message(error),
+          "danger",
+          retry(() => void latest.current.generate?.(options)),
+        );
       } finally {
         useStudioSession.getState().patch({ generating: false });
       }
@@ -116,10 +127,13 @@ export function useStudioActions() {
           useStudioStore.getState().setResultsBadge(true);
         }
       } catch (error) {
-        toast(
-          error instanceof RefineUnavailableError ? error.message : message(error),
-          error instanceof RefineUnavailableError ? "neutral" : "danger",
-        );
+        if (error instanceof RefineUnavailableError) toast(error.message, "neutral");
+        else
+          toast(
+            message(error),
+            "danger",
+            retry(() => void latest.current.refine?.(generationId, variantId, action, instruction)),
+          );
       } finally {
         useStudioSession.getState().setBusy(variantId, undefined);
       }
@@ -146,13 +160,21 @@ export function useStudioActions() {
           ...(outcome.notice ? { notice: outcome.notice } : {}),
         });
       } catch (error) {
-        toast(message(error), "danger");
+        toast(
+          message(error),
+          "danger",
+          retry(() => void latest.current.decline?.(generationId, variantId)),
+        );
       } finally {
         useStudioSession.getState().setBusy(variantId, undefined);
       }
     },
     [repository, retriever],
   );
+
+  useEffect(() => {
+    latest.current = { generate, refine, decline };
+  }, [generate, refine, decline]);
 
   return { generate, refine, decline, ready: Boolean(repository && retriever) };
 }

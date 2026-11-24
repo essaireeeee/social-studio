@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AiSettingsPage } from "@/components/settings/AiSettingsPage";
+import { DataPage } from "@/components/settings/data/DataPage";
+import { PreferencesPage } from "@/components/settings/preferences/PreferencesPage";
+import { UsersPage } from "@/components/settings/users/UsersPage";
 
-/**
- * Paramètres par section. Phase 6 : « Intelligence artificielle » (`ai`).
- * Préférences, données et utilisateurs arrivent en Phase 11 : d'ici là, ces adresses
- * renvoient une page introuvable plutôt qu'un écran vide.
- */
+/** Paramètres par section (sections 11.5 et 16.3). Une section inconnue renvoie un vrai 404. */
 const SECTIONS = {
   ai: { title: "Intelligence artificielle", Component: AiSettingsPage },
+  preferences: { title: "Préférences", Component: PreferencesPage },
+  data: { title: "Gestion des données", Component: DataPage },
+  users: { title: "Utilisateurs", Component: UsersPage },
 } as const;
 
 /**

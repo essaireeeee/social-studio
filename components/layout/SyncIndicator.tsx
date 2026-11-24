@@ -3,7 +3,7 @@
 import { Cloud, CloudOff, LoaderCircle } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip";
 import { useNow } from "@/hooks/useNow";
-import { formatRelative } from "@/lib/format";
+import { syncLabel } from "@/lib/shell/sync-label";
 import { useDataStore } from "@/stores/data.store";
 
 /** État de la sauvegarde dans le fichier local (section 12.2) : « Sauvegardé · il y a 3 s ». */
@@ -11,22 +11,16 @@ export function SyncIndicator() {
   const sync = useDataStore((state) => state.fileSync);
   const now = useNow();
 
-  let icon = <Cloud className="size-3.5" aria-hidden="true" />;
-  let text = "Sauvegarde locale";
-  let tone = "text-muted-foreground";
-  if (sync.status === "pending" || sync.status === "saving") {
-    icon = <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" />;
-    text = "Enregistrement…";
-  } else if (sync.status === "saved" && sync.lastSavedAt) {
-    text = now ? `Sauvegardé · ${formatRelative(sync.lastSavedAt, now)}` : "Sauvegardé";
-  } else if (sync.status === "error") {
-    icon = <CloudOff className="size-3.5" aria-hidden="true" />;
-    text = "Sauvegarde en erreur";
-    tone = "text-danger";
-  } else if (sync.status === "disabled") {
-    icon = <CloudOff className="size-3.5" aria-hidden="true" />;
-    text = "Sauvegarde fichier désactivée";
-  }
+  const { text, tone: kind } = syncLabel(sync, now);
+  const tone = kind === "danger" ? "text-danger" : "text-muted-foreground";
+  const icon =
+    kind === "busy" ? (
+      <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" />
+    ) : sync.status === "error" || sync.status === "disabled" ? (
+      <CloudOff className="size-3.5" aria-hidden="true" />
+    ) : (
+      <Cloud className="size-3.5" aria-hidden="true" />
+    );
 
   return (
     <Tooltip

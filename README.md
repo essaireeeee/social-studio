@@ -81,6 +81,27 @@ Les doublons exacts sont ignorés par défaut ; « Remplacer » demande une conf
 - **Dans le Studio** : choisir un événement de la base dans le brief remplit la date, la salle, la ville et le lien billetterie de la catégorie. Une valeur saisie à la main n'est jamais écrasée.
 - **Hashtags & signatures** (`/hashtags`) : groupes (le `#` est ajouté et les espaces retirés à la saisie), ordre, modes, état par défaut ; signatures avec variables `{date}`, `{venue}`, `{city}`, `{broadcaster}`, `{prelimsTime}`, `{prelimsChannel}`, `{mainTime}`, `{mainChannel}`, `{ticketLink}`, champs requis et aperçu rendu avec un événement. Une ligne dont une variable est vide n'est pas affichée.
 
+## Historique, dashboard et données (Phase 11)
+
+- **Dashboard** (`/`) : « NOUVEAU WORDING », accès LIVE SHOW et DAILY & MEDIA, dernières générations et publications, références réelles et fictives, répartition LIVE / DAILY, Session Live, moteur IA, sauvegarde.
+- **Historique** (`/history`) : toutes les générations, filtrables par statut (Brouillon, En cours de modification, Validé, Publié) et par mode. Le détail montre le brief, chaque version avec son origine (moteur ou CM), la différence entre texte initial et final, les références utilisées. Actions : rouvrir dans le Studio, enregistrer dans la bibliothèque, valider, publier.
+- **Publications validées** (`/validated`) : les textes validés pas encore versés dans la bibliothèque. Rien n'entre dans le corpus de style sans « Ajouter comme référence ».
+- **Paramètres** : Préférences (logo, nom de compte, coupures, options rapides, ordre des variantes, raccourci, espaces insécables, poids de recherche), Gestion des données, Utilisateurs (profils locaux, rôle CM ou administrateur ; contrôle de rôle local, sans authentification).
+
+**Gestion des données** (`/settings/data`) :
+
+| Action               | Détail                                                                                              |
+| -------------------- | --------------------------------------------------------------------------------------------------- |
+| Export JSON intégral | Toutes les tables et `schemaVersion`, jamais de clé API. Se réimporte tel quel.                     |
+| Bibliothèque en CSV  | UTF-8 avec BOM (accents et emojis corrects dans Excel), séparateur `;`, colonnes de l'import CSV.   |
+| Excel                | Une feuille par table, plus les réglages.                                                           |
+| Import JSON          | Aperçu des volumes. « Fusionner » (défaut, doublons ignorés) ou « Remplacer » (deux confirmations). |
+| Restaurer            | Depuis `data/hexagone-studio.json` ou une sauvegarde de `data/backups/`.                            |
+| Exemples fictifs     | Suppression des six publications de démonstration.                                                  |
+| Réinitialiser        | Trois confirmations, export JSON téléchargé automatiquement avant.                                  |
+
+Avant tout remplacement, l'état courant est copié dans `data/backups/` ; si la sauvegarde fichier est désactivée, un export JSON est téléchargé à la place.
+
 ## Moteurs IA : Claude et OpenAI (Phase 6)
 
 Le moteur natif fonctionne sans clé. Pour rédiger avec Claude ou OpenAI :

@@ -41,18 +41,9 @@ describe("navigation (section 12.1)", () => {
     ]);
   });
 
-  it("seuls les écrans livrés sont actifs, les autres portent « Bientôt disponible »", () => {
-    expect(NAV_ITEMS.filter((i) => i.available).map((i) => i.href)).toEqual([
-      "/studio",
-      "/studio?mode=live",
-      "/studio?mode=daily",
-      "/library",
-      "/fighters",
-      "/events",
-      "/hashtags",
-      "/editorial",
-      "/settings/ai",
-    ]);
+  it("tous les écrans sont livrés : plus aucune entrée « Bientôt disponible »", () => {
+    expect(NAV_ITEMS.every((i) => i.available)).toBe(true);
+    expect(NAV_ITEMS.map((i) => i.href)).toContain("/settings/users");
     expect(COMING_SOON).toBe("Bientôt disponible");
     expect(navItem("studio-live")).toMatchObject({ href: "/studio?mode=live", mode: "live" });
   });
@@ -62,6 +53,9 @@ describe("navigation (section 12.1)", () => {
     expect(isActive(editorial, "/editorial")).toBe(true);
     expect(isActive(editorial, "/editorial/regles")).toBe(true);
     expect(isActive(editorial, "/editorialx")).toBe(false);
+    // Le dashboard (« / ») n'est actif que sur l'accueil.
+    expect(isActive(navItem("dashboard")!, "/")).toBe(true);
+    expect(isActive(navItem("dashboard")!, "/library")).toBe(false);
     // Dans le Studio, seule l'entrée du mode actif est marquée.
     expect(isActive(navItem("studio-live")!, "/studio", "live")).toBe(true);
     expect(isActive(navItem("studio-daily")!, "/studio", "live")).toBe(false);
@@ -107,13 +101,19 @@ describe("palette de commandes", () => {
     expect(live.map((a) => a.label)).toEqual([
       "Passer en DAILY & MEDIA",
       "Démarrer une Session Live",
+      "Ouvrir : Dashboard",
       "Ouvrir : Social Studio",
       "Ouvrir : Bibliothèque de wordings",
       "Ouvrir : Combattants",
       "Ouvrir : Événements",
       "Ouvrir : Hashtags & signatures",
       "Ouvrir : ADN éditorial",
+      "Ouvrir : Historique",
+      "Ouvrir : Publications validées",
       "Ouvrir : Intelligence artificielle",
+      "Ouvrir : Préférences",
+      "Ouvrir : Gestion des données",
+      "Ouvrir : Utilisateurs",
       "Replier la barre latérale",
     ]);
     const daily = actionCommands({ mode: "daily", hasActiveSession: true, sidebarCollapsed: true });
@@ -121,13 +121,19 @@ describe("palette de commandes", () => {
       "mode-live",
       "session-edit",
       "session-end",
+      "nav:dashboard",
       "nav:studio",
       "nav:library",
       "nav:fighters",
       "nav:events",
       "nav:hashtags",
       "nav:editorial",
+      "nav:history",
+      "nav:validated",
       "nav:settings-ai",
+      "nav:settings-preferences",
+      "nav:settings-data",
+      "nav:settings-users",
       "sidebar-toggle",
     ]);
   });

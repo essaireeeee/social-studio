@@ -29,7 +29,7 @@ test("navigation complète au clavier", async ({ page }) => {
   // Parcours depuis le haut : lien d'évitement, header, barre latérale (écrans disponibles
   // seulement), Session Live.
   await expect(page.getByRole("button", { name: "Démarrer une Session Live" })).toBeVisible();
-  const stops = await tabStops(page, 30);
+  const stops = await tabStops(page, 45);
   expect(stops[0]).toBe("Aller au contenu");
   const expected = [
     "HEXAGONE MMA Social Studio : accueil",
@@ -37,12 +37,18 @@ test("navigation complète au clavier", async ({ page }) => {
     "Rechercher",
     "Moteur : Natif",
     "Paramètres",
+    "Dashboard",
     "Bibliothèque de wordings",
     "Combattants",
     "Événements",
     "Hashtags & signatures",
     "ADN éditorial",
+    "Historique",
+    "Publications validées",
     "Intelligence artificielle",
+    "Préférences",
+    "Gestion des données",
+    "Utilisateurs",
     "Replier la barre latérale",
     "Démarrer une Session Live",
   ];
@@ -53,7 +59,6 @@ test("navigation complète au clavier", async ({ page }) => {
     stops.join(" | "),
   ).toBe(true);
   expect([...positions].sort((a, b) => a - b)).toEqual(positions);
-  expect(stops.join("|")).not.toMatch(/Dashboard|Historique/);
   expect(stops).toEqual(expect.arrayContaining(["Social Studio", "LIVE SHOW"]));
 
   // Lien d'évitement : le focus passe au contenu.
@@ -80,9 +85,8 @@ test("navigation complète au clavier", async ({ page }) => {
     page.getByRole("link", { name: "Intelligence artificielle", exact: true }),
   ).toHaveAttribute("aria-current", "page");
 
-  // Les écrans à venir sont annoncés, jamais cliquables.
-  const soon = page.getByRole("link", { name: "Historique (bientôt disponible)" });
-  await expect(soon).toHaveAttribute("aria-disabled", "true");
+  // Tous les écrans sont livrés : aucune entrée désactivée dans la navigation.
+  await expect(page.locator('nav [aria-disabled="true"]')).toHaveCount(0);
 });
 
 test("barre latérale repliable, état mémorisé après actualisation", async ({ page }) => {

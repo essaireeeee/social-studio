@@ -10,15 +10,17 @@ interface DiffDialogProps {
   open: boolean;
   revisions: readonly Revision[];
   onOpenChange: (open: boolean) => void;
+  /** Révision de départ (par défaut : l'avant-dernière). */
+  defaultFrom?: number;
 }
 
 const revisionLabel = (r: Revision, i: number) =>
   `v${i + 1} · ${ORIGIN_LABELS[r.origin]}${r.action ? ` · ${ACTION_LABELS[r.action]}` : ""}`;
 
 /** Différences mot à mot entre deux révisions (section 13.4). */
-export function DiffDialog({ open, revisions, onOpenChange }: DiffDialogProps) {
+export function DiffDialog({ open, revisions, onOpenChange, defaultFrom }: DiffDialogProps) {
   const last = revisions.length - 1;
-  const [from, setFrom] = useState(Math.max(0, last - 1));
+  const [from, setFrom] = useState(defaultFrom ?? Math.max(0, last - 1));
   const [to, setTo] = useState(last);
   const a = revisions[Math.min(from, last)]?.text ?? "";
   const b = revisions[Math.min(to, last)]?.text ?? "";
