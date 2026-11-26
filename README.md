@@ -13,6 +13,7 @@ Le cahier des charges est dans [`PROMPT.md`](./PROMPT.md), le journal des phases
 - [Installation](#installation)
 - [Lancement](#lancement)
 - [Écrans](#écrans)
+- [Interface : thèmes, iPhone, application installable](#interface--thèmes-iphone-application-installable)
 - [Structure du projet](#structure-du-projet)
 - [Base locale : IndexedDB et dossier `data/`](#base-locale--indexeddb-et-dossier-data)
 - [Sauvegarde et restauration](#sauvegarde-et-restauration)
@@ -69,21 +70,51 @@ npm run start
 | `npm run test:e2e`                | Tous les tests Playwright (`tests/e2e`)                                      |
 | `npm run test:scenarios`          | Les 15 scénarios de recette (`tests/e2e/scenarios`)                          |
 | `npm run check:bundle`            | Après un build : aucune clé, aucun SDK ni hôte de fournisseur IA côté client |
+| `npm run check:pwa`               | Serveur de production lancé : service worker, installabilité, hors ligne     |
+| `npm run screenshots`             | Captures de revue (iPhone et desktop, jour et nuit) dans `tests/screenshots` |
 
 ## Écrans
 
 | Écran                             | Rôle                                                                                                                      |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard (`/`)                   | NOUVEAU WORDING, accès LIVE SHOW / DAILY & MEDIA, dernières générations et publications, références, état de l'outil.     |
+| Accueil (`/`)                     | NOUVEAU WORDING, accès LIVE SHOW / DAILY & MEDIA, dernières générations et publications, références, état de l'outil.     |
 | Social Studio (`/studio`)         | Brief, trois variantes éditables avec leurs versions, aperçu Instagram, Facebook, X, TikTok, déclinaison sur les réseaux. |
 | Bibliothèque (`/library`)         | Publications de la ligue : recherche, filtres, liste ou grille, fiche, imports.                                           |
 | Combattants, Événements           | Fiches datées (« À vérifier » après 90 jours), palmarès daté, fight card, diffuseurs et horaires confirmés.               |
 | Hashtags & signatures             | Groupes de hashtags, signatures à variables avec aperçu sur un événement.                                                 |
 | ADN éditorial (`/editorial`)      | Profil de style mesuré par mode, comparaison, validation par un administrateur, règles éditoriales.                       |
 | Historique, Publications validées | Toutes les générations et leurs statuts ; versement contrôlé des textes validés dans la bibliothèque.                     |
-| Paramètres                        | Intelligence artificielle, Préférences, Gestion des données, Utilisateurs (rôles locaux, sans authentification).          |
+| Paramètres (`/settings`)          | Intelligence artificielle, Préférences (dont Apparence), Gestion des données, Utilisateurs (rôles locaux).                |
+| Plus (`/plus`, mobile)            | Tous les écrans hors tab bar, en cellules groupées.                                                                       |
 
-Une **Session Live** (barre sous le header, en LIVE SHOW) garde l'événement en cours : ses informations pré-remplissent les briefs du gala.
+Une **Session Live** (barre sous la barre de navigation, en LIVE SHOW) garde l'événement en cours : ses informations pré-remplissent les briefs du gala.
+
+## Interface : thèmes, iPhone, application installable
+
+L'interface reprend les principes d'iOS (sans icônes SF Symbols ni polices SF embarquées) : barre de navigation translucide à grand titre, **tab bar** sous 768 px (Accueil, Studio, Calendrier, Idées, Plus), **sidebar** façon iPadOS dès 1 024 px, feuilles qui montent du bas sur mobile, confirmations de suppression en ActionSheet.
+
+- **Thèmes** : Jour, Nuit ou Automatique (défaut, suit le système). Bouton soleil / lune dans la barre de navigation, ou Paramètres > Préférences > Apparence. Le choix est propre à chaque appareil. L'aperçu des réseaux a son propre interrupteur clair / sombre.
+- **Contraste** : `npm run test` vérifie chaque paire texte / fond des deux thèmes (4,5:1 pour le texte, 3:1 pour les icônes).
+
+### Utiliser l'app sur iPhone
+
+- `localhost` sur l'ordinateur n'est pas accessible depuis le téléphone.
+- Le service worker, l'installation sur l'écran d'accueil et les notifications exigent **HTTPS** (sauf sur `localhost`).
+- Les données IndexedDB sont **propres à chaque appareil et à chaque navigateur**. Sans synchronisation, le téléphone et l'ordinateur n'ont pas les mêmes données ; l'export / import JSON (Gestion des données) permet un transfert manuel.
+
+Par ordre de simplicité :
+
+1. **Tester l'interface** sur iPhone, sur le même réseau Wi-Fi :
+
+   ```bash
+   npx next dev --experimental-https -H 0.0.0.0
+   ```
+
+   Ouvrir `https://<adresse IP de l'ordinateur>:3000` dans Safari et accepter le certificat. Suffisant pour juger le design, pas pour un usage quotidien.
+
+2. **Usage réel sur téléphone** : déploiement privé (par exemple Vercel) protégé par une authentification, avec la synchronisation Supabase. Hors périmètre de cette version ; l'architecture ne l'empêche pas.
+
+**Installer sur l'écran d'accueil** : dans Safari, Partager, puis « Sur l'écran d'accueil ». L'application s'ouvre alors en plein écran. Le service worker (`public/sw.js`, actif en production seulement) garde l'interface en cache pour un démarrage hors ligne ; les routes `/api/*` ne sont jamais mises en cache.
 
 ## Structure du projet
 

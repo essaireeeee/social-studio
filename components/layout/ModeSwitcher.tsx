@@ -9,6 +9,11 @@ import type { Mode } from "@/types/domain";
 interface ModeSwitcherProps {
   mode: Mode;
   onChange: (mode: Mode) => void;
+  /** Pleine largeur (sidebar, haut des écrans sur mobile). */
+  block?: boolean;
+  /** Sans la mention « ON AIR » (sidebar, trop étroite) : la pastille pulse toujours. */
+  compact?: boolean;
+  className?: string;
 }
 
 const MODES: readonly Mode[] = ["live", "daily"];
@@ -16,11 +21,18 @@ const SHORTCUTS: Record<Mode, string> = { live: "Alt+L", daily: "Alt+D" };
 const NEXT_KEYS = new Set(["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"]);
 
 /**
- * Sélecteur de mode (section 12.2) : LIVE SHOW rouge avec pastille ON AIR, DAILY & MEDIA or.
+ * Sélecteur de mode, en contrôle segmenté iOS : LIVE SHOW rouge avec pastille ON AIR,
+ * DAILY & MEDIA or ; le segment actif change de couleur en fondu (200 ms, section 5.6).
  * Groupe radio : un seul arrêt de tabulation, les flèches changent le mode, comme des boutons
  * radio natifs. `Alt+L` / `Alt+D` partout dans l'application.
  */
-export function ModeSwitcher({ mode, onChange }: ModeSwitcherProps) {
+export function ModeSwitcher({
+  mode,
+  onChange,
+  block = false,
+  compact = false,
+  className,
+}: ModeSwitcherProps) {
   const refs = useRef<Partial<Record<Mode, HTMLButtonElement | null>>>({});
 
   const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
@@ -35,7 +47,11 @@ export function ModeSwitcher({ mode, onChange }: ModeSwitcherProps) {
     <div
       role="radiogroup"
       aria-label="Mode de travail"
-      className="flex h-8 items-center rounded-md border border-border bg-elevated p-0.5"
+      className={cn(
+        "grid auto-cols-fr grid-flow-col rounded-[9px] bg-fill p-0.5 squircle",
+        block ? "w-full" : "w-fit",
+        className,
+      )}
     >
       {MODES.map((value) => {
         const active = value === mode;
@@ -58,36 +74,35 @@ export function ModeSwitcher({ mode, onChange }: ModeSwitcherProps) {
               onClick={() => onChange(value)}
               onKeyDown={onKeyDown}
               className={cn(
-                "flex h-7 cursor-pointer items-center gap-1.5 rounded-sm px-2.5 text-xs font-semibold tracking-wide whitespace-nowrap accent-transition sm:px-3",
+                "relative flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[7px] px-3 text-xs font-semibold tracking-wide whitespace-nowrap pointer-coarse:h-10",
+                "transition-colors duration-200",
                 active
-                  ? value === "live"
-                    ? "bg-live text-white"
-                    : "bg-daily text-background"
-                  : "text-muted-foreground hover:bg-subtle hover:text-foreground",
+                  ? cn(
+                      "text-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]",
+                      value === "live" ? "bg-live-fill" : "bg-daily-fill",
+                    )
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <span
                 className={cn(
-                  "size-1.5 rounded-full",
-                  value === "live"
-                    ? active
+                  "relative size-1.5 rounded-full",
+                  active
+                    ? value === "live"
                       ? "animate-on-air bg-white"
-                      : "bg-live"
-                    : active
-                      ? "bg-background"
+                      : "bg-white"
+                    : value === "live"
+                      ? "bg-live"
                       : "bg-daily",
                 )}
                 aria-hidden="true"
               />
-              <span className="hidden sm:inline" aria-hidden="true">
+              <span className="relative" aria-hidden="true">
                 {MODE_LABELS[value]}
               </span>
-              <span className="sm:hidden" aria-hidden="true">
-                {value === "live" ? "LIVE" : "DAILY"}
-              </span>
-              {value === "live" && active ? (
+              {value === "live" && active && !compact ? (
                 <span
-                  className="hidden rounded-xs bg-white/20 px-1 text-[10px] tracking-wider md:inline"
+                  className="relative rounded-xs bg-black/30 px-1 text-[10px] tracking-wider"
                   aria-hidden="true"
                 >
                   ON AIR

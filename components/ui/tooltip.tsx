@@ -25,7 +25,7 @@ export function Tooltip({ content, children, side = "right", enabled = true }: T
           side={side}
           sideOffset={6}
           className={cn(
-            "z-50 max-w-64 rounded-md border border-border bg-elevated px-2 py-1 text-xs text-foreground shadow-md",
+            "z-50 max-w-64 rounded-md border border-border bg-popover px-2 py-1 text-xs text-foreground shadow-float",
           )}
         >
           {content}

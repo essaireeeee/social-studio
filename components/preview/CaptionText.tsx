@@ -5,7 +5,7 @@ const TOKEN = /(#[\p{L}\p{N}_]+|@[\p{L}\p{N}_.]+)/gu;
 /** Légende : hashtags et mentions en couleur lien, sauts de ligne conservés. */
 export const CaptionText = memo(function CaptionText({
   text,
-  linkClass = "text-[#4f8cff]",
+  linkClass = "text-[var(--pv-link)]",
 }: {
   text: string;
   linkClass?: string;

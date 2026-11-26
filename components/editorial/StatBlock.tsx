@@ -13,9 +13,7 @@ interface StatBlockProps {
 /** Bloc d'indicateurs : chaque bloc rappelle le volume analysé et la date d'analyse (section 8.8). */
 export function StatBlock({ title, corpusSize, analyzedAt, className, children }: StatBlockProps) {
   return (
-    <section
-      className={cn("flex flex-col gap-3 rounded-lg border border-border bg-card p-4", className)}
-    >
+    <section className={cn("flex flex-col gap-3 rounded-xl bg-card p-4 squircle", className)}>
       <h3 className="text-13 font-semibold tracking-wide text-foreground uppercase">{title}</h3>
       <div className="flex flex-1 flex-col gap-3">{children}</div>
       <p className="text-xs text-muted-foreground">

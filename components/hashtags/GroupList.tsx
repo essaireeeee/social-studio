@@ -36,7 +36,7 @@ export function GroupList({ groups }: { groups: HashtagGroup[] }) {
           <li
             key={group.id}
             aria-label={group.name}
-            className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-3"
+            className="flex flex-wrap items-center gap-3 rounded-xl bg-card p-3 squircle"
           >
             <OrderButtons
               name={group.name}

@@ -26,18 +26,15 @@ async function tabStops(page: Page, count: number): Promise<string[]> {
 }
 
 test("navigation complète au clavier", async ({ page }) => {
-  // Parcours depuis le haut : lien d'évitement, header, barre latérale (écrans disponibles
-  // seulement), Session Live.
+  // V2 : lien d'évitement, sidebar iPadOS (mode, sections, état), barre de navigation,
+  // puis Session Live. Les écrans à venir sont annoncés « bientôt disponible », hors tabulation.
   await expect(page.getByRole("button", { name: "Démarrer une Session Live" })).toBeVisible();
   const stops = await tabStops(page, 45);
   expect(stops[0]).toBe("Aller au contenu");
   const expected = [
     "HEXAGONE MMA Social Studio : accueil",
     "LIVE SHOW",
-    "Rechercher",
-    "Moteur : Natif",
-    "Paramètres",
-    "Dashboard",
+    "Accueil",
     "Bibliothèque de wordings",
     "Combattants",
     "Événements",
@@ -49,7 +46,10 @@ test("navigation complète au clavier", async ({ page }) => {
     "Préférences",
     "Gestion des données",
     "Utilisateurs",
-    "Replier la barre latérale",
+    "Moteur : Natif",
+    "Masquer la barre latérale",
+    "Rechercher",
+    "Passer en thème",
     "Démarrer une Session Live",
   ];
   // Chaque arrêt attendu apparaît, dans cet ordre.
@@ -85,18 +85,21 @@ test("navigation complète au clavier", async ({ page }) => {
     page.getByRole("link", { name: "Intelligence artificielle", exact: true }),
   ).toHaveAttribute("aria-current", "page");
 
-  // Tous les écrans sont livrés : aucune entrée désactivée dans la navigation.
-  await expect(page.locator('nav [aria-disabled="true"]')).toHaveCount(0);
+  // Écrans V2 pas encore livrés : visibles, désactivés (Calendrier, Idées, Atelier Français,
+  // Campagnes), jamais atteints par la tabulation.
+  await expect(page.locator('nav [aria-disabled="true"]:visible')).toHaveCount(4);
+  expect(stops.some((stop) => stop.includes("Calendrier"))).toBe(false);
 });
 
-test("barre latérale repliable, état mémorisé après actualisation", async ({ page }) => {
+test("barre latérale masquable, état mémorisé après actualisation", async ({ page }) => {
   const sidebar = page.locator("#app-sidebar");
-  await expect(sidebar).toHaveCSS("width", "232px");
-  const toggle = page.getByRole("button", { name: "Replier la barre latérale" });
+  await expect(sidebar).toBeVisible();
+  await expect(sidebar).toHaveCSS("width", "260px");
+  const toggle = page.getByRole("button", { name: "Masquer la barre latérale" });
   await toggle.focus();
   await page.keyboard.press("Enter");
-  await expect(sidebar).toHaveCSS("width", "56px");
-  await expect(page.getByRole("button", { name: "Déplier la barre latérale" })).toHaveAttribute(
+  await expect(sidebar).toBeHidden();
+  await expect(page.getByRole("button", { name: "Afficher la barre latérale" })).toHaveAttribute(
     "aria-expanded",
     "false",
   );
@@ -104,14 +107,11 @@ test("barre latérale repliable, état mémorisé après actualisation", async (
   await page.reload();
   await waitForReady(page);
   await expect(page.locator("html")).toHaveAttribute("data-sidebar", "collapsed");
-  await expect(sidebar).toHaveCSS("width", "56px");
+  await expect(sidebar).toBeHidden();
 
-  // Repliée : l'infobulle donne le libellé.
-  await page.getByRole("link", { name: "ADN éditorial" }).first().hover();
-  await expect(page.getByRole("tooltip")).toHaveText("ADN éditorial");
-
-  await page.getByRole("button", { name: "Déplier la barre latérale" }).click();
-  await expect(sidebar).toHaveCSS("width", "232px");
+  await page.getByRole("button", { name: "Afficher la barre latérale" }).click();
+  await expect(sidebar).toBeVisible();
+  await expect(page.getByRole("button", { name: "Masquer la barre latérale" })).toBeVisible();
 });
 
 test("mode persistant après actualisation, Alt+L / Alt+D", async ({ page }) => {

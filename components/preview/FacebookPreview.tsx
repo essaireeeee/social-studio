@@ -24,22 +24,22 @@ export const FacebookPreview = memo(function FacebookPreview({
   const [expanded, setExpanded] = useState(false);
   const cut = truncateFacebook(text, limit);
   return (
-    <div className="bg-[#18191a] text-[15px] leading-[20px] text-[#e4e6eb]">
+    <div className="bg-[var(--pv-fb-bg)] text-[15px] leading-[20px] text-[var(--pv-fb-text)]">
       <div className="flex items-center gap-2.5 px-3 py-3">
         <PreviewAvatar size={40} />
         <span className="flex flex-col">
           <span className="font-semibold">{accountName}</span>
-          <span className="flex items-center gap-1 text-[12px] text-[#b0b3b8]">
+          <span className="flex items-center gap-1 text-[12px] text-[var(--pv-fb-muted)]">
             À l&apos;instant · <Globe className="size-3" aria-hidden="true" />
           </span>
         </span>
       </div>
       <p className="px-3 pb-3 whitespace-pre-wrap">
         {expanded || !cut.truncated ? (
-          <CaptionText text={text} linkClass="text-[#4599ff]" />
+          <CaptionText text={text} linkClass="text-[var(--pv-fb-link)]" />
         ) : (
           <>
-            <CaptionText text={cut.visible} linkClass="text-[#4599ff]" />…{" "}
+            <CaptionText text={cut.visible} linkClass="text-[var(--pv-fb-link)]" />…{" "}
             <button
               type="button"
               className="cursor-pointer font-semibold"
@@ -51,7 +51,7 @@ export const FacebookPreview = memo(function FacebookPreview({
         )}
       </p>
       <PreviewMedia ratio={wide ? 16 / 9 : 1} />
-      <div className="flex justify-around border-t border-[#3e4042] py-2 text-[13px] text-[#b0b3b8]">
+      <div className="flex justify-around border-t border-[var(--pv-fb-border)] py-2 text-[13px] text-[var(--pv-fb-muted)]">
         <span className="flex items-center gap-1.5">
           <ThumbsUp className="size-4" aria-hidden="true" />
           J&apos;aime

@@ -96,7 +96,7 @@ export function CompareView({ repository, user, initialMode }: CompareViewProps)
         </p>
       ) : (
         <div className="flex flex-col gap-3">
-          <div className="overflow-x-auto rounded-lg border border-border bg-card">
+          <div className="overflow-x-auto rounded-xl bg-card squircle">
             <table className="w-full min-w-[520px] text-left text-13">
               <thead className="border-b border-border text-xs text-muted-foreground">
                 <tr>

@@ -35,7 +35,7 @@ interface LibraryToolbarProps {
 }
 
 const itemClass =
-  "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 outline-none data-[highlighted]:bg-subtle [&_svg]:size-4 [&_svg]:text-muted-foreground";
+  "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 outline-none data-[highlighted]:bg-fill [&_svg]:size-4 [&_svg]:text-muted-foreground";
 
 /** Recherche, tri, vue, ajout et imports. */
 export function LibraryToolbar(props: LibraryToolbarProps) {
@@ -110,7 +110,7 @@ export function LibraryToolbar(props: LibraryToolbarProps) {
           <DropdownMenu.Portal>
             <DropdownMenu.Content
               align="end"
-              className="z-50 min-w-60 rounded-md border border-border bg-elevated p-1 text-13 shadow-lg"
+              className="z-50 min-w-60 rounded-md border border-border bg-popover p-1 text-13 shadow-float"
             >
               <DropdownMenu.Item className={itemClass} onSelect={() => props.onImport("bulk")}>
                 <ClipboardPaste aria-hidden="true" />

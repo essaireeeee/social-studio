@@ -61,7 +61,7 @@ export function RuleEditor({ rule, canEdit, onToggle, onSave }: RuleEditorProps)
   };
 
   return (
-    <li className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
+    <li className="flex flex-col gap-3 rounded-xl bg-card p-4 squircle">
       <div className="flex items-start gap-3">
         <input
           id={fieldId}

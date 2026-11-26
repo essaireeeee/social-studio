@@ -7,28 +7,31 @@ import { useRepository } from "@/hooks/useRepository";
 import type { Settings } from "@/types/domain";
 import { toast } from "@/stores/toast.store";
 import { preferencesErrors } from "@/lib/settings/preferences";
+import { AppearanceGroup } from "./AppearanceGroup";
+import { IphoneGroup } from "./IphoneGroup";
 import { PreferencesForm } from "./PreferencesForm";
+import { LargeTitle } from "@/components/layout/ScreenTitle";
 
 /** Paramètres > Préférences (section 16.3). */
 export function PreferencesPage() {
   const repository = useRepository();
   const stored = useLiveQuery(() => repository?.getSettings(), [repository]);
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 pt-3 pb-10 sm:px-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Préférences</h1>
-        <p className="text-13 text-muted-foreground">
-          Réglages du Studio et de l&apos;aperçu. Ils sont inclus dans les sauvegardes.
+        <LargeTitle>Préférences</LargeTitle>
+        <p className="text-subheadline text-muted-foreground">
+          Apparence de l&apos;application, réglages du Studio et de l&apos;aperçu. Seule
+          l&apos;apparence reste propre à cet appareil ; le reste est inclus dans les sauvegardes.
         </p>
       </header>
+      <AppearanceGroup />
       {stored ? (
         <Editor key={stored.accountName + stored.igTruncation} stored={stored} />
       ) : (
-        <div
-          className="h-64 animate-pulse rounded-lg border border-border bg-card"
-          aria-busy="true"
-        />
+        <div className="h-64 animate-pulse rounded-xl bg-card squircle" aria-busy="true" />
       )}
+      <IphoneGroup />
     </div>
   );
 }

@@ -4,8 +4,17 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 
 const PHONE_WIDTH = 375;
 
-/** Cadre téléphone sobre : 375 px logiques, mis à l'échelle pour tenir dans la colonne. */
-export function PhoneFrame({ children }: { children: ReactNode }) {
+/**
+ * Cadre téléphone sobre : 375 px logiques, mis à l'échelle pour tenir dans la colonne.
+ * `theme` : apparence simulée du réseau (clair ou sombre), indépendante du thème de l'app.
+ */
+export function PhoneFrame({
+  children,
+  theme = "dark",
+}: {
+  children: ReactNode;
+  theme?: "light" | "dark";
+}) {
   const outer = useRef<HTMLDivElement | null>(null);
   const inner = useRef<HTMLDivElement | null>(null);
   const [scale, setScale] = useState(1);
@@ -27,7 +36,8 @@ export function PhoneFrame({ children }: { children: ReactNode }) {
     <div ref={outer} className="w-full" style={{ height }}>
       <div
         ref={inner}
-        className="overflow-hidden rounded-[28px] border border-border bg-[#000] shadow-xl"
+        data-preview-theme={theme}
+        className="overflow-hidden rounded-[28px] border border-border bg-[var(--pv-frame)] shadow-float"
         style={{
           width: PHONE_WIDTH,
           transform: `scale(${scale})`,

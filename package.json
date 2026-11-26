@@ -14,7 +14,9 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test --trace off",
     "test:scenarios": "playwright test tests/e2e/scenarios --trace off",
-    "check:bundle": "node scripts/check-bundle.mjs"
+    "check:bundle": "node scripts/check-bundle.mjs",
+    "screenshots": "playwright test --config playwright.screenshots.config.ts --trace off",
+    "check:pwa": "node scripts/check-pwa.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.11.0",
@@ -27,7 +29,6 @@
     "dexie-react-hooks": "^4.4.0",
     "diff": "^9.0.0",
     "exceljs": "^4.4.0",
-    "geist": "^1.9.2",
     "ics": "^3.12.1",
     "lucide-react": "^1.77.0",
     "motion": "^14.14.0",

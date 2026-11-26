@@ -11,6 +11,7 @@ import { LOCAL_ROLE_NOTICE, ROLE_LABELS, deleteUser, setActiveUser } from "@/lib
 import { toast } from "@/stores/toast.store";
 import type { UserProfile } from "@/types/domain";
 import { UserDialog } from "./UserDialog";
+import { LargeTitle } from "@/components/layout/ScreenTitle";
 
 /** Paramètres > Utilisateurs (section 16.3) : profils locaux et profil actif. */
 export function UsersPage() {
@@ -39,12 +40,12 @@ export function UsersPage() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-6 sm:px-6">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 pt-3 pb-10 sm:px-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Utilisateurs</h1>
+        <LargeTitle>Utilisateurs</LargeTitle>
         <p className="text-13 text-muted-foreground">
-          Le profil actif s&apos;affiche dans le header. Valider l&apos;ADN éditorial et modifier
-          les règles demandent le rôle administrateur.
+          Le profil actif s&apos;affiche au pied de la barre latérale. Valider l&apos;ADN éditorial
+          et modifier les règles demandent le rôle administrateur.
         </p>
         <p className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-13 text-warning">
           {LOCAL_ROLE_NOTICE}
@@ -55,10 +56,7 @@ export function UsersPage() {
         Nouveau profil
       </Button>
       {!data ? (
-        <div
-          className="h-24 animate-pulse rounded-lg border border-border bg-card"
-          aria-busy="true"
-        />
+        <div className="h-24 animate-pulse rounded-xl bg-card squircle" aria-busy="true" />
       ) : (
         <ul className="flex flex-col gap-2" aria-label="Profils">
           {data.users.map((user) => {
@@ -67,7 +65,7 @@ export function UsersPage() {
               <li
                 key={user.id}
                 aria-label={user.name}
-                className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-3"
+                className="flex flex-wrap items-center gap-3 rounded-xl bg-card p-3 squircle"
               >
                 <span className="flex min-w-0 flex-1 items-center gap-2 text-13 font-medium">
                   {user.name}

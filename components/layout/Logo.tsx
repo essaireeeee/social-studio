@@ -7,7 +7,11 @@ import { useRepository } from "@/hooks/useRepository";
 /** Hexagone sobre, en attendant un logo chargé dans Préférences. */
 function Placeholder() {
   return (
-    <svg viewBox="0 0 24 24" className="size-6 text-accent accent-transition" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      className="size-6 text-accent-text accent-transition"
+      aria-hidden="true"
+    >
       <path
         d="M12 2.5 20.2 7.25v9.5L12 21.5 3.8 16.75v-9.5Z"
         fill="none"

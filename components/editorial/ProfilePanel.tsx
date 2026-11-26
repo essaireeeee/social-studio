@@ -32,9 +32,7 @@ export function ProfilePanel({ repository, mode, onCompare }: ProfilePanelProps)
   const [error, setError] = useState<string>();
 
   if (!profiles) {
-    return (
-      <div className="h-40 animate-pulse rounded-lg border border-border bg-card" aria-hidden />
-    );
+    return <div className="h-40 animate-pulse rounded-xl bg-card squircle" aria-hidden />;
   }
 
   const active = activeProfile(profiles);
@@ -56,7 +54,7 @@ export function ProfilePanel({ repository, mode, onCompare }: ProfilePanelProps)
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 rounded-xl bg-card p-4 squircle sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-semibold">Profil {MODE_LABELS[mode]}</span>
@@ -122,7 +120,7 @@ export function ProfilePanel({ repository, mode, onCompare }: ProfilePanelProps)
           publications {MODE_LABELS[mode]} de la bibliothèque.
         </p>
       ) : shown.confidence === "insufficient" ? (
-        <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 text-13">
+        <div className="flex flex-col gap-3 rounded-xl bg-card p-4 text-13 squircle">
           <p className="font-medium text-foreground">
             Corpus insuffisant pour tirer des conclusions (
             {plural(shown.corpusSize, "publication analysée", "publications analysées")}).

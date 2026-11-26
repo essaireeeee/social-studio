@@ -54,7 +54,7 @@ export function LibraryFilters({
       id="library-filters"
       aria-label="Filtres"
       className={cn(
-        "grid-cols-2 gap-3 rounded-lg border border-border bg-card p-3 sm:grid-cols-3 lg:grid lg:grid-cols-6",
+        "grid-cols-2 gap-3 rounded-xl bg-card p-3 squircle sm:grid-cols-3 lg:grid lg:grid-cols-6",
         open ? "grid" : "hidden",
       )}
     >

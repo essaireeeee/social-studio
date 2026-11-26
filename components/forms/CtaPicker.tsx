@@ -27,7 +27,7 @@ export function CtaPicker({ suggestions, value, onChange }: CtaPickerProps) {
                   "max-w-full cursor-pointer truncate rounded-md border px-2 py-1 text-xs accent-transition",
                   pressed
                     ? "border-accent bg-accent text-accent-foreground"
-                    : "border-border bg-elevated hover:bg-subtle",
+                    : "border-transparent bg-fill hover:bg-fill/70",
                 )}
               >
                 {cta}

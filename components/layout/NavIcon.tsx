@@ -1,11 +1,17 @@
 import {
   BadgeCheck,
+  CalendarClock,
   CalendarDays,
+  Ellipsis,
+  House,
+  Lightbulb,
+  Megaphone,
+  Settings,
+  SpellCheck,
   Database,
   Dna,
   Hash,
   History,
-  LayoutDashboard,
   Library,
   Newspaper,
   Radio,
@@ -19,7 +25,13 @@ import {
 import type { NavIcon as NavIconName } from "@/lib/shell/navigation";
 
 const ICONS: Record<NavIconName, LucideIcon> = {
-  dashboard: LayoutDashboard,
+  dashboard: House,
+  calendar: CalendarClock,
+  ideas: Lightbulb,
+  french: SpellCheck,
+  campaigns: Megaphone,
+  more: Ellipsis,
+  settings: Settings,
   studio: SquarePen,
   live: Radio,
   daily: Newspaper,

@@ -41,10 +41,10 @@ export function ReferencesPanel({
   const selected = references.find((r) => r.wording.id === selectedId) ?? null;
 
   return (
-    <section className="rounded-lg border border-border bg-card">
+    <section className="rounded-xl bg-card squircle">
       <button
         type="button"
-        className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-lg px-4 py-3 text-left hover:bg-subtle"
+        className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-lg px-4 py-3 text-left hover:bg-fill"
         aria-expanded={open}
         aria-controls={contentId}
         onClick={() => setOpen((value) => !value)}
@@ -76,7 +76,7 @@ export function ReferencesPanel({
                     <button
                       type="button"
                       className={cn(
-                        "flex w-full cursor-pointer flex-col gap-1.5 rounded-md p-2 text-left hover:bg-subtle",
+                        "flex w-full cursor-pointer flex-col gap-1.5 rounded-md p-2 text-left hover:bg-fill",
                         isExcluded && "opacity-50",
                       )}
                       onClick={() => setSelectedId(wording.id)}

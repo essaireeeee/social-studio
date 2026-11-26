@@ -8,6 +8,7 @@ import { distinctValues, filterFighters, type FighterFilters } from "@/lib/fight
 import { cn } from "@/lib/utils";
 import { FighterDetail } from "./FighterDetail";
 import { FighterList } from "./FighterList";
+import { LargeTitle } from "@/components/layout/ScreenTitle";
 
 type Selection = { kind: "fighter"; id: string } | { kind: "new" } | null;
 
@@ -23,11 +24,11 @@ export function FightersPage() {
   const showDetail = selection?.kind === "new" || Boolean(selected);
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-6 sm:px-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 pt-3 pb-10 sm:px-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Combattants</h1>
-          <p className="max-w-2xl text-13 text-muted-foreground">
+          <LargeTitle>Combattants</LargeTitle>
+          <p className="max-w-2xl text-subheadline text-muted-foreground">
             Les fiches alimentent les formulaires du Studio et les faits autorisés des moteurs. Une
             fiche non mise à jour depuis 90 jours porte la mention « À vérifier ».
           </p>
@@ -57,7 +58,7 @@ export function FightersPage() {
           <section
             aria-label="Fiche"
             className={cn(
-              "min-w-0 rounded-lg border border-border bg-card p-4 sm:p-5",
+              "min-w-0 rounded-xl bg-card p-4 squircle sm:p-5",
               !showDetail && "hidden lg:block",
             )}
           >

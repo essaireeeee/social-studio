@@ -84,7 +84,7 @@ export function QuickChips({
                 "h-8 cursor-pointer rounded-md border px-2.5 text-xs font-medium accent-transition",
                 pressed
                   ? "border-accent bg-accent text-accent-foreground"
-                  : "border-border bg-elevated text-foreground hover:bg-subtle active:bg-subtle/70",
+                  : "border-transparent bg-fill text-foreground hover:bg-fill/70 active:opacity-70",
               )}
             >
               {option}

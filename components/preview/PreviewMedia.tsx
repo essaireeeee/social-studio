@@ -60,7 +60,7 @@ export function PreviewMedia({ ratio, video = false, className }: PreviewMediaPr
   return (
     <div
       className={cn(
-        "relative w-full bg-[#1c1d22]",
+        "relative w-full bg-[var(--pv-media)]",
         over && "outline-2 outline-[var(--accent)] outline-dashed",
         className,
       )}
@@ -81,7 +81,7 @@ export function PreviewMedia({ ratio, video = false, className }: PreviewMediaPr
           className="object-cover"
         />
       ) : (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-[#6b7280]">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-[var(--pv-media-text)]">
           {video ? (
             <Clapperboard className="size-8" aria-hidden="true" />
           ) : (

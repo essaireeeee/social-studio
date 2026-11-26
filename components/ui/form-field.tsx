@@ -19,16 +19,16 @@ export function FormField({
 }) {
   return (
     <div className="flex min-w-0 flex-col gap-1">
-      <label htmlFor={id} className="text-xs text-muted-foreground">
+      <label htmlFor={id} className="text-footnote font-medium text-muted-foreground">
         {label}
       </label>
       {children}
       {error ? (
-        <p id={`${id}-error`} className="text-xs text-danger">
+        <p id={`${id}-error`} className="text-footnote text-danger">
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="text-xs text-muted-foreground">
+        <p id={`${id}-hint`} className="text-footnote text-muted-foreground">
           {hint}
         </p>
       ) : null}

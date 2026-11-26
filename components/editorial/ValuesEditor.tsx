@@ -35,7 +35,7 @@ export function ValuesEditor({ values, disabled, label, onChange }: ValuesEditor
             {disabled ? null : (
               <button
                 type="button"
-                className="cursor-pointer rounded-sm p-0.5 text-muted-foreground hover:bg-subtle hover:text-foreground"
+                className="cursor-pointer rounded-sm p-0.5 text-muted-foreground hover:bg-fill hover:text-foreground"
                 aria-label={`Retirer « ${value} »`}
                 onClick={() => onChange(values.filter((v) => v !== value))}
               >

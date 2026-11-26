@@ -5,26 +5,29 @@ import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Bouton (shadcn/ui adapté). `default` utilise l'accent du mode actif.
- * Focus : anneau `--accent` global (globals.css). États : hover, active, disabled, loading.
+ * Bouton iOS (section 5.5). `default` : remplissage d'accent, libellé blanc. `secondary` :
+ * fond gris système, texte d'accent. `plain` : texte d'accent seul. `destructive` : rouge plein.
+ * Cible tactile de 44 px sur écran tactile (`pointer-coarse`), quelle que soit la taille.
  */
 export const buttonVariants = cva(
-  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md font-medium whitespace-nowrap select-none accent-transition disabled:pointer-events-none disabled:opacity-50 aria-busy:cursor-progress [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md font-semibold whitespace-nowrap select-none squircle accent-transition pointer-coarse:min-h-11 disabled:pointer-events-none disabled:opacity-40 aria-busy:cursor-progress [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default: "bg-accent text-accent-foreground hover:bg-accent/90 active:bg-accent/80",
-        secondary:
-          "border border-border bg-elevated text-foreground hover:bg-subtle active:bg-subtle/70",
-        ghost: "text-foreground hover:bg-subtle active:bg-subtle/70",
-        // Rouge plus sombre que --danger : contraste ≥ 4,5:1 avec le texte blanc.
-        destructive: "bg-[#dc2626] text-white hover:bg-[#b91c1c] active:bg-[#991b1b]",
+        default: "bg-accent text-accent-foreground hover:brightness-110 active:brightness-90",
+        secondary: "bg-fill text-accent-text hover:bg-fill/80 active:opacity-70",
+        tinted:
+          "bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] text-accent-text hover:opacity-90 active:opacity-70",
+        ghost: "text-foreground hover:bg-fill active:opacity-70",
+        plain: "text-accent-text hover:opacity-80 active:opacity-60",
+        destructive: "bg-danger-fill text-on-fill hover:brightness-110 active:brightness-90",
       },
       size: {
-        sm: "h-7 px-2.5 text-xs",
-        default: "h-8 px-3 text-13",
-        touch: "h-11 px-4 text-sm",
-        icon: "size-8",
+        sm: "h-8 px-3 text-13",
+        default: "h-9 px-3.5 text-sm",
+        touch: "h-11 px-4 text-[17px] lg:text-[15px]",
+        lg: "h-[52px] w-full px-5 text-[17px]",
+        icon: "size-9 pointer-coarse:min-w-11",
       },
     },
     defaultVariants: { variant: "default", size: "default" },

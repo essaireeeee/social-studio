@@ -28,6 +28,8 @@ import { LibraryToolbar, type ImportKind } from "./LibraryToolbar";
 import { WordingForm } from "./WordingForm";
 import type { WordingAction } from "./WordingMenu";
 import { WordingResults } from "./WordingResults";
+import { LargeTitle } from "@/components/layout/ScreenTitle";
+import { Fab } from "@/components/ui/fab";
 
 type FormState = { kind: "create" } | { kind: "edit" | "duplicate"; wording: Wording };
 
@@ -92,9 +94,9 @@ export function LibraryPage() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-6 sm:px-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 pt-3 pb-10 sm:px-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Bibliothèque de wordings</h1>
+        <LargeTitle>Bibliothèque de wordings</LargeTitle>
         <p className="max-w-3xl text-13 text-muted-foreground">
           Les publications de HEXAGONE MMA. Elles nourrissent l&apos;ADN éditorial et la recherche
           de références, séparément pour LIVE SHOW et DAILY & MEDIA.
@@ -180,6 +182,7 @@ export function LibraryPage() {
         </>
       )}
 
+      <Fab href="/studio" label="Nouveau wording" />
       <RecordSheet
         item={consulted ? { kind: "wording", record: consulted } : null}
         onClose={() => setConsulted(null)}

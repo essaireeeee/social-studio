@@ -16,6 +16,8 @@ import { syncLabel } from "@/lib/shell/sync-label";
 import { cn } from "@/lib/utils";
 import { useDataStore } from "@/stores/data.store";
 import { DashboardBlock } from "./DashboardBlock";
+import { LargeTitle } from "@/components/layout/ScreenTitle";
+import { Fab } from "@/components/ui/fab";
 
 const excerpt = (text: string) => text.replace(/\s+/g, " ").trim();
 
@@ -31,19 +33,21 @@ export function DashboardPage() {
   const backup = syncLabel(sync, now);
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pt-3 pb-24 sm:px-6 md:pb-10">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1">
-          <p className="font-mono text-xs tracking-[0.2em] text-muted-foreground">
-            HEXAGONE MMA · SOCIAL STUDIO
+          <p className="text-footnote font-semibold tracking-wide text-muted-foreground uppercase">
+            HEXAGONE MMA · Social Studio
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <LargeTitle>Accueil</LargeTitle>
+          <p className="text-subheadline text-muted-foreground">
             Bienvenue dans votre Social Studio.
-          </h1>
+          </p>
         </div>
+        {/* Sur mobile, le bouton d'action flottant le remplace. */}
         <Link
           href="/studio"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-accent px-5 text-sm font-semibold tracking-wide text-accent-foreground accent-transition hover:bg-accent/90"
+          className="hidden h-11 items-center justify-center gap-2 rounded-md bg-accent px-5 text-sm font-semibold tracking-wide text-accent-foreground accent-transition squircle hover:brightness-110 md:inline-flex"
         >
           <PenLine className="size-4" aria-hidden="true" />
           NOUVEAU WORDING
@@ -53,28 +57,35 @@ export function DashboardPage() {
       <nav aria-label="Ouvrir le Studio" className="grid gap-3 sm:grid-cols-2">
         <Link
           href="/studio?mode=live"
-          className="flex flex-col gap-1 rounded-lg border border-live/50 bg-live/10 p-5 hover:bg-live/15"
+          className="flex flex-col gap-1 rounded-xl bg-card p-5 squircle hover:bg-fill/60"
         >
-          <span className="text-xl font-bold tracking-wide text-live">LIVE SHOW</span>
+          <span className="flex items-center gap-2 text-title-3 tracking-wide text-live-text">
+            <span className="size-2.5 animate-on-air rounded-full bg-live" aria-hidden="true" />
+            LIVE SHOW
+          </span>
           <span className="text-13 text-muted-foreground">
             Pendant la soirée : résultats, ambiance, réactions.
           </span>
         </Link>
         <Link
           href="/studio?mode=daily"
-          className="flex flex-col gap-1 rounded-lg border border-daily/50 bg-daily/10 p-5 hover:bg-daily/15"
+          className="flex flex-col gap-1 rounded-xl bg-card p-5 squircle hover:bg-fill/60"
         >
-          <span className="text-xl font-bold tracking-wide text-daily">DAILY & MEDIA</span>
+          <span className="flex items-center gap-2 text-title-3 tracking-wide text-daily-text">
+            <span className="size-2.5 rounded-full bg-daily" aria-hidden="true" />
+            DAILY & MEDIA
+          </span>
           <span className="text-13 text-muted-foreground">
             Le reste du temps : annonces, billetterie, médias.
           </span>
         </Link>
       </nav>
+      <Fab href="/studio" label="Nouveau wording" />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <DashboardBlock title="Dernières générations" href="/history" linkLabel="Historique">
           {!stats ? (
-            <div className="h-24 animate-pulse rounded-md bg-elevated" />
+            <div className="h-24 animate-skeleton rounded-lg bg-fill" />
           ) : stats.lastGenerations.length === 0 ? (
             <p className="text-13 text-muted-foreground">Aucune génération pour l&apos;instant.</p>
           ) : (
@@ -98,7 +109,7 @@ export function DashboardPage() {
           linkLabel="Bibliothèque"
         >
           {!stats ? (
-            <div className="h-24 animate-pulse rounded-md bg-elevated" />
+            <div className="h-24 animate-skeleton rounded-lg bg-fill" />
           ) : stats.lastWordings.length === 0 ? (
             <p className="text-13 text-muted-foreground">La bibliothèque est vide.</p>
           ) : (

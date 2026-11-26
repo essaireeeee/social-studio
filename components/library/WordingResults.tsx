@@ -40,7 +40,7 @@ export function WordingResults({ wordings, view, onAction }: WordingResultsProps
       ref={ref}
       role="list"
       aria-label="Publications de la bibliothèque"
-      className={grid ? "relative" : "relative rounded-lg border border-border bg-card"}
+      className={grid ? "relative" : "relative rounded-xl bg-card squircle"}
       style={{ height: Math.max(totalHeight - (grid ? CARD_GAP : 0), 0) }}
     >
       {items.map(({ wording, index, row, column }) =>

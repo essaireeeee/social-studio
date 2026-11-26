@@ -36,7 +36,7 @@ export function MultiFighterField({ value, onChange, ...props }: MultiFighterFie
                   const next = value.filter((v) => v !== name);
                   onChange(next.length > 0 ? next : undefined);
                 }}
-                className="cursor-pointer rounded-sm p-0.5 text-muted-foreground hover:bg-subtle hover:text-foreground"
+                className="cursor-pointer rounded-sm p-0.5 text-muted-foreground hover:bg-fill hover:text-foreground"
               >
                 <X className="size-3" aria-hidden="true" />
               </button>

@@ -49,7 +49,7 @@ export function RefineBar({ engine, busy, disabled, onRefine }: RefineBarProps) 
             aria-busy={busy === action || undefined}
             onClick={() => onRefine(action)}
             className={cn(
-              "flex h-7 cursor-pointer items-center gap-1 rounded-md border border-border bg-elevated px-2 text-xs accent-transition hover:bg-subtle active:bg-subtle/70 disabled:cursor-not-allowed disabled:opacity-50",
+              "flex h-7 cursor-pointer items-center gap-1 rounded-md border border-border bg-elevated px-2 text-xs accent-transition hover:bg-fill active:bg-fill/70 disabled:cursor-not-allowed disabled:opacity-50",
               busy === action && "border-accent",
             )}
           >

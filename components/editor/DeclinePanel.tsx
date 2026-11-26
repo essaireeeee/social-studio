@@ -33,7 +33,7 @@ export function DeclinePanel({ generation, warnings }: DeclinePanelProps) {
   };
 
   return (
-    <section aria-label="Déclinaisons" className="rounded-lg border border-border bg-card p-3">
+    <section aria-label="Déclinaisons" className="rounded-xl bg-card p-3 squircle">
       <Tabs defaultValue={platforms[0]}>
         <TabsList aria-label="Plateformes">
           {platforms.map((p) => (

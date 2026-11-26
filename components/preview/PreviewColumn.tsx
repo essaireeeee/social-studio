@@ -15,6 +15,7 @@ import type { Generation } from "@/types/domain";
 import { FacebookPreview } from "./FacebookPreview";
 import { InstagramPreview } from "./InstagramPreview";
 import { PhoneFrame } from "./PhoneFrame";
+import { usePreviewTheme } from "./usePreviewTheme";
 import { TikTokPreview } from "./TikTokPreview";
 import { XPreview } from "./XPreview";
 
@@ -40,6 +41,7 @@ export function PreviewColumn({ data }: { data: StudioData }) {
   const live = useStudioSession((s) => (variant ? s.liveText[variant.id] : undefined));
   const platform = chosen ?? current?.brief.platform ?? draftPlatform;
 
+  const [previewTheme, setPreviewTheme] = usePreviewTheme();
   const [visibleOnly, setVisibleOnly] = useState(false);
   const [video, setVideo] = useState(false);
   const [wide, setWide] = useState(false);
@@ -80,7 +82,16 @@ export function PreviewColumn({ data }: { data: StudioData }) {
         options={PLATFORMS.map((p) => ({ value: p, label: PLATFORM_RULES[p].label }))}
         onChange={(p) => useStudioStore.getState().setPreviewPlatform(p)}
       />
-      <p className="rounded-md border border-border bg-elevated px-3 py-2 text-xs text-muted-foreground">
+      <Segmented
+        label="Apparence simulée du réseau"
+        value={previewTheme}
+        options={[
+          { value: "light", label: "Réseau en clair" },
+          { value: "dark", label: "Réseau en sombre" },
+        ]}
+        onChange={setPreviewTheme}
+      />
+      <p className="rounded-lg bg-surface-2 px-3 py-2 text-xs text-muted-foreground">
         {SIMULATION_NOTICE}
       </p>
       {declined ? (
@@ -94,7 +105,7 @@ export function PreviewColumn({ data }: { data: StudioData }) {
           L&apos;aperçu apparaîtra après la génération.
         </p>
       ) : (
-        <PhoneFrame>
+        <PhoneFrame theme={previewTheme}>
           {platform === "instagram" ? (
             <InstagramPreview
               text={text}

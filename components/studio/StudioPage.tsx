@@ -54,7 +54,7 @@ export function StudioPage() {
         aria-label="Chargement du Studio"
       >
         {[0, 1, 2].map((i) => (
-          <div key={i} className="h-96 animate-pulse rounded-lg border border-border bg-card" />
+          <div key={i} className="h-96 animate-pulse rounded-xl bg-card squircle" />
         ))}
       </div>
     );

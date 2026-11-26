@@ -42,7 +42,7 @@ function Skeletons() {
   return (
     <div className="flex flex-col gap-3" aria-busy="true" aria-label="Génération en cours">
       {[0, 1, 2].map((i) => (
-        <div key={i} className="h-56 animate-pulse rounded-lg border border-border bg-card" />
+        <div key={i} className="h-56 animate-pulse rounded-xl bg-card squircle" />
       ))}
     </div>
   );

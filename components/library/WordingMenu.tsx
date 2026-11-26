@@ -9,7 +9,7 @@ import type { Wording } from "@/types/domain";
 export type WordingAction = "consult" | "edit" | "duplicate" | "copy" | "reference" | "delete";
 
 const itemClass =
-  "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 outline-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 data-[highlighted]:bg-subtle [&_svg]:size-4 [&_svg]:text-muted-foreground";
+  "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 outline-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 data-[highlighted]:bg-fill [&_svg]:size-4 [&_svg]:text-muted-foreground";
 
 function Item({
   icon,
@@ -52,7 +52,7 @@ export function WordingMenu({
       <DropdownMenu.Portal>
         <DropdownMenu.Content
           align="end"
-          className="z-50 min-w-52 rounded-md border border-border bg-elevated p-1 text-13 shadow-lg"
+          className="z-50 min-w-52 rounded-md border border-border bg-popover p-1 text-13 shadow-float"
         >
           <Item icon={<Eye aria-hidden="true" />} onSelect={run("consult")}>
             Consulter

@@ -8,6 +8,8 @@ import { DynamicForm } from "@/components/forms/DynamicForm";
 import { HashtagPicker } from "@/components/forms/HashtagPicker";
 import { SignaturePicker } from "@/components/forms/SignaturePicker";
 import { Button } from "@/components/ui/button";
+import { useUiStore } from "@/stores/ui.store";
+import { cn } from "@/lib/utils";
 import { Kbd } from "@/components/ui/kbd";
 import { Segmented } from "@/components/ui/segmented";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,7 +35,7 @@ import { chooseCategory } from "./choose-category";
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-2" aria-label={title}>
-      <h3 className="font-mono text-[11px] tracking-[0.16em] text-muted-foreground uppercase">
+      <h3 className="text-footnote font-semibold tracking-wide text-muted-foreground uppercase">
         {title}
       </h3>
       {children}
@@ -49,6 +51,7 @@ export function BriefColumn({ data }: { data: StudioData }) {
   const errors = useStudioSession((s) => s.errors);
   const generating = useStudioSession((s) => s.generating);
   const { generate, ready } = useStudioActions();
+  const keyboardOpen = useUiStore((s) => s.keyboardOpen);
 
   const category = getCategory(draft.categoryId ?? "");
   const current = category?.mode === mode ? category : undefined;
@@ -198,10 +201,19 @@ export function BriefColumn({ data }: { data: StudioData }) {
         ) : null}
       </div>
 
-      <div className="sticky bottom-0 z-10 flex flex-col gap-2 border-t border-border bg-background p-3">
+      {/*
+        Sur mobile, le bouton reste collé en bas, au-dessus de la tab bar (52 px, pleine
+        largeur) ; la tab bar se masque pendant la saisie et le bouton descend au bas de l'écran.
+      */}
+      <div
+        className={cn(
+          "sticky z-10 flex flex-col gap-1 border-t-[0.5px] border-separator bg-bg px-4 pt-3 pb-2 lg:bottom-0 lg:bg-surface lg:px-3",
+          keyboardOpen ? "bottom-0" : "bottom-[calc(49px+env(safe-area-inset-bottom))] md:bottom-0",
+        )}
+      >
         <Button
-          size="touch"
-          className="h-13 w-full text-sm font-semibold tracking-wide lg:h-11"
+          size="lg"
+          className="text-[15px] font-semibold tracking-wide lg:h-11"
           disabled={!current || !ready}
           loading={generating}
           aria-keyshortcuts="Control+Enter Meta+Enter"

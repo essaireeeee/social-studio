@@ -42,11 +42,13 @@ function Pill({
       aria-keyshortcuts={live ? category.shortcut : undefined}
       onClick={onSelect}
       className={cn(
-        "relative flex min-h-10 cursor-pointer items-center gap-1.5 rounded-md border py-1.5 text-left accent-transition",
-        live ? "pr-5 pl-2 text-[11px] leading-tight font-semibold uppercase" : "px-2.5 text-13",
+        "relative flex min-h-11 cursor-pointer items-center gap-1.5 py-1.5 text-left accent-transition squircle lg:min-h-10",
+        live
+          ? "rounded-xl pr-5 pl-2.5 text-[11px] leading-tight font-semibold uppercase"
+          : "rounded-full px-3 text-13",
         selected
-          ? "border-accent bg-accent text-accent-foreground"
-          : "border-border bg-elevated text-foreground hover:bg-subtle active:bg-subtle/70",
+          ? "bg-accent text-accent-foreground"
+          : "bg-fill text-foreground hover:bg-fill/70 active:opacity-70",
       )}
     >
       <span aria-hidden="true" className="shrink-0">
@@ -85,7 +87,7 @@ export function CategoryPills({ mode, value, error, onSelect }: CategoryPillsPro
         <div
           role="group"
           aria-label="Catégorie"
-          className="grid grid-cols-2 gap-1.5 xl:grid-cols-3"
+          className="grid grid-cols-2 gap-1.5 2xl:grid-cols-3"
         >
           {categories.map((category, index) => (
             <Pill
@@ -133,7 +135,7 @@ export function CategoryPills({ mode, value, error, onSelect }: CategoryPillsPro
               aria-expanded={open}
               aria-controls={panelId}
               onClick={() => toggle(group.id)}
-              className="flex w-full cursor-pointer items-center justify-between px-3 py-2 font-mono text-[11px] tracking-[0.16em] text-muted-foreground hover:text-foreground"
+              className="flex w-full cursor-pointer items-center justify-between px-3 py-2 text-footnote font-semibold tracking-wide text-muted-foreground hover:text-foreground"
             >
               {group.label}
               <ChevronDown

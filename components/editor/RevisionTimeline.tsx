@@ -44,7 +44,7 @@ export function RevisionTimeline({ revisions, disabled, onRestore }: RevisionTim
                     "h-6 min-w-8 cursor-pointer rounded-full border px-2 text-[11px] font-medium tabular-nums accent-transition disabled:cursor-default",
                     current
                       ? "border-accent bg-accent text-accent-foreground"
-                      : "border-border bg-elevated text-muted-foreground hover:bg-subtle hover:text-foreground",
+                      : "border-border bg-elevated text-muted-foreground hover:bg-fill hover:text-foreground",
                     r.origin === "cm_edit" && !current && "border-dashed",
                   )}
                 >

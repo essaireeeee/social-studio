@@ -1,17 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { buttonVariants } from "@/components/ui/button";
+import { ActionSheet } from "@/components/ui/action-sheet";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -22,7 +12,7 @@ interface ConfirmDialogProps {
   onClose: () => void;
 }
 
-/** Confirmation d'une action destructive. */
+/** Confirmation d'une action destructive, présentée en ActionSheet. */
 export function ConfirmDialog({
   open,
   title,
@@ -32,24 +22,12 @@ export function ConfirmDialog({
   onClose,
 }: ConfirmDialogProps) {
   return (
-    <AlertDialog open={open} onOpenChange={(next) => !next && onClose()}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel className={buttonVariants({ variant: "secondary" })}>
-            Annuler
-          </AlertDialogCancel>
-          <AlertDialogAction
-            className={buttonVariants({ variant: "destructive" })}
-            onClick={onConfirm}
-          >
-            {confirmLabel}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <ActionSheet
+      open={open}
+      onClose={onClose}
+      title={title}
+      description={description}
+      actions={[{ label: confirmLabel, onSelect: onConfirm, destructive: true }]}
+    />
   );
 }

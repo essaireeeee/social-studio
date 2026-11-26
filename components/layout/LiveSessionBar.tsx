@@ -6,7 +6,7 @@ import { useLiveSession } from "@/hooks/useLiveSession";
 import { sessionSummary } from "@/lib/shell/live-session";
 import { useUiStore } from "@/stores/ui.store";
 
-/** Barre Session Live (section 12.3), sous le header, en LIVE SHOW uniquement. */
+/** Barre Session Live (section 12.3), sous la barre de navigation, en LIVE SHOW uniquement. */
 export function LiveSessionBar() {
   const session = useLiveSession();
   const ref = useRef<HTMLElement | null>(null);
@@ -27,14 +27,14 @@ export function LiveSessionBar() {
   const openDialog = () => useUiStore.getState().setSessionDialogOpen(true);
 
   if (session === undefined) {
-    return <div className="h-10 border-b border-border bg-elevated" aria-hidden="true" />;
+    return <div className="h-11 border-b-[0.5px] border-separator" aria-hidden="true" />;
   }
 
   return (
     <section
       ref={ref}
       aria-label="Session Live"
-      className="sticky top-13 z-20 flex min-h-10 flex-wrap items-center gap-x-3 gap-y-1 border-b border-border bg-elevated px-4 py-1.5 sm:px-6"
+      className="sticky top-[calc(2.75rem+env(safe-area-inset-top))] z-20 flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 border-b-[0.5px] border-separator bg-surface px-4 py-1.5 sm:px-6 lg:top-[52px]"
     >
       {session ? (
         <>
@@ -43,7 +43,7 @@ export function LiveSessionBar() {
               className="size-2 shrink-0 animate-on-air rounded-full bg-live"
               aria-hidden="true"
             />
-            <span className="font-mono font-semibold tracking-wider text-live">
+            <span className="font-mono font-semibold tracking-wider text-live-text">
               ÉVÉNEMENT ACTIF
             </span>
             <span className="truncate text-foreground">

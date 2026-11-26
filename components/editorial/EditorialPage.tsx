@@ -8,6 +8,7 @@ import type { Mode } from "@/types/domain";
 import { CompareView } from "./CompareView";
 import { ProfilePanel } from "./ProfilePanel";
 import { RulesSection } from "./RulesSection";
+import { LargeTitle } from "@/components/layout/ScreenTitle";
 
 type Tab = Mode | "compare";
 
@@ -24,11 +25,11 @@ export function EditorialPage() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pt-3 pb-10 sm:px-6">
       <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">ADN éditorial</h1>
-          <p className="max-w-2xl text-13 text-muted-foreground">
+          <LargeTitle>ADN éditorial</LargeTitle>
+          <p className="max-w-2xl text-subheadline text-muted-foreground">
             Style mesuré sur les publications réelles de la bibliothèque, analysé séparément pour
             LIVE SHOW et DAILY & MEDIA. Les exemples fictifs sont exclus sauf demande explicite.
           </p>
@@ -44,7 +45,7 @@ export function EditorialPage() {
       </header>
 
       {!repository ? (
-        <div className="h-64 animate-pulse rounded-lg border border-border bg-card" aria-hidden />
+        <div className="h-64 animate-pulse rounded-xl bg-card squircle" aria-hidden />
       ) : (
         <>
           <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>

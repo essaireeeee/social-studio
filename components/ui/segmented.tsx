@@ -1,6 +1,8 @@
 "use client";
 
-import { useRef, type KeyboardEvent, type ReactNode } from "react";
+import { motion } from "motion/react";
+import { useId, useRef, type KeyboardEvent, type ReactNode } from "react";
+import { useReducedMotion } from "@/hooks/useMedia";
 import { cn } from "@/lib/utils";
 
 export interface SegmentedOption<T extends string> {
@@ -20,8 +22,10 @@ interface SegmentedProps<T extends string> {
 }
 
 /**
- * Groupe radio segmenté (motif ARIA) : un seul arrêt de tabulation, les flèches changent
- * la sélection, Début et Fin vont aux extrémités.
+ * SegmentedControl iOS (section 5.5) : fond `--fill`, segment actif en surface claire
+ * (jour) ou `--surface-3` (nuit) avec ombre légère, qui glisse d'un segment à l'autre.
+ * Groupe radio (motif ARIA) : un seul arrêt de tabulation, les flèches changent la sélection,
+ * Début et Fin vont aux extrémités.
  */
 export function Segmented<T extends string>({
   value,
@@ -32,6 +36,8 @@ export function Segmented<T extends string>({
   className,
 }: SegmentedProps<T>) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
+  const group = useId();
+  const reduced = useReducedMotion();
   const index = Math.max(
     0,
     options.findIndex((o) => o.value === value),
@@ -58,7 +64,10 @@ export function Segmented<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className={cn("flex w-full rounded-md border border-border bg-elevated p-0.5", className)}
+      className={cn(
+        "grid w-full auto-cols-fr grid-flow-col rounded-[9px] bg-fill p-0.5 squircle",
+        className,
+      )}
     >
       {options.map((option, i) => {
         const checked = option.value === value;
@@ -76,17 +85,33 @@ export function Segmented<T extends string>({
             onClick={() => onChange(option.value)}
             onKeyDown={onKeyDown}
             className={cn(
-              "flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-sm px-2 text-xs font-medium whitespace-nowrap accent-transition",
-              size === "touch" ? "h-10" : "h-7",
+              "relative flex min-w-0 cursor-pointer items-center justify-center gap-1.5 rounded-[7px] whitespace-nowrap",
+              options.length >= 4 ? "px-1 text-xs" : "px-2 text-13",
+              size === "touch" ? "h-10" : "h-7 pointer-coarse:h-10",
               checked
-                ? "bg-accent text-accent-foreground"
-                : "text-muted-foreground hover:bg-subtle hover:text-foreground active:bg-subtle/70",
+                ? "font-semibold text-foreground"
+                : "font-medium text-muted-foreground hover:text-foreground",
             )}
           >
-            {option.label}
+            {checked ? (
+              <motion.span
+                layoutId={`segment-${group}`}
+                aria-hidden="true"
+                transition={
+                  reduced ? { duration: 0.1 } : { type: "spring", stiffness: 380, damping: 36 }
+                }
+                className="absolute inset-0 rounded-[7px] bg-surface shadow-[0_3px_8px_rgba(0,0,0,0.12),0_0_1px_rgba(0,0,0,0.04)] dark:bg-surface-3"
+              />
+            ) : null}
+            <span className="relative z-10 flex min-w-0 items-center gap-1.5 truncate">
+              {option.label}
+            </span>
           </button>
         );
       })}
     </div>
   );
 }
+
+/** Nom du composant dans la section 5.5. */
+export const SegmentedControl = Segmented;

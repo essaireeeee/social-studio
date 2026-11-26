@@ -61,9 +61,7 @@ test("export JSON → réinitialisation → import JSON : données identiques", 
   expect(automatic.suggestedFilename()).toMatch(/avant-reinitialisation/);
   await page.waitForURL("**/");
   await waitForReady(page);
-  await expect(
-    page.getByRole("heading", { name: "Bienvenue dans votre Social Studio." }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Accueil", level: 1 })).toBeVisible();
   await page.goto("/fighters");
   await waitForReady(page);
   await expect(page.getByRole("list", { name: "Combattants" })).not.toContainText("Karim Fictif");
@@ -175,7 +173,8 @@ test("profils locaux : création, profil actif, toujours un administrateur", asy
   const lea = page.getByRole("listitem", { name: "Léa" });
   await lea.getByRole("button", { name: "Activer" }).click();
   await expect(lea).toContainText("Profil actif");
-  await expect(page.getByRole("banner")).toContainText("Léa");
+  // V2 : le profil actif s'affiche au pied de la barre latérale.
+  await expect(page.getByRole("complementary", { name: "Barre latérale" })).toContainText("Léa");
 
   // Le seul administrateur ne peut pas devenir CM.
   const admin = page.getByRole("listitem", { name: "Community Manager" });

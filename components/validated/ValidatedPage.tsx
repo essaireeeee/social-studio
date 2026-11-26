@@ -13,6 +13,7 @@ import { MODE_LABELS } from "@/lib/shell/mode";
 import { saveToLibrary } from "@/lib/studio/actions";
 import { toast } from "@/stores/toast.store";
 import type { Generation } from "@/types/domain";
+import { LargeTitle } from "@/components/layout/ScreenTitle";
 
 /**
  * Apprentissage contrôlé (section 16.1) : les générations validées attendent ici. Rien
@@ -42,19 +43,16 @@ export function ValidatedPage() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 py-6 sm:px-6">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 pt-3 pb-10 sm:px-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Publications validées</h1>
-        <p className="max-w-2xl text-13 text-muted-foreground">
+        <LargeTitle>Publications validées</LargeTitle>
+        <p className="max-w-2xl text-subheadline text-muted-foreground">
           Les textes validés ou publiés qui ne sont pas encore dans la bibliothèque. Rien
           n&apos;entre automatiquement dans le corpus de style : c&apos;est vous qui décidez.
         </p>
       </header>
       {!data ? (
-        <div
-          className="h-24 animate-pulse rounded-lg border border-border bg-card"
-          aria-busy="true"
-        />
+        <div className="h-24 animate-pulse rounded-xl bg-card squircle" aria-busy="true" />
       ) : pending.length === 0 ? (
         <p className="rounded-lg border border-dashed border-border p-10 text-center text-13 text-muted-foreground">
           Aucune publication validée en attente.
@@ -62,10 +60,7 @@ export function ValidatedPage() {
       ) : (
         <ul className="flex flex-col gap-3" aria-label="Publications en attente">
           {pending.map((g) => (
-            <li
-              key={g.id}
-              className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4"
-            >
+            <li key={g.id} className="flex flex-col gap-2 rounded-xl bg-card p-4 squircle">
               <p className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 <GenerationStatusBadge status={g.status} />
                 <span>{MODE_LABELS[g.brief.mode]}</span>

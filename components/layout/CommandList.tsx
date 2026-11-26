@@ -40,7 +40,7 @@ export function CommandList({
         <li key={entry.key} role="presentation">
           {index === 0 || entries[index - 1]!.group !== entry.group ? (
             <p
-              className="px-2.5 pt-2 pb-1 font-mono text-[10px] tracking-[0.18em] text-muted-foreground/70 uppercase"
+              className="px-2.5 pt-2 pb-1 text-footnote font-semibold tracking-wide text-muted-foreground uppercase"
               role="presentation"
             >
               {entry.group}
@@ -54,7 +54,7 @@ export function CommandList({
             onClick={() => onPick(entry)}
             className={cn(
               "flex cursor-pointer items-center gap-3 rounded-md px-2.5 py-1.5 text-13",
-              index === selected ? "bg-subtle text-foreground" : "text-muted-foreground",
+              index === selected ? "bg-fill text-foreground" : "text-muted-foreground",
             )}
           >
             <span className="min-w-0 flex-1 truncate">{entry.label}</span>

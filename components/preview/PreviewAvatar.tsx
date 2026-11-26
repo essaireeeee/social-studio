@@ -18,7 +18,7 @@ export function PreviewAvatar({ size = 32, className }: { size?: number; classNa
   return (
     <span
       className={cn(
-        "flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#2a2b31]",
+        "flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--pv-skeleton)]",
         className,
       )}
       style={{ width: size, height: size }}
@@ -36,7 +36,7 @@ export function PreviewAvatar({ size = 32, className }: { size?: number; classNa
           <path
             d="M12 2.5 20.2 7.25v9.5L12 21.5 3.8 16.75v-9.5Z"
             fill="none"
-            stroke="#e5e7eb"
+            stroke="var(--pv-avatar-stroke)"
             strokeWidth="1.75"
           />
         </svg>

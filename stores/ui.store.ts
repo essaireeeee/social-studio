@@ -9,6 +9,12 @@ interface UiStoreState {
   /** Pré-remplissage d'une nouvelle session (fiche événement ouverte depuis la recherche). */
   sessionDraft?: LiveSessionInput;
   endSessionOpen: boolean;
+  /** Grand titre de l'écran visible : la barre de navigation masque alors son petit titre. */
+  largeTitleVisible: boolean;
+  /** Clavier virtuel ouvert (champ actif sur mobile) : la tab bar se masque. */
+  keyboardOpen: boolean;
+  setLargeTitleVisible: (visible: boolean) => void;
+  setKeyboardOpen: (open: boolean) => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
   setMobileNavOpen: (open: boolean) => void;
   setCommandOpen: (open: boolean) => void;
@@ -23,6 +29,10 @@ export const useUiStore = create<UiStoreState>((set) => ({
   commandOpen: false,
   sessionDialogOpen: false,
   endSessionOpen: false,
+  largeTitleVisible: false,
+  keyboardOpen: false,
+  setLargeTitleVisible: (largeTitleVisible) => set({ largeTitleVisible }),
+  setKeyboardOpen: (keyboardOpen) => set({ keyboardOpen }),
   setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
   setMobileNavOpen: (mobileNavOpen) => set({ mobileNavOpen }),
   setCommandOpen: (commandOpen) => set({ commandOpen }),

@@ -31,7 +31,7 @@ export function RulesSection({ repository, user }: RulesSectionProps) {
         </p>
       </div>
       {!rules ? (
-        <div className="h-32 animate-pulse rounded-lg border border-border bg-card" aria-hidden />
+        <div className="h-32 animate-pulse rounded-xl bg-card squircle" aria-hidden />
       ) : (
         <ul className="flex flex-col gap-3">
           {rules.map((rule) => (

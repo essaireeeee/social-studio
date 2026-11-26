@@ -57,13 +57,13 @@ export function EngineChoice({ value, views, disabled, onChange }: EngineChoiceP
               disabled={disabled}
               onClick={() => onChange(option.id)}
               className={cn(
-                "flex flex-col items-start gap-1.5 rounded-lg border bg-card p-3 text-left accent-transition hover:bg-subtle disabled:cursor-not-allowed disabled:opacity-50",
+                "flex flex-col items-start gap-1.5 rounded-lg border bg-card p-3 text-left accent-transition hover:bg-fill disabled:cursor-not-allowed disabled:opacity-50",
                 checked ? "border-accent" : "border-border",
               )}
             >
               <span className="flex w-full items-center justify-between gap-2 text-13 font-medium">
                 {option.label}
-                {checked ? <Check className="size-4 text-accent" aria-hidden="true" /> : null}
+                {checked ? <Check className="size-4 text-accent-text" aria-hidden="true" /> : null}
               </span>
               <span className="text-xs text-muted-foreground">{option.description}</span>
               {view ? (

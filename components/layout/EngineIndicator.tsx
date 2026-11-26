@@ -11,7 +11,7 @@ export function EngineIndicator() {
   return (
     <Link
       href="/settings/ai"
-      className={cn(badgeVariants({ variant: indicator.tone }), "h-7 px-2 hover:bg-subtle")}
+      className={cn(badgeVariants({ variant: indicator.tone }), "h-7 px-2 hover:bg-fill")}
       aria-label={`Moteur : ${indicator.text}. Ouvrir les paramètres de l'intelligence artificielle`}
     >
       {indicator.text}

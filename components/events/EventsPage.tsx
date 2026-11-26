@@ -9,6 +9,7 @@ import { eventTimeline } from "@/lib/events/query";
 import { cn } from "@/lib/utils";
 import { EventDetail } from "./EventDetail";
 import { EventList } from "./EventList";
+import { LargeTitle } from "@/components/layout/ScreenTitle";
 
 type Selection = { kind: "event"; id: string } | { kind: "new" } | null;
 
@@ -25,11 +26,11 @@ export function EventsPage() {
   const showDetail = selection?.kind === "new" || Boolean(selected);
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-6 sm:px-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 pt-3 pb-10 sm:px-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Événements</h1>
-          <p className="max-w-2xl text-13 text-muted-foreground">
+          <LargeTitle>Événements</LargeTitle>
+          <p className="max-w-2xl text-subheadline text-muted-foreground">
             Date, lieu, diffusion et fight card alimentent les formulaires du Studio, les signatures
             et la Session Live. Sans « Horaires confirmés », aucun horaire n&apos;est publié.
           </p>
@@ -53,7 +54,7 @@ export function EventsPage() {
           <section
             aria-label="Fiche"
             className={cn(
-              "min-w-0 rounded-lg border border-border bg-card p-4 sm:p-5",
+              "min-w-0 rounded-xl bg-card p-4 squircle sm:p-5",
               !showDetail && "hidden lg:block",
             )}
           >

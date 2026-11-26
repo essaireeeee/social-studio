@@ -63,7 +63,7 @@ export function LogoField() {
             Aucun logo : l&apos;hexagone par défaut s&apos;affiche.
           </span>
         )}
-        <label className="inline-flex h-8 cursor-pointer items-center rounded-md border border-border bg-elevated px-3 text-13 hover:bg-subtle">
+        <label className="inline-flex h-8 cursor-pointer items-center rounded-md border border-border bg-elevated px-3 text-13 hover:bg-fill">
           Choisir une image
           <input
             type="file"

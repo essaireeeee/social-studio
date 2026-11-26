@@ -2,6 +2,7 @@
  * Raccourcis globaux du shell (section 12.2) et script exécuté avant le premier affichage.
  * Logique pure.
  */
+import { THEME_COLORS, THEME_STORAGE_KEY } from "@/lib/design/theme";
 import type { Mode } from "@/types/domain";
 
 export const MODE_STORAGE_KEY = "hex-mode";
@@ -32,10 +33,12 @@ export function isCommandShortcut(event: KeyLike): boolean {
 }
 
 /**
- * Exécuté pendant la lecture du HTML, avant l'affichage : rétablit le mode et l'état de la
- * barre latérale mémorisés, sans flash de couleur ni saut de mise en page.
+ * Exécuté pendant la lecture du HTML, avant l'affichage : rétablit le thème, le mode et l'état
+ * de la barre latérale mémorisés, sans flash de couleur ni saut de mise en page.
+ * Le thème est aussi posé par `next-themes` ; le poser ici garantit qu'il précède le premier
+ * rendu, et la couleur de la barre du navigateur suit (`theme-color`).
  */
-export const PREPAINT_SCRIPT = `(function(){try{var d=document.documentElement;var m=localStorage.getItem("${MODE_STORAGE_KEY}");if(m==="live"||m==="daily")d.setAttribute("data-mode",m);if(localStorage.getItem("${SIDEBAR_STORAGE_KEY}")==="collapsed")d.setAttribute("data-sidebar","collapsed")}catch(e){}})()`;
+export const PREPAINT_SCRIPT = `(function(){try{var d=document.documentElement;var t=localStorage.getItem("${THEME_STORAGE_KEY}");if(t!=="light"&&t!=="dark")t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";d.setAttribute("data-theme",t);d.style.colorScheme=t;var c=t==="dark"?"${THEME_COLORS.dark}":"${THEME_COLORS.light}";var ms=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<ms.length;i++){ms[i].setAttribute("content",c)}var m=localStorage.getItem("${MODE_STORAGE_KEY}");if(m==="live"||m==="daily")d.setAttribute("data-mode",m);if(localStorage.getItem("${SIDEBAR_STORAGE_KEY}")==="collapsed")d.setAttribute("data-sidebar","collapsed")}catch(e){}})()`;
 
 export function readStored(key: string): string | null {
   try {

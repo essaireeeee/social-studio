@@ -37,7 +37,7 @@ export function SignatureList({
           <li
             key={signature.id}
             aria-label={signature.name}
-            className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3"
+            className="flex flex-col gap-2 rounded-xl bg-card p-3 squircle"
           >
             <div className="flex flex-wrap items-center gap-3">
               <OrderButtons

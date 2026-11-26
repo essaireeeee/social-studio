@@ -8,6 +8,7 @@ import { nextEvent } from "@/lib/events/query";
 import { eventLabelOf } from "@/lib/generation/native/context";
 import { GroupList } from "./GroupList";
 import { SignatureList } from "./SignatureList";
+import { LargeTitle } from "@/components/layout/ScreenTitle";
 
 /** Écran Hashtags & signatures (section 15.3). */
 export function HashtagsPage() {
@@ -23,10 +24,10 @@ export function HashtagsPage() {
   const previewEvent = events.find((e) => e.id === chosen) ?? fallback;
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-6 sm:px-6">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 pt-3 pb-10 sm:px-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Hashtags & signatures</h1>
-        <p className="max-w-2xl text-13 text-muted-foreground">
+        <LargeTitle>Hashtags & signatures</LargeTitle>
+        <p className="max-w-2xl text-subheadline text-muted-foreground">
           Les groupes et signatures actifs sont proposés dans le Studio, dans cet ordre.
         </p>
       </header>

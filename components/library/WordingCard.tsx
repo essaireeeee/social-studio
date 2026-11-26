@@ -28,7 +28,7 @@ export function WordingCard({ wording, position, total, style, onAction }: Wordi
       aria-posinset={position}
       aria-label={category?.label ?? "Publication"}
       style={style}
-      className="absolute flex flex-col gap-2 overflow-hidden rounded-lg border border-border bg-card p-3"
+      className="absolute flex flex-col gap-2 overflow-hidden rounded-xl bg-card p-3 squircle"
     >
       <div className="flex items-center gap-1.5">
         <span aria-hidden="true">{category?.emoji}</span>

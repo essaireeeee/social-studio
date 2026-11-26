@@ -51,7 +51,7 @@ export function ProviderPanel({
 
   return (
     <section
-      className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4"
+      className="flex flex-col gap-4 rounded-xl bg-card p-4 squircle"
       aria-labelledby={`${keyId}-title`}
     >
       <header className="flex flex-wrap items-center justify-between gap-2">

@@ -3,6 +3,9 @@
 import type { ReactNode } from "react";
 import { VARIANT_LABELS } from "@/components/editor/VariantCard";
 import { FormField } from "@/components/ui/form-field";
+import { FormGroup, SwitchRow } from "@/components/ui/form-group";
+import { Picker } from "@/components/ui/picker";
+import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { QUICK_OPTION_LABELS, moveItem, type QuickOptionKey } from "@/lib/settings/preferences";
 import { RetrievalWeightsSchema, type Settings } from "@/types/domain";
@@ -21,17 +24,7 @@ const WEIGHT_LABELS: Record<keyof Settings["retrievalWeights"], string> = {
 };
 
 function Block({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section
-      aria-label={title}
-      className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4"
-    >
-      <h2 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-        {title}
-      </h2>
-      {children}
-    </section>
-  );
+  return <FormGroup title={title}>{children}</FormGroup>;
 }
 
 interface PreferencesFormProps {
@@ -99,33 +92,30 @@ export function PreferencesForm({ values, errors, onChange }: PreferencesFormPro
           items={values.variantOrder.map((kind) => ({ id: kind, label: VARIANT_LABELS[kind] }))}
           onMove={(from, to) => onChange({ variantOrder: moveItem(values.variantOrder, from, to) })}
         />
-        <label className="flex items-start gap-2 text-13">
-          <input
-            type="checkbox"
-            checked={values.frenchSpacing}
-            onChange={(e) => onChange({ frenchSpacing: e.target.checked })}
-            className="mt-0.5 size-4 accent-[var(--accent)]"
-          />
-          <span>
-            Espaces insécables avant ! ? : ;
-            <span className="block text-xs text-muted-foreground">
-              Typographie française, appliquée à tous les textes.
-            </span>
-          </span>
-        </label>
+        <SwitchRow
+          id="pref-french-spacing"
+          label="Espaces insécables avant ! ? : ;"
+          hint="Typographie française, appliquée à tous les textes."
+          control={
+            <Switch
+              aria-labelledby="pref-french-spacing"
+              checked={values.frenchSpacing}
+              onCheckedChange={(checked) => onChange({ frenchSpacing: checked })}
+            />
+          }
+        />
         <FormField id="pref-shortcut" label="Raccourci « Copier la variante affichée »">
-          <select
+          <Picker
             id="pref-shortcut"
             value={values.copyShortcut}
             onChange={(e) => onChange({ copyShortcut: e.target.value as Settings["copyShortcut"] })}
-            className="h-8 rounded-md border border-input bg-background px-2 text-13 text-foreground"
           >
             <option value="mod+shift+c">Ctrl (Cmd) + Maj + C</option>
             <option value="mod+alt+c">Ctrl (Cmd) + Alt + C</option>
-          </select>
+          </Picker>
         </FormField>
       </Block>
-      <details className="rounded-lg border border-border bg-card p-4">
+      <details className="rounded-xl bg-card p-4 squircle">
         <summary className="cursor-pointer text-xs font-semibold tracking-wide text-muted-foreground uppercase">
           Avancé : poids de la recherche de références
         </summary>

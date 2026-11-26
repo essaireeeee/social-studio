@@ -19,12 +19,17 @@ import { PLATFORM_RULES } from "@/lib/platforms/rules";
 import { MODE_LABELS } from "@/lib/shell/mode";
 import type { GenerationStatus } from "@/lib/history/history";
 import type { Mode } from "@/types/domain";
+import { SquarePen } from "lucide-react";
+import { SwipeActions } from "@/components/ui/swipe-actions";
+import { useReopenInStudio } from "@/hooks/useReopenInStudio";
 import { GenerationStatusBadge } from "./GenerationStatusBadge";
 import { HistoryDetail } from "./HistoryDetail";
+import { LargeTitle } from "@/components/layout/ScreenTitle";
 
 const PAGE = 50;
 const cell = "px-3 py-2";
-const selectClass = "h-8 rounded-md border border-input bg-background px-2 text-13 text-foreground";
+const selectClass =
+  "h-11 rounded-md border border-input bg-surface px-3 text-field text-foreground lg:h-9";
 
 /** Historique des générations (section 16.1). */
 export function HistoryPage() {
@@ -37,12 +42,13 @@ export function HistoryPage() {
   const pages = Math.max(1, Math.ceil(rows.length / PAGE));
   const current = Math.min(page, pages - 1);
   const opened = data?.generations.find((g) => g.id === openId);
+  const reopenInStudio = useReopenInStudio();
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-6 sm:px-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 pt-3 pb-10 sm:px-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Historique</h1>
-        <p className="max-w-2xl text-13 text-muted-foreground">
+        <LargeTitle>Historique</LargeTitle>
+        <p className="max-w-2xl text-subheadline text-muted-foreground">
           Toutes les générations, avec leurs versions. Brouillon, en cours de modification, validé,
           publié : chaque statut a sa propre étiquette.
         </p>
@@ -99,7 +105,7 @@ export function HistoryPage() {
           aria-label="Chargement de l'historique"
         >
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-10 animate-pulse rounded-md border border-border bg-card" />
+            <div key={i} className="h-10 animate-pulse rounded-lg bg-card squircle" />
           ))}
         </div>
       ) : rows.length === 0 ? (
@@ -109,59 +115,94 @@ export function HistoryPage() {
             : "Aucune génération ne correspond aux filtres."}
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
-          <table className="w-full min-w-[56rem] text-left text-13">
-            <caption className="sr-only">Historique des générations</caption>
-            <thead className="bg-elevated text-xs text-muted-foreground">
-              <tr>
-                <th scope="col" className={cell}>
-                  Date
-                </th>
-                <th scope="col" className={cell}>
-                  Mode
-                </th>
-                <th scope="col" className={cell}>
-                  Catégorie
-                </th>
-                <th scope="col" className={cell}>
-                  Plateforme
-                </th>
-                <th scope="col" className={cell}>
-                  Moteur
-                </th>
-                <th scope="col" className={cell}>
-                  Statut
-                </th>
-                <th scope="col" className={cell}>
-                  Texte final
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.slice(current * PAGE, (current + 1) * PAGE).map((g) => (
-                <tr key={g.id} className="border-t border-border hover:bg-subtle/50">
-                  <td className={`${cell} whitespace-nowrap`}>{formatDateTime(g.createdAt)}</td>
-                  <td className={cell}>{g.brief.mode === "live" ? "LIVE" : "DAILY"}</td>
-                  <td className={cell}>{getCategory(g.brief.categoryId)?.label}</td>
-                  <td className={cell}>{PLATFORM_RULES[g.brief.platform].label}</td>
-                  <td className={cell}>{ENGINE_LABELS[g.engine]}</td>
-                  <td className={cell}>
-                    <GenerationStatusBadge status={g.status} />
-                  </td>
-                  <td className={`${cell} max-w-80`}>
-                    <button
-                      type="button"
-                      onClick={() => setOpenId(g.id)}
-                      className="line-clamp-2 cursor-pointer text-left hover:underline"
-                    >
+        <>
+          {/* Mobile : cellules ; glisser vers la droite (ou appui long) pour rouvrir dans le Studio. */}
+          <ul
+            aria-label="Générations"
+            className="overflow-hidden rounded-xl bg-card squircle md:hidden"
+          >
+            {rows.slice(current * PAGE, (current + 1) * PAGE).map((g) => (
+              <li key={g.id} className="border-b-[0.5px] border-separator last:border-b-0">
+                <SwipeActions
+                  label={`Actions : ${getCategory(g.brief.categoryId)?.label ?? "génération"}`}
+                  leading={[
+                    { label: "Rouvrir", icon: SquarePen, onSelect: () => reopenInStudio(g) },
+                  ]}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenId(g.id)}
+                    className="flex w-full cursor-pointer flex-col gap-1 bg-card px-4 py-3 text-left active:bg-fill"
+                  >
+                    <span className="flex items-center justify-between gap-2 text-footnote text-muted-foreground">
+                      <span className="truncate">
+                        {formatDateTime(g.createdAt)} · {g.brief.mode === "live" ? "LIVE" : "DAILY"}{" "}
+                        · {getCategory(g.brief.categoryId)?.label}
+                      </span>
+                      <GenerationStatusBadge status={g.status} />
+                    </span>
+                    <span className="line-clamp-2 text-subheadline">
                       {finalTextOf(g).replace(/\s+/g, " ")}
-                    </button>
-                  </td>
+                    </span>
+                  </button>
+                </SwipeActions>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden overflow-x-auto rounded-xl bg-card squircle md:block">
+            <table className="w-full min-w-[56rem] text-left text-13">
+              <caption className="sr-only">Historique des générations</caption>
+              <thead className="text-footnote text-muted-foreground">
+                <tr>
+                  <th scope="col" className={cell}>
+                    Date
+                  </th>
+                  <th scope="col" className={cell}>
+                    Mode
+                  </th>
+                  <th scope="col" className={cell}>
+                    Catégorie
+                  </th>
+                  <th scope="col" className={cell}>
+                    Plateforme
+                  </th>
+                  <th scope="col" className={cell}>
+                    Moteur
+                  </th>
+                  <th scope="col" className={cell}>
+                    Statut
+                  </th>
+                  <th scope="col" className={cell}>
+                    Texte final
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {rows.slice(current * PAGE, (current + 1) * PAGE).map((g) => (
+                  <tr key={g.id} className="border-t-[0.5px] border-separator hover:bg-fill/50">
+                    <td className={`${cell} whitespace-nowrap`}>{formatDateTime(g.createdAt)}</td>
+                    <td className={cell}>{g.brief.mode === "live" ? "LIVE" : "DAILY"}</td>
+                    <td className={cell}>{getCategory(g.brief.categoryId)?.label}</td>
+                    <td className={cell}>{PLATFORM_RULES[g.brief.platform].label}</td>
+                    <td className={cell}>{ENGINE_LABELS[g.engine]}</td>
+                    <td className={cell}>
+                      <GenerationStatusBadge status={g.status} />
+                    </td>
+                    <td className={`${cell} max-w-80`}>
+                      <button
+                        type="button"
+                        onClick={() => setOpenId(g.id)}
+                        className="line-clamp-2 cursor-pointer text-left hover:underline"
+                      >
+                        {finalTextOf(g).replace(/\s+/g, " ")}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
       {pages > 1 ? (
         <div className="flex items-center justify-end gap-2 text-xs text-muted-foreground">

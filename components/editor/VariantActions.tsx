@@ -89,12 +89,12 @@ export function VariantActions({ generation, variant, text }: VariantActionsProp
         <DropdownMenu.Portal>
           <DropdownMenu.Content
             align="end"
-            className="z-50 min-w-48 rounded-md border border-border bg-elevated p-1 text-13 shadow-lg"
+            className="z-50 min-w-48 rounded-md border border-border bg-popover p-1 text-13 shadow-float"
           >
             {generation.status !== "published" ? (
               <DropdownMenu.Item
                 onSelect={() => setDialog("publish")}
-                className="cursor-pointer rounded-sm px-2 py-1.5 outline-none data-[highlighted]:bg-subtle"
+                className="cursor-pointer rounded-sm px-2 py-1.5 outline-none data-[highlighted]:bg-fill"
               >
                 Marquer comme publié…
               </DropdownMenu.Item>
@@ -105,7 +105,7 @@ export function VariantActions({ generation, variant, text }: VariantActionsProp
                   repository &&
                   void run(() => reopen(repository, generation.id), "Validation retirée")
                 }
-                className="cursor-pointer rounded-sm px-2 py-1.5 outline-none data-[highlighted]:bg-subtle"
+                className="cursor-pointer rounded-sm px-2 py-1.5 outline-none data-[highlighted]:bg-fill"
               >
                 Retirer la validation
               </DropdownMenu.Item>

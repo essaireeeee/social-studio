@@ -7,7 +7,7 @@ const STYLES: Record<GenerationStatus, string> = {
   draft: "border-dashed border-border text-muted-foreground",
   editing: "border-warning/40 bg-warning/10 text-warning",
   validated: "border-success/40 bg-success/10 text-success",
-  published: "border-success bg-success text-black",
+  published: "border-success bg-success-fill text-black",
 };
 
 const ICONS = { draft: CircleDashed, editing: PenLine, validated: CheckCheck, published: Send };

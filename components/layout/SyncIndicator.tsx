@@ -28,6 +28,7 @@ export function SyncIndicator() {
       side="bottom"
     >
       <span
+        role="status"
         tabIndex={0}
         className={`flex h-7 items-center gap-1.5 rounded-md px-1.5 text-xs whitespace-nowrap ${tone}`}
         aria-label={sync.message ? `${text}. ${sync.message}` : text}

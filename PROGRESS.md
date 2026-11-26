@@ -7,12 +7,64 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | Phase | Intitulé                            | Statut   |
 | ----- | ----------------------------------- | -------- |
 | V2-0  | Audit, migration, socle             | Terminée |
-| V2-1  | Design system iOS, mode jour / nuit | À faire  |
+| V2-1  | Design system iOS, mode jour / nuit | Terminée |
 | V2-2  | Atelier Français                    | À faire  |
 | V2-3  | Calendrier éditorial et rappels     | À faire  |
 | V2-4  | Plans de campagne                   | À faire  |
 | V2-5  | Suggestions de posts (« Idées »)    | À faire  |
 | V2-6  | Tests, QA, documentation            | À faire  |
+
+## Phase V2-1 : Design system iOS et mode jour / nuit (terminée le 26/11/2026)
+
+### Livré
+
+- **Thèmes** Jour, Nuit, Automatique (défaut) : `data-theme` posé avant l'affichage par le script d'en-tête, tenu à jour par `next-themes` ; `theme-color` et `color-scheme` suivent. Bouton soleil / lune dans la barre de navigation, contrôle segmenté dans Paramètres > Préférences > Apparence. L'aperçu des réseaux a son propre interrupteur clair / sombre.
+- **Tokens** (`app/globals.css`) : tableau 5.2 pour les deux thèmes, accent par mode (`--accent`, `--accent-text`, `--accent-fill`). Les noms V1 (`bg-card`, `text-muted-foreground`…) pointent sur les tokens V2 : tous les écrans V1 ont basculé d'un coup. Échelle typographique iOS (`text-large-title` à `text-caption`), rayons 10 / 12 / 16 / 20, coins `squircle` en amélioration progressive, séparateurs de 0,5 px, ombre réservée aux éléments flottants.
+- **Police** : pile système, Inter servie depuis le projet (`app/fonts`, licence OFL) ; Geist retirée.
+- **Composants** (`components/ui/`) : bouton iOS (plein, gris, teinté, simple, destructif ; 44 px au doigt), champs 17 px sur mobile, `Dialog` en feuille vaul sur mobile et dialogue de 560 px ailleurs, `Sheet` à deux crans, `ActionSheet`, alerte, `ContextMenu` (clic droit, appui long de 500 ms), `SwipeActions`, `Segmented` (segment qui glisse), `Switch` 51 × 31, `Stepper`, `Picker`, `TimeField`, `SearchField`, `Chip`, `Skeleton`, `EmptyState`, `Fab`, `GroupedSection` / `Cell`, `FormGroup` / `SwitchRow`, bannières en haut (remplacent les toasts).
+- **Shell** : barre de navigation translucide (petit titre centré quand le grand titre a défilé, retour « ‹ Parent », deux actions au plus, menu « ⋯ » sur mobile), tab bar sous 768 px (Accueil, Studio, Calendrier, Idées, Plus ; masquée pendant la saisie ; l'onglet actif remonte en haut), sidebar iPadOS dès 1 024 px (sections repliables, masquable, état mémorisé ; en surimpression entre 768 et 1 023 px). Écrans Plus et Paramètres en listes groupées. Transitions de page à ressort, fondu de 100 ms si le mouvement est réduit, retour par glissement depuis le bord gauche dans l'application installée.
+- **Écrans V1** : grands titres sur toutes les pages ; Accueil (cartes de mode, FAB) ; Studio en contrôle segmenté sur mobile, bouton Générer de 52 px collé au-dessus de la tab bar, trois colonnes en surfaces arrondies sur fond groupé ; Bibliothèque (glissement : Dupliquer, Supprimer ; FAB) ; Historique en cellules sur mobile (glissement : Rouvrir) ; Préférences en groupes (Apparence, Installer sur l'écran d'accueil, Utiliser l'app sur iPhone) ; toutes les suppressions en ActionSheet ; pilules de catégorie de 44 px.
+- **PWA** : `app/manifest.ts`, icônes 192, 512, masquable et `apple-touch-icon` 180 (`public/icons`), `viewport-fit=cover`, zones sûres sur barre, tab bar, feuilles et FAB, service worker écrit à la main (`public/sw.js`, production seulement : interface en cache, jamais `/api/*`, clic sur notification).
+- Scripts `npm run screenshots` (captures de revue) et `npm run check:pwa` (installabilité et démarrage hors ligne sur un build de production). Section « Interface : thèmes, iPhone, application installable » dans le README (contraintes réelles de la section 3.4).
+
+### Validation
+
+- `npm run typecheck`, `npm run lint`, `npm run format:check` : sans erreur. `npm run check:bundle` : conforme.
+- `npm run test` : 595 tests au vert, dont le test de contraste (paires texte / fond des deux thèmes, carrés d'icône).
+- `npm run test:e2e` : 60 tests au vert, dont les 15 scénarios V1, inchangés dans cette phase.
+- **Captures** : `tests/screenshots/` (32 fichiers) : Accueil, Studio, Bibliothèque, Paramètres, en 390 × 844 (densité 2) et 1 440 × 900, thèmes Jour et Nuit, modes LIVE et DAILY.
+- **Contraste** : test automatisé au vert (4,5:1 pour le texte, 3:1 pour les icônes).
+- **Aucun flash** : `v2-phase1-theme.spec.ts` relève `data-theme` au moment où `<body>` est inséré, avant tout affichage, sur trois écrans.
+- **LIVE KO sur mobile** : 5 interactions en 390 × 844 (toucher la catégorie, saisir, flèche « suivant » du clavier, saisir, toucher Générer ; `v2-phase1-shell.spec.ts`).
+- **Lighthouse 12** (build de production) : accessibilité 100 sur Accueil, Studio, Bibliothèque, Paramètres, Préférences, Plus, Historique et ADN éditorial, en mobile et en desktop. Installabilité : aucune erreur selon Chromium, service worker actif, démarrage hors ligne vérifié (`npm run check:pwa`).
+
+### Décisions et écarts
+
+1. **Contraste avant tableau 5.2.** Le cahier des charges impose un test AA que plusieurs de ses propres valeurs ne passent pas. Ajustés : `--label-2` jour à 0,78 d'opacité (0,60 donne 3,4:1 sur blanc) ; textes d'état jour plus sombres (`--success-text` #1C6F30, `--warning-text` #B83000, `--danger-text` #C70014, `--daily-text` #A84D07) pour tenir aussi sur les bandeaux teintés ; `--danger-text` nuit #FF6961. Les valeurs du tableau restent pour les aplats et les icônes.
+2. **Libellé blanc sur l'accent.** Blanc sur #D97706 (3,2:1), #F59E0B (2,2:1) et #F43F5E (3,7:1) échoue l'AA. Les boutons pleins utilisent `--accent-fill` : #E11D48 en LIVE et #B45309 en DAILY, dans les deux thèmes, toujours avec un libellé blanc. Même logique pour les boutons destructifs (#D70015).
+3. **Points de rupture.** Tab bar sous 768 px, sidebar dès 1 024 px, comme demandé. Entre les deux (iPad en portrait), rien n'était prévu : la sidebar s'ouvre par-dessus le contenu depuis la barre de navigation. Les tailles « desktop » de la typographie s'appliquent dès 1 024 px.
+4. **Écrans pas encore livrés.** Calendrier et Idées (tab bar, sidebar), Atelier Français et Campagnes (Plus, sidebar) sont visibles, désactivés, annoncés « Bientôt disponible », hors tabulation. Les captures du Calendrier viendront avec la phase V2-3.
+5. **Échelle V1 conservée** (`text-13`, `text-xs`…) dans le corps des écrans existants, pour ne pas casser les hauteurs fixes des listes virtualisées. Titres, cellules, formulaires et nouveaux composants passent à l'échelle iOS. Garde-fou global : 16 px minimum dans les champs sur écran tactile ou étroit.
+6. **Thème mémorisé par appareil** (localStorage), hors réglages et sauvegardes, comme le réglage d'apparence d'iOS. L'interrupteur de l'aperçu suit la même règle.
+7. **Sélecteur de mode** : fondu de couleur de 200 ms (section 5.6) plutôt qu'un segment qui glisse. Le fond coloré reste sur le bouton actif : le contraste du libellé est mesurable à tout instant. Les autres contrôles segmentés glissent.
+8. **Retour par glissement** depuis le bord gauche : seulement dans l'application installée. Dans Safari, le navigateur fournit déjà ce geste ; le doubler ferait reculer de deux écrans.
+9. **Bouton Générer collé en bas** sur mobile dans les deux modes (la spec le demande en LIVE) : un seul comportement, plus prévisible.
+10. **Feuilles** : deux crans (moyen, grand) pour les fiches de consultation, un seul cran (grand) pour les formulaires, qui ont besoin de la hauteur.
+11. **Historique sur mobile** : cellules avec glissement « Rouvrir ». Les générations n'ont pas de suppression en V1 : pas d'action destructive à révéler. Le tableau reste au-delà de 768 px.
+12. **Icônes de l'application** : hexagone de la marque, générées en PNG et versionnées. Le logo chargé dans Préférences vit dans IndexedDB et ne peut pas servir d'icône d'installation.
+13. **Service worker en production seulement** : en développement, un cache de l'interface masquerait les modifications. Navigation : réseau d'abord, cache ensuite, puis `/` (l'interface lit ses données dans IndexedDB).
+14. **Lighthouse 12 n'a plus de catégorie PWA.** L'installabilité est vérifiée par Chromium lui-même (`Page.getInstallabilityErrors`) dans `npm run check:pwa`.
+15. **Captures** : densité 2 pour l'iPhone (rendu réel du téléphone), 1 pour le desktop (poids des fichiers). Script séparé de la suite e2e pour ne pas réécrire les images à chaque lancement.
+16. **Accueil** : grand titre « Accueil », la phrase de bienvenue devient le sous-titre ; l'entrée « Dashboard » de la sidebar devient « Accueil ». Le bouton NOUVEAU WORDING laisse la place au FAB sur mobile.
+17. **Couleurs de l'aperçu** : variables par thème simulé (`[data-preview-theme]`), approchées des applications et ajustées pour rester lisibles.
+18. **Correctif** : le focus vers le premier champ après le choix d'une catégorie passait par `requestAnimationFrame` ; une frappe immédiate pouvait perdre ses premiers caractères (visible dans un scénario e2e). Le rendu est désormais synchrone (`flushSync`).
+19. **Tests V1 adaptés au nouveau design** (les 15 scénarios n'ont pas changé) : `phase0-theme` remplacé par `v2-phase1-theme` (le thème OCTOGON DARK est supprimé par la spec) ; `phase7-shell` réécrit pour la sidebar iPadOS (ordre de tabulation, barre masquable) ; deux assertions de `phase11-data` (titre « Accueil », profil actif dans la sidebar) ; libellés de navigation et tokens dans les tests unitaires.
+
+### Fichiers créés ou modifiés
+
+- Créés : `components/ui/{action-sheet,chip,context-menu,empty-state,fab,form-group,grouped-list,picker,search-field,skeleton,stepper,swipe-actions,switch}.tsx`, `components/layout/{NavigationBar,TabBar,MoreMenu,StatusFooter,ScreenTitle,ThemeToggle,PageTransition}.tsx`, `components/theme/{ThemeProvider,ServiceWorker}.tsx`, `components/more/MorePage.tsx`, `components/settings/{SettingsIndex,preferences/AppearanceGroup,preferences/IphoneGroup}.tsx`, `components/preview/usePreviewTheme.ts`, `hooks/{useMedia,useMounted,useShellGestures}.ts`, `lib/design/{theme,contrast,icon-colors}.ts`, `app/manifest.ts`, `app/(workspace)/{plus,settings}/page.tsx`, `app/fonts/*`, `public/sw.js`, `public/icons/*`, `scripts/check-pwa.mjs`, `playwright.screenshots.config.ts`, `tests/screenshots/*`, `tests/unit/design/*`, `tests/e2e/v2-phase1-{theme,shell}.spec.ts`.
+- Supprimés : `components/layout/{Header,MobileNav}.tsx`, `tests/e2e/phase0-theme.spec.ts`.
+- Modifiés : `app/{globals.css,layout.tsx}`, `next.config.ts`, `components/ui/*` (bouton, champs, dialogue, feuille, alerte, contrôle segmenté, onglets, bannières), shell, Studio, aperçu, Accueil, Bibliothèque, Historique, Préférences, en-têtes de toutes les pages, `lib/shell/{navigation,shortcuts}.ts`, `lib/utils.ts`, `stores/ui.store.ts`, `README.md`, `CLAUDE.md`, tests listés au point 19.
 
 ## Phase V2-0 : Audit, migration, socle (terminée le 26/11/2026)
 

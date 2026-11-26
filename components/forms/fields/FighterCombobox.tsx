@@ -127,7 +127,7 @@ export function FighterCombobox({
           id={listId}
           role="listbox"
           aria-label={`Suggestions : ${label}`}
-          className="absolute inset-x-0 top-9 z-30 max-h-60 overflow-y-auto rounded-md border border-border bg-elevated p-1 shadow-lg"
+          className="absolute inset-x-0 top-9 z-30 max-h-60 overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-float"
         >
           {options.map((option, index) => (
             <li
@@ -142,7 +142,7 @@ export function FighterCombobox({
               onMouseMove={() => setActive(index)}
               className={cn(
                 "flex cursor-pointer items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-13",
-                index === selected ? "bg-subtle" : "",
+                index === selected ? "bg-fill" : "",
               )}
             >
               {option.kind === "fighter" ? (

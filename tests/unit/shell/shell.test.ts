@@ -22,7 +22,10 @@ const key = (patch: Partial<KeyLike>): KeyLike => ({
 describe("navigation (section 12.1)", () => {
   it("quatre sections, dans l'ordre de la spec", () => {
     expect(NAV_SECTIONS.map((s) => [s.label, s.items.map((i) => i.label)])).toEqual([
-      ["Workspace", ["Dashboard", "Social Studio", "LIVE SHOW", "DAILY & MEDIA"]],
+      [
+        "Workspace",
+        ["Accueil", "Social Studio", "LIVE SHOW", "DAILY & MEDIA", "Calendrier", "Idées"],
+      ],
       [
         "Ressources",
         [
@@ -31,6 +34,8 @@ describe("navigation (section 12.1)", () => {
           "Événements",
           "Hashtags & signatures",
           "ADN éditorial",
+          "Atelier Français",
+          "Campagnes",
         ],
       ],
       ["Suivi", ["Historique", "Publications validées"]],
@@ -41,8 +46,13 @@ describe("navigation (section 12.1)", () => {
     ]);
   });
 
-  it("tous les écrans sont livrés : plus aucune entrée « Bientôt disponible »", () => {
-    expect(NAV_ITEMS.every((i) => i.available)).toBe(true);
+  it("écrans V1 livrés ; écrans V2 à venir marqués « Bientôt disponible »", () => {
+    expect(NAV_ITEMS.filter((i) => !i.available).map((i) => i.id)).toEqual([
+      "calendar",
+      "ideas",
+      "french",
+      "campaigns",
+    ]);
     expect(NAV_ITEMS.map((i) => i.href)).toContain("/settings/users");
     expect(COMING_SOON).toBe("Bientôt disponible");
     expect(navItem("studio-live")).toMatchObject({ href: "/studio?mode=live", mode: "live" });
@@ -101,7 +111,7 @@ describe("palette de commandes", () => {
     expect(live.map((a) => a.label)).toEqual([
       "Passer en DAILY & MEDIA",
       "Démarrer une Session Live",
-      "Ouvrir : Dashboard",
+      "Ouvrir : Accueil",
       "Ouvrir : Social Studio",
       "Ouvrir : Bibliothèque de wordings",
       "Ouvrir : Combattants",
