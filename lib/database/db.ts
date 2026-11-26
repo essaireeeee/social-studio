@@ -16,6 +16,18 @@ import type {
   UserProfile,
   Wording,
 } from "@/types/domain";
+import type {
+  CalendarItem,
+  Campaign,
+  Engagement,
+  FrenchDictionaryEntry,
+  FrenchIssueRecord,
+  FrenchRuleState,
+  NewsItem,
+  NewsSource,
+  Reminder,
+  Suggestion,
+} from "@/types/v2";
 
 export const DB_NAME = "hexagone-social-studio";
 
@@ -46,6 +58,30 @@ export const DEXIE_SCHEMA_V1 = {
   meta: "key",
 } as const;
 
+/**
+ * Tables ajoutées en v2 (section 3.2 de PROMPT_V2.md), avec trois écarts :
+ * - `calendarItems` : index multi-valeurs `*platforms` (le champ est une liste) au lieu de `platform` ;
+ * - `frenchRules` et `newsSources` : pas d'index sur `enabled` (booléen, voir plus haut) ;
+ * - `frenchIssues` et `newsItems` : index utiles aux statistiques et à la déduplication.
+ * Les tables V1 sont reprises telles quelles.
+ */
+export const DEXIE_SCHEMA_V2 = {
+  ...DEXIE_SCHEMA_V1,
+  calendarItems:
+    "id, type, status, scheduledAt, campaignId, generationId, eventId, *platforms, [status+scheduledAt]",
+  reminders: "id, calendarItemId, fireAt, firedAt, dismissedAt",
+  campaigns: "id, eventId, status, createdAt, *fighterIds",
+  suggestions: "id, kind, status, score, createdAt, expiresAt, dedupeKey",
+  frenchRules: "id, family, level",
+  frenchDictionary: "id, word, kind",
+  frenchIssues: "id, ruleId, createdAt, resolution",
+  newsSources: "id",
+  newsItems: "id, sourceId, publishedAt, url, *matchedFighterIds",
+  engagement: "id, wordingId, recordedAt",
+} as const;
+
+export const DEXIE_VERSION = 2;
+
 export type HexagoneDB = Dexie & {
   wordings: Table<Wording, string>;
   fighters: Table<Fighter, string>;
@@ -58,11 +94,36 @@ export type HexagoneDB = Dexie & {
   styleProfiles: Table<StyleProfile, string>;
   users: Table<UserProfile, string>;
   blobs: Table<BlobRecord, string>;
+  calendarItems: Table<CalendarItem, string>;
+  reminders: Table<Reminder, string>;
+  campaigns: Table<Campaign, string>;
+  suggestions: Table<Suggestion, string>;
+  frenchRules: Table<FrenchRuleState, string>;
+  frenchDictionary: Table<FrenchDictionaryEntry, string>;
+  frenchIssues: Table<FrenchIssueRecord, string>;
+  newsSources: Table<NewsSource, string>;
+  newsItems: Table<NewsItem, string>;
+  engagement: Table<Engagement, string>;
   meta: Table<MetaRecord, string>;
 };
 
 export function createDatabase(name: string = DB_NAME): HexagoneDB {
   const db = new Dexie(name) as HexagoneDB;
   db.version(1).stores(DEXIE_SCHEMA_V1);
+  db.version(2)
+    .stores(DEXIE_SCHEMA_V2)
+    .upgrade(async (tx) => {
+      // Migration douce : les fiches V1 reçoivent une liste de jalons vide.
+      // Aucune autre donnée V1 n'est modifiée ; les nouvelles tables naissent vides.
+      await tx
+        .table("events")
+        .toCollection()
+        .modify((event: Record<string, unknown>) => {
+          if (!Array.isArray(event.milestones)) event.milestones = [];
+        });
+      if ((await tx.table("meta").get("schemaVersion")) !== undefined) {
+        await tx.table("meta").put({ key: "schemaVersion", value: 2 });
+      }
+    });
   return db;
 }

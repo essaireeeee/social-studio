@@ -124,9 +124,9 @@ describe("export / import JSON", () => {
 });
 
 describe("migrations", () => {
-  it("v1 : aucune migration déclarée", () => {
-    expect(CURRENT_SCHEMA_VERSION).toBe(1);
-    expect(Object.keys(MIGRATIONS)).toEqual([]);
+  it("v2 : une migration déclarée, de v1 vers v2", () => {
+    expect(CURRENT_SCHEMA_VERSION).toBe(2);
+    expect(Object.keys(MIGRATIONS)).toEqual(["1"]);
   });
 
   it("un instantané v1 vide se migre en instantané complet et vide", () => {

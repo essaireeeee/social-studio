@@ -17,6 +17,16 @@ export const SHEET_NAMES: Record<TableName, string> = {
   styleProfiles: "Profils de style",
   users: "Utilisateurs",
   blobs: "Images",
+  calendarItems: "Calendrier",
+  reminders: "Rappels",
+  campaigns: "Campagnes",
+  suggestions: "Idées",
+  frenchRules: "Règles de français",
+  frenchDictionary: "Dictionnaire",
+  frenchIssues: "Alertes de français",
+  newsSources: "Sources d'actualité",
+  newsItems: "Articles",
+  engagement: "Engagement",
 };
 
 const MAX_CELL = 32_767;

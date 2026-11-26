@@ -5,7 +5,7 @@
 import { CURRENT_SCHEMA_VERSION } from "@/lib/database/migrations";
 import type { BackupHandler, DataRepository } from "@/lib/database/repository";
 import { runSeed } from "@/lib/database/seed";
-import type { Snapshot } from "@/lib/database/snapshot";
+import { TABLE_NAMES, type Snapshot } from "@/lib/database/snapshot";
 import { APP_ID, SettingsSchema } from "@/types/domain";
 
 /** Supprime les publications fictives. Renvoie le nombre supprimé. */
@@ -21,19 +21,7 @@ export function emptySnapshot(now: Date): Snapshot {
     app: APP_ID,
     schemaVersion: CURRENT_SCHEMA_VERSION,
     exportedAt: now.toISOString(),
-    tables: {
-      wordings: [],
-      fighters: [],
-      events: [],
-      liveSessions: [],
-      generations: [],
-      hashtagGroups: [],
-      signatures: [],
-      rules: [],
-      styleProfiles: [],
-      users: [],
-      blobs: [],
-    },
+    tables: Object.fromEntries(TABLE_NAMES.map((name) => [name, []])) as unknown as Snapshot["tables"],
     meta: { seedVersion: 0, settings: SettingsSchema.parse({}), hookBank: [] },
   };
 }

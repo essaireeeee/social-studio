@@ -102,6 +102,7 @@ describe("signatures", () => {
     links: [],
     broadcasters: [],
     confirmedSchedule: false,
+    milestones: [],
     fightCard: [],
     updatedAt: "2026-11-20T14:00:00.000Z",
   };

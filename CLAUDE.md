@@ -1,11 +1,12 @@
 # CLAUDE.md : HEXAGONE MMA SOCIAL STUDIO
 
-À relire au début de chaque phase. Le cahier des charges complet est dans `PROMPT.md`, l'avancement dans `PROGRESS.md`.
+À relire au début de chaque phase. Cahiers des charges : `PROMPT.md` (V1, terminée) et `PROMPT_V2.md` (V2, en cours). L'avancement est dans `PROGRESS.md` (section « V2 » pour la V2).
 
 ## Méthode
 
 - Les phases s'exécutent dans l'ordre. On ne passe pas à la suivante tant qu'un critère de validation échoue.
-- Fin de phase : `npm run typecheck`, `npm run lint`, `npm run test` sans erreur, mise à jour de `PROGRESS.md` (fichiers créés, décisions, écarts justifiés), commit `phase-N: <résumé>`.
+- Fin de phase : `npm run typecheck`, `npm run lint`, `npm run test` sans erreur, mise à jour de `PROGRESS.md` (fichiers créés, décisions, écarts justifiés), commit `phase-N: <résumé>` (V1) ou `v2-phase-N: <résumé>` (V2).
+- V2 : à chaque phase, les 15 scénarios e2e de la V1 (`npm run test:scenarios`) restent verts. Aucune régression V1 n'est acceptée.
 - Instruction impossible ou ambiguë : option la plus simple qui fonctionne réellement, documentée dans `PROGRESS.md`.
 - Aucun bouton, écran ou fonction décoratif. Une fonctionnalité non implémentée n'apparaît pas, ou apparaît désactivée avec la mention « Bientôt disponible ».
 
@@ -58,6 +59,39 @@ Une génération ne devient une référence de style qu'après validation par le
 - Pas d'accroches répétitives, pas de hashtags systématiques, pas de surcharge d'emojis, pas de ton publicitaire sur chaque post, pas de formules typiques d'IA.
 - Les références ne sont jamais recopiées textuellement.
 
+### Règles ajoutées en V2 (section 1 de `PROMPT_V2.md`)
+
+Toutes les règles ci-dessus restent en vigueur.
+
+**Projet Voltaire**
+
+- Le Projet Voltaire est un service propriétaire de la société Woonoz, sans API publique connue. Aucun appel, aucun scraping, aucune reproduction de ses exercices, de ses contenus pédagogiques, de son logo ou de son interface.
+- Le module s'appelle **« Atelier Français »**. Seule mention autorisée, en texte simple dans l'écran « À propos du correcteur » : « Règles organisées par grandes familles, sur le modèle des référentiels d'orthographe professionnelle (type Projet Voltaire). Aucun lien ni partenariat avec le Projet Voltaire. »
+- Explications de règles et exemples rédigés pour l'application, avec des phrases du monde du MMA. Exercices jamais repris d'une source externe.
+
+**Interface iOS**
+
+- Inspiration des principes d'interface d'Apple, sans copier les icônes SF Symbols ni embarquer les polices SF. Icônes : `lucide-react`. Police : pile système.
+- Matériau translucide flouté autorisé **uniquement** sur la barre de navigation, la tab bar et le fond des sheets. Nulle part ailleurs.
+
+**Calendrier et rappels**
+
+- L'application ne publie rien sur Instagram, Facebook, X ou TikTok. Elle planifie et rappelle ; le CM publie lui-même puis marque le post comme publié.
+- Les rappels du navigateur ne fonctionnent que si l'application est ouverte, et l'interface le dit. Le moyen fiable sur téléphone est l'export `.ics` avec alarmes (`VALARM`).
+- Dates stockées en ISO 8601 UTC, affichées en Europe/Paris (fuseau configurable).
+
+**Suggestions et campagnes**
+
+- Une suggestion dit toujours pourquoi elle est proposée et d'où vient l'information (lien vers le post, l'événement, la fiche ou l'article source). Le schéma impose au moins une source.
+- Une suggestion issue d'un flux d'actualité ne reprend que le titre et le lien. Le CM confirme les faits ; aucun fait d'un article n'entre dans un texte sans validation.
+- Un plan de campagne ne crée aucune date, pesée, conférence de presse, face-à-face ou horaire absent de la fiche événement. Une étape qui dépend d'une info manquante est « À confirmer », sans date (le schéma `CalendarItem` refuse une date sur un élément `to_confirm`).
+- Aucune statistique de performance inventée : elles n'existent que si le CM les saisit ou les importe.
+
+**Sécurité des nouvelles routes**
+
+- `/api/news/fetch` : URL `http(s)` publiques uniquement ; refuse `localhost`, les IP privées et les redirections vers elles (SSRF). Timeout 8 s, 2 Mo max par flux.
+- Les routes IA V2 (`/api/french/check`, `/api/campaign/plan`, `/api/suggestions/ai`) réutilisent les adaptateurs, le prompt système de base, le post-traitement et la bascule native de la V1. Mêmes règles de clés.
+
 ## Conventions de code
 
 - TypeScript `strict: true`, aucun `any` non justifié.
@@ -95,6 +129,8 @@ Une génération ne devient une référence de style qu'après validation par le
 - Notifications : `toast(message, tone, action?)` ; une erreur réessayable passe `{ label: "Réessayer", onClick }`.
 - Jamais `new Date()` ni `Date.now()` pendant le rendu d'un composant client (Cache Components) : `useNow()` ou un gestionnaire d'événement.
 - Composants client qui lisent la base : `useRepository()` (null tant que les données ne sont pas prêtes) + `useLiveQuery`.
+- Schéma de base v2 (`lib/database/db.ts`, `DEXIE_SCHEMA_V2`) : les tables V1 sont reprises à l'identique, dix tables s'ajoutent (types dans `types/v2.ts`). Toute nouvelle table : schéma Zod dans `types/v2.ts`, index dans `db.ts` (nouvelle `db.version(N)` si les index changent), entrée dans `TABLE_NAMES` et `SnapshotTablesSchema`, store dans `DexieRepository`, libellés dans `SHEET_NAMES` et `TABLE_LABELS`, entité dans `sampleEntities`. Un changement de format d'instantané incrémente `CURRENT_SCHEMA_VERSION` et ajoute `MIGRATIONS[n]`. `tests/fixtures/snapshot-v1.json` est un vrai export V1 : ne pas le régénérer.
+- Brief partiel (calendrier, campagnes, suggestions) : `BriefDraftSchema`, sans valeurs par défaut. Il ne devient un `Brief` qu'en passant par le Studio.
 - Les outils d'écriture de fichiers transforment les séquences `\u…` en caractères bruts. Pour un caractère invisible dans le code : `new RegExp("\\u…")` ou `String.fromCodePoint(…)`.
 
 @AGENTS.md

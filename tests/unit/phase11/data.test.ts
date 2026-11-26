@@ -8,7 +8,8 @@ import { dashboardStats, livePercent } from "@/lib/dashboard/stats";
 import { snapshotWorkbook, tableRows } from "@/lib/data/excel-export";
 import { exportFileName, libraryCsv, snapshotJson, UTF8_BOM } from "@/lib/data/export";
 import { readSnapshotText } from "@/lib/data/import-json";
-import { deleteDemoWordings, resetApplication } from "@/lib/data/maintenance";
+import { CURRENT_SCHEMA_VERSION } from "@/lib/database/migrations";
+import { deleteDemoWordings, emptySnapshot, resetApplication } from "@/lib/data/maintenance";
 import {
   filterHistory,
   finalTextOf,
@@ -186,21 +187,9 @@ describe("exports", () => {
     );
     const snapshot = {
       app: "hexagone-social-studio" as const,
-      schemaVersion: 1,
+      schemaVersion: CURRENT_SCHEMA_VERSION,
       exportedAt: now.toISOString(),
-      tables: {
-        wordings: [],
-        fighters: [],
-        events: [],
-        liveSessions: [],
-        generations: [],
-        hashtagGroups: [],
-        signatures: [],
-        rules: [],
-        styleProfiles: [],
-        users: [],
-        blobs: [],
-      },
+      tables: emptySnapshot(now).tables,
       meta: { settings: SettingsSchema.parse({}) },
     };
     const preview = readSnapshotText(snapshotJson(snapshot));
@@ -227,7 +216,8 @@ describe("exports", () => {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(buffer);
     expect(workbook.worksheets.map((s) => s.name)).toContain("Bibliothèque");
-    expect(workbook.worksheets).toHaveLength(12);
+    // Une feuille par table (21) plus « Réglages ».
+    expect(workbook.worksheets).toHaveLength(22);
     expect(workbook.getWorksheet("Bibliothèque")!.rowCount).toBe(7);
     await disposeRepository(repository);
   });

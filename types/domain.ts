@@ -143,6 +143,23 @@ export type Fighter = z.infer<typeof FighterSchema>;
 export const BroadcasterScopeSchema = z.enum(["prelims", "main_card", "full"]);
 export const CardPositionSchema = z.enum(["main", "co-main", "card", "prelim"]);
 
+/** Temps forts médiatiques d'un événement (V2, section 8.1). Sans date, aucune étape n'est planifiée. */
+export const MilestoneTypeSchema = z.enum([
+  "weigh_in",
+  "press_conference",
+  "open_workout",
+  "media_day",
+]);
+export type MilestoneType = z.infer<typeof MilestoneTypeSchema>;
+
+export const EventMilestoneSchema = z.object({
+  type: MilestoneTypeSchema,
+  date: IsoDateSchema.optional(),
+  /** Faux : la date n'est ni affichée comme sûre ni reprise dans un texte. */
+  confirmed: z.boolean().default(false),
+});
+export type EventMilestone = z.infer<typeof EventMilestoneSchema>;
+
 export const HexEventSchema = z.object({
   id: idSchema,
   name: z.string().min(1),
@@ -176,6 +193,8 @@ export const HexEventSchema = z.object({
       }),
     )
     .default(() => []),
+  /** V2 : ajouté par la migration douce (tableau vide pour les fiches V1). */
+  milestones: z.array(EventMilestoneSchema).default(() => []),
   notes: z.string().optional(),
   updatedAt: IsoDateSchema,
 });

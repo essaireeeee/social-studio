@@ -22,6 +22,7 @@ const EVENT = {
   ],
   confirmedSchedule: false,
   fightCard: [],
+  milestones: [],
   updatedAt: NOW,
 };
 

@@ -34,6 +34,7 @@ const event: HexEvent = {
     { name: "RMC SPORT", scope: "main_card" },
   ],
   confirmedSchedule: false,
+  milestones: [],
   fightCard: [],
   updatedAt: "2026-11-01T00:00:00.000Z",
 };

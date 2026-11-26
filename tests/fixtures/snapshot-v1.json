@@ -1,0 +1,704 @@
+{
+  "app": "hexagone-social-studio",
+  "schemaVersion": 1,
+  "exportedAt": "2026-11-20T14:00:00.000Z",
+  "tables": {
+    "wordings": [
+      {
+        "id": "demo-daily-fight-announce",
+        "text": "📢 COMBAT OFFICIEL\n\nEnzo Factice affrontera Théo Exemple lors du prochain gala de HEXAGONE MMA.\nUn grappler redoutable face à un striker explosif chez les poids welters : le choc des styles est annoncé.\n\n🎫 Prenez vos places dès maintenant !\n(Lien en bio du profil)\n\n#HexagoneMMA #MMAFrance",
+        "textNormalized": "combat officiel enzo factice affrontera theo exemple lors du prochain gala de hexagone mma. un grappler redoutable face a un striker explosif chez les poids welters : le choc des styles est annonce. prenez vos places des maintenant ! (lien en bio du profil) #hexagonemma #mmafrance",
+        "contentHash": "4ec7ac7d22a3b6bc094ab63518dc3f29f4e1ab706ef5d629d40666746c29a197",
+        "mode": "daily",
+        "categoryId": "daily_fight_announce",
+        "platform": "instagram",
+        "fighterIds": [],
+        "hashtags": [
+          "#HexagoneMMA",
+          "#MMAFrance"
+        ],
+        "emojis": [
+          "📢",
+          "🎫"
+        ],
+        "cta": "Prenez vos places dès maintenant !",
+        "tags": [
+          "exemple"
+        ],
+        "internalNotes": "Exemple fictif créé au premier lancement. Combattants et médias inventés. À remplacer par une publication officielle.",
+        "status": "validated",
+        "source": "demo",
+        "isDemo": true,
+        "isReference": false,
+        "createdAt": "2026-11-20T14:00:00.000Z",
+        "updatedAt": "2026-11-20T14:00:00.000Z"
+      },
+      {
+        "id": "demo-daily-press",
+        "text": "📰 Nina Exemple se confie au Journal Fictif.\n\nSa préparation, ses ambitions et ce qu'elle attend de son prochain combat sous les couleurs de HEXAGONE MMA.\n\nL'interview complète est à lire via le lien en bio.\n\n#HexagoneMMA",
+        "textNormalized": "nina exemple se confie au journal fictif. sa preparation, ses ambitions et ce qu'elle attend de son prochain combat sous les couleurs de hexagone mma. l'interview complete est a lire via le lien en bio. #hexagonemma",
+        "contentHash": "e5d4e64ddeb3800ded1d4fd614d19565ba9bbc99e9dfb9d2706f5b0187c56453",
+        "mode": "daily",
+        "categoryId": "media_press",
+        "platform": "instagram",
+        "fighterIds": [],
+        "hashtags": [
+          "#HexagoneMMA"
+        ],
+        "emojis": [
+          "📰"
+        ],
+        "cta": "L'interview complète est à lire via le lien en bio.",
+        "tags": [
+          "exemple"
+        ],
+        "internalNotes": "Exemple fictif créé au premier lancement. Combattants et médias inventés. À remplacer par une publication officielle.",
+        "status": "validated",
+        "source": "demo",
+        "isDemo": true,
+        "isReference": false,
+        "createdAt": "2026-11-20T14:00:00.000Z",
+        "updatedAt": "2026-11-20T14:00:00.000Z"
+      },
+      {
+        "id": "demo-daily-ticketing",
+        "text": "🎟️ LA BILLETTERIE EST OUVERTE\n\nLa prochaine soirée de HEXAGONE MMA se prépare.\nVenez vivre les combats au plus près de la cage.\n\n🎫 Prenez vos places dès maintenant !\n(Lien en bio du profil)\n\n#HexagoneMMA",
+        "textNormalized": "la billetterie est ouverte la prochaine soiree de hexagone mma se prepare. venez vivre les combats au plus pres de la cage. prenez vos places des maintenant ! (lien en bio du profil) #hexagonemma",
+        "contentHash": "12eda416d9c3aeb37574b637894a164d0259520682c4dadc0f251b21211fbbe6",
+        "mode": "daily",
+        "categoryId": "daily_ticketing",
+        "platform": "instagram",
+        "fighterIds": [],
+        "hashtags": [
+          "#HexagoneMMA"
+        ],
+        "emojis": [
+          "🎟️",
+          "🎫"
+        ],
+        "cta": "Prenez vos places dès maintenant !",
+        "tags": [
+          "exemple"
+        ],
+        "internalNotes": "Exemple fictif créé au premier lancement. Combattants et médias inventés. À remplacer par une publication officielle.",
+        "status": "validated",
+        "source": "demo",
+        "isDemo": true,
+        "isReference": false,
+        "createdAt": "2026-11-20T14:00:00.000Z",
+        "updatedAt": "2026-11-20T14:00:00.000Z"
+      },
+      {
+        "id": "demo-live-champion",
+        "text": "🏆 NOUVEAU CHAMPION !\n\nHugo Démo s'empare de la ceinture d'HEXAGONE MMA des poids légers face à Karim Modèle.\nCinq rounds d'une intensité folle, et une victoire par décision unanime.\n\nLe règne commence ce soir.\n\n#HexagoneMMA",
+        "textNormalized": "nouveau champion ! hugo demo s'empare de la ceinture d'hexagone mma des poids legers face a karim modele. cinq rounds d'une intensite folle, et une victoire par decision unanime. le regne commence ce soir. #hexagonemma",
+        "contentHash": "0ef3086be207ec88fcf2eb0d95e1d4bd1db172ec76d74cd7e4a8efbf1d7249c4",
+        "mode": "live",
+        "categoryId": "live_champion",
+        "platform": "instagram",
+        "fighterIds": [],
+        "hashtags": [
+          "#HexagoneMMA"
+        ],
+        "emojis": [
+          "🏆"
+        ],
+        "tags": [
+          "exemple"
+        ],
+        "internalNotes": "Exemple fictif créé au premier lancement. Combattants et médias inventés. À remplacer par une publication officielle.",
+        "status": "validated",
+        "source": "demo",
+        "isDemo": true,
+        "isReference": false,
+        "createdAt": "2026-11-20T14:00:00.000Z",
+        "updatedAt": "2026-11-20T14:00:00.000Z"
+      },
+      {
+        "id": "demo-live-ko",
+        "text": "💥 KO AU PREMIER ROUND !\n\nYanis Fictif n'a laissé aucune chance à Bruno Exemple.\nUne droite, et c'est terminé.\n\n#HexagoneMMA",
+        "textNormalized": "ko au premier round ! yanis fictif n'a laisse aucune chance a bruno exemple. une droite, et c'est termine. #hexagonemma",
+        "contentHash": "3818a7bcdab5292461c2f631d0b7994d570afebcaaffa163d25df28ec92093fc",
+        "mode": "live",
+        "categoryId": "live_ko",
+        "platform": "instagram",
+        "fighterIds": [],
+        "hashtags": [
+          "#HexagoneMMA"
+        ],
+        "emojis": [
+          "💥"
+        ],
+        "tags": [
+          "exemple"
+        ],
+        "internalNotes": "Exemple fictif créé au premier lancement. Combattants et médias inventés. À remplacer par une publication officielle.",
+        "status": "validated",
+        "source": "demo",
+        "isDemo": true,
+        "isReference": false,
+        "createdAt": "2026-11-20T14:00:00.000Z",
+        "updatedAt": "2026-11-20T14:00:00.000Z"
+      },
+      {
+        "id": "demo-live-reaction",
+        "text": "🎤 « Je rêvais de ce moment depuis mes débuts. Ce soir, tout le travail a payé. »\n\nLucas Témoin, à chaud après sa victoire.\n\n#HexagoneMMA",
+        "textNormalized": "« je revais de ce moment depuis mes debuts. ce soir, tout le travail a paye. » lucas temoin, a chaud apres sa victoire. #hexagonemma",
+        "contentHash": "ce9a61c5b2b334ad9fef9e4b110a65e40c67891c6c5f35763fb23e2f50b03152",
+        "mode": "live",
+        "categoryId": "live_reaction",
+        "platform": "instagram",
+        "fighterIds": [],
+        "hashtags": [
+          "#HexagoneMMA"
+        ],
+        "emojis": [
+          "🎤"
+        ],
+        "tags": [
+          "exemple"
+        ],
+        "internalNotes": "Exemple fictif créé au premier lancement. Combattants et médias inventés. À remplacer par une publication officielle.",
+        "status": "validated",
+        "source": "demo",
+        "isDemo": true,
+        "isReference": false,
+        "createdAt": "2026-11-20T14:00:00.000Z",
+        "updatedAt": "2026-11-20T14:00:00.000Z"
+      },
+      {
+        "id": "wording-test-1",
+        "text": "💥 KO de Jean Testeur au R1 !\n\nIl n'a laissé aucune chance.\n\n#HexagoneMMA #MMAFrance",
+        "textNormalized": "ko de jean testeur au r1 ! il n'a laisse aucune chance. #hexagonemma #mmafrance",
+        "contentHash": "19c19dfd41a55e295a8e60abba0d8c5951f41cd58085b21bc841d0f62b83c8de",
+        "mode": "live",
+        "categoryId": "live_ko",
+        "platform": "instagram",
+        "fighterIds": [
+          "fighter-test-1"
+        ],
+        "hashtags": [
+          "#HexagoneMMA",
+          "#MMAFrance"
+        ],
+        "emojis": [
+          "💥"
+        ],
+        "tags": [
+          "ko"
+        ],
+        "status": "validated",
+        "source": "manual",
+        "isDemo": false,
+        "isReference": true,
+        "createdAt": "2026-11-20T14:00:00.000Z",
+        "updatedAt": "2026-11-20T14:00:00.000Z"
+      }
+    ],
+    "fighters": [
+      {
+        "id": "fighter-samba-sima",
+        "firstName": "Samba",
+        "lastName": "Sima",
+        "fightHistory": [],
+        "editorialNotes": "Règle éditoriale : en contexte positif (victoire, présentation, annonce, titre), présenter Samba Sima comme un crack, un jeune phénomène exceptionnel. Jamais en contexte de défaite.",
+        "updatedAt": "2026-11-20T14:00:00.000Z"
+      },
+      {
+        "id": "fighter-test-1",
+        "firstName": "Jean",
+        "lastName": "Testeur",
+        "nickname": "La Foudre",
+        "weightClass": "Poids légers",
+        "fightHistory": [
+          {
+            "date": "2026-03-14",
+            "opponent": "Paul Fictif",
+            "result": "W",
+            "method": "KO"
+          }
+        ],
+        "updatedAt": "2026-11-20T14:00:00.000Z"
+      }
+    ],
+    "events": [
+      {
+        "id": "event-test-1",
+        "name": "HEXAGONE MMA",
+        "number": 12,
+        "date": "2026-03-14",
+        "city": "Ville Test",
+        "venue": "Salle Test",
+        "links": [],
+        "broadcasters": [
+          {
+            "name": "Chaîne Test",
+            "scope": "full"
+          }
+        ],
+        "confirmedSchedule": false,
+        "fightCard": [
+          {
+            "fighterAId": "fighter-test-1",
+            "fighterBId": "fighter-test-2",
+            "position": "main"
+          }
+        ],
+        "updatedAt": "2026-11-20T14:00:00.000Z"
+      }
+    ],
+    "liveSessions": [
+      {
+        "id": "session-test-1",
+        "eventName": "HEXAGONE MMA 12",
+        "eventNumber": 12,
+        "city": "Ville Test",
+        "startedAt": "2026-11-20T14:00:00.000Z",
+        "active": true
+      }
+    ],
+    "generations": [
+      {
+        "id": "generation-test-1",
+        "createdAt": "2026-11-20T14:00:00.000Z",
+        "updatedAt": "2026-11-20T14:00:00.000Z",
+        "brief": {
+          "mode": "live",
+          "categoryId": "live_ko",
+          "platform": "instagram",
+          "fields": {
+            "winner": "Jean Testeur",
+            "loser": "Paul Fictif",
+            "round": "R1"
+          },
+          "hashtagIds": [
+            "hashtags-official"
+          ]
+        },
+        "engine": "native",
+        "referenceIds": [],
+        "variants": [
+          {
+            "id": "variant-test-1",
+            "kind": "signature",
+            "revisions": [
+              {
+                "id": "revision-test-1",
+                "text": "💥 KO !",
+                "createdAt": "2026-11-20T14:00:00.000Z",
+                "origin": "native",
+                "factWarnings": []
+              }
+            ],
+            "selected": true
+          }
+        ],
+        "status": "draft"
+      }
+    ],
+    "hashtagGroups": [
+      {
+        "id": "hashtags-mma-france",
+        "name": "MMA France",
+        "kind": "mma_france",
+        "tags": [
+          "#MMAFrance",
+          "#MMA",
+          "#CombatSports"
+        ],
+        "defaultOn": false,
+        "modes": [
+          "live",
+          "daily"
+        ],
+        "order": 1
+      },
+      {
+        "id": "hashtags-official",
+        "name": "Officiel",
+        "kind": "official",
+        "tags": [
+          "#HexagoneMMA"
+        ],
+        "defaultOn": true,
+        "modes": [
+          "live",
+          "daily"
+        ],
+        "order": 0
+      },
+      {
+        "id": "hashtags-test",
+        "name": "Campagne test",
+        "kind": "campaign",
+        "tags": [
+          "#CampagneTest"
+        ],
+        "defaultOn": false,
+        "modes": [
+          "daily"
+        ],
+        "order": 5
+      }
+    ],
+    "signatures": [
+      {
+        "id": "signature-broadcast",
+        "name": "Diffusion détaillée",
+        "template": "📺 En direct à partir de {prelimsTime} sur {prelimsChannel} et à partir de {mainTime} pour la carte principale sur {mainChannel}",
+        "requiredFields": [
+          "prelimsTime",
+          "prelimsChannel",
+          "mainTime",
+          "mainChannel"
+        ],
+        "requiresConfirmedSchedule": true,
+        "modes": [
+          "daily",
+          "live"
+        ],
+        "enabled": true,
+        "order": 1
+      },
+      {
+        "id": "signature-event",
+        "name": "Signature événementielle",
+        "template": "🗓️ {date} - {venue}, {city}\n📺 En direct sur {broadcaster}\n🎫 Prenez vos places dès maintenant !\n(Lien en bio du profil)",
+        "requiredFields": [
+          "date",
+          "venue",
+          "city"
+        ],
+        "requiresConfirmedSchedule": false,
+        "modes": [
+          "daily",
+          "live"
+        ],
+        "enabled": true,
+        "order": 0
+      },
+      {
+        "id": "signature-test",
+        "name": "Signature test",
+        "template": "🗓️ {date}",
+        "requiredFields": [
+          "date"
+        ],
+        "requiresConfirmedSchedule": false,
+        "modes": [
+          "daily"
+        ],
+        "enabled": true,
+        "order": 3
+      }
+    ],
+    "rules": [
+      {
+        "id": "rule-ai-formulas",
+        "label": "Pas de formules typiques d'IA",
+        "kind": "forbid",
+        "values": [
+          "Dans un monde",
+          "Il est important de noter",
+          "Il convient de noter",
+          "Cette initiative vise à",
+          "Plongez dans",
+          "N'hésitez pas à",
+          "Préparez-vous à vivre",
+          "Plus qu'un simple",
+          "Bien plus qu'un",
+          "Que vous soyez",
+          "Dans le paysage"
+        ],
+        "order": 70,
+        "enabled": true,
+        "editableBy": "admin"
+      },
+      {
+        "id": "rule-ai-opening-veritable",
+        "label": "Pas de « véritable » en ouverture",
+        "kind": "forbid",
+        "pattern": "^[^\\p{L}]*v[eé]ritable(?![\\p{L}])",
+        "flags": "iu",
+        "order": 71,
+        "enabled": true,
+        "editableBy": "admin"
+      },
+      {
+        "id": "rule-brand-case",
+        "label": "Nom de la ligue toujours écrit HEXAGONE MMA (hors hashtags)",
+        "kind": "replace",
+        "pattern": "(?<![#@]|[\\p{L}\\p{N}_])hexagone[ \\u00A0]+mma(?![\\p{L}\\p{N}_])",
+        "flags": "giu",
+        "replacement": "HEXAGONE MMA",
+        "order": 10,
+        "enabled": true,
+        "editableBy": "admin"
+      },
+      {
+        "id": "rule-ceinture-titre",
+        "label": "Exception : « la ceinture d'HEXAGONE MMA », « le titre d'HEXAGONE MMA »",
+        "kind": "replace",
+        "pattern": "(?<![\\p{L}\\p{N}_])(ceintures?|titres?) de HEXAGONE MMA(?![\\p{L}\\p{N}_])",
+        "flags": "giu",
+        "replacement": "$1 d'HEXAGONE MMA",
+        "order": 30,
+        "enabled": true,
+        "editableBy": "admin"
+      },
+      {
+        "id": "rule-cta-lexicon",
+        "label": "Lexique des appels à l'action",
+        "description": "Sert à détecter les CTA dans les deux dernières lignes des publications (ADN éditorial). Les verbes à l'impératif en tête de ligne sont aussi reconnus.",
+        "kind": "contextual",
+        "values": [
+          "lien en bio",
+          "prenez vos places",
+          "billetterie",
+          "rendez-vous",
+          "on vous attend",
+          "à suivre",
+          "en direct"
+        ],
+        "order": 130,
+        "enabled": true,
+        "editableBy": "admin"
+      },
+      {
+        "id": "rule-de-hexagone",
+        "label": "Écrire « de HEXAGONE MMA », jamais « d'HEXAGONE MMA »",
+        "description": "Sauf si « ceinture » ou « titre » figure dans les 3 mots qui précèdent (« la ceinture d'HEXAGONE MMA »).",
+        "kind": "replace",
+        "pattern": "(?<!(?:^|[^\\p{L}])(?:ceintures?|titres?)(?:\\s+\\S+){0,2}\\s+)(?<![\\p{L}\\p{N}_])([dD])['’]HEXAGONE MMA(?![\\p{L}\\p{N}_])",
+        "flags": "giu",
+        "replacement": "$1e HEXAGONE MMA",
+        "order": 20,
+        "enabled": true,
+        "editableBy": "admin"
+      },
+      {
+        "id": "rule-emoji-overload",
+        "label": "Pas de surcharge d'emojis",
+        "description": "Seuil : p90 du profil de style du mode, 6 par défaut si le profil est insuffisant.",
+        "kind": "contextual",
+        "order": 80,
+        "enabled": true,
+        "editableBy": "admin"
+      },
+      {
+        "id": "rule-final-question",
+        "label": "Pas de question finale sur les catégories factuelles",
+        "description": "Catégories concernées : liste ci-dessous.",
+        "kind": "forbid",
+        "values": [
+          "live_result",
+          "live_ko",
+          "live_sub",
+          "live_decision",
+          "live_defeat"
+        ],
+        "order": 100,
+        "enabled": true,
+        "editableBy": "admin"
+      },
+      {
+        "id": "rule-french-spacing",
+        "label": "Espace insécable avant ! ? : ; et pas d'espace double",
+        "description": "L'espace insécable se désactive dans Préférences.",
+        "kind": "contextual",
+        "order": 50,
+        "enabled": true,
+        "editableBy": "admin"
+      },
+      {
+        "id": "rule-hashtag-duplicates",
+        "label": "Pas de hashtag en double",
+        "kind": "contextual",
+        "order": 40,
+        "enabled": true,
+        "editableBy": "admin"
+      },
+      {
+        "id": "rule-no-copy",
+        "label": "Les références ne sont jamais recopiées textuellement",
+        "description": "Contrôlé par l'anti-copie des moteurs (Phase 5).",
+        "kind": "contextual",
+        "order": 120,
+        "enabled": true,
+        "editableBy": "admin"
+      },
+      {
+        "id": "rule-no-hashtag-spam",
+        "label": "Pas de hashtags systématiques ni de ton publicitaire sur chaque post",
+        "description": "Consigne transmise aux moteurs de génération.",
+        "kind": "contextual",
+        "order": 110,
+        "enabled": true,
+        "editableBy": "admin"
+      },
+      {
+        "id": "rule-repetitive-hooks",
+        "label": "Pas d'accroche répétitive",
+        "description": "Alerte si l'accroche est identique ou trop proche (Jaccard ≥ 0,7 sur les mots) de l'une des 20 dernières générations validées.",
+        "kind": "contextual",
+        "order": 90,
+        "enabled": true,
+        "editableBy": "admin"
+      },
+      {
+        "id": "rule-samba-sima",
+        "label": "Samba Sima présenté comme un crack en contexte positif, jamais en contexte de défaite",
+        "description": "Victoire, présentation, annonce, titre : il est présenté comme un crack, un jeune phénomène exceptionnel. Qualificatifs reconnus : liste ci-dessous.",
+        "kind": "contextual",
+        "values": [
+          "crack",
+          "phénomène",
+          "pépite",
+          "prodige"
+        ],
+        "order": 60,
+        "enabled": true,
+        "editableBy": "admin"
+      },
+      {
+        "id": "rule-test",
+        "label": "Règle de test",
+        "kind": "forbid",
+        "values": [
+          "formule interdite"
+        ],
+        "order": 500,
+        "enabled": true,
+        "editableBy": "admin"
+      }
+    ],
+    "styleProfiles": [
+      {
+        "id": "profile-test",
+        "mode": "live",
+        "createdAt": "2026-11-20T14:00:00.000Z",
+        "corpusSize": 0,
+        "corpusIds": [],
+        "includesDemo": false,
+        "confidence": "insufficient",
+        "status": "proposed",
+        "length": {
+          "charsMean": 0,
+          "charsMedian": 0,
+          "charsP90": 0,
+          "linesMedian": 0,
+          "paragraphsMedian": 0
+        },
+        "emojis": {
+          "top": [],
+          "perPostMedian": 0,
+          "perPostP90": 0,
+          "lineStartRatio": 0
+        },
+        "hashtags": {
+          "top": [],
+          "perPostMedian": 0,
+          "position": "end"
+        },
+        "hooks": {
+          "samples": [],
+          "patterns": [],
+          "uppercaseRatio": 0,
+          "exclamationRatio": 0,
+          "questionRatio": 0,
+          "avgWords": 0
+        },
+        "ctas": {
+          "top": []
+        },
+        "ngrams": {
+          "bigrams": [],
+          "trigrams": [],
+          "quadgrams": []
+        },
+        "vocabulary": {
+          "top": []
+        },
+        "structures": [],
+        "overused": [],
+        "punctuation": {
+          "exclamationPerPost": 0,
+          "ellipsisPerPost": 0,
+          "uppercaseWordRatio": 0
+        }
+      }
+    ],
+    "users": [
+      {
+        "id": "user-default",
+        "name": "Community Manager",
+        "role": "admin"
+      },
+      {
+        "id": "user-test",
+        "name": "CM Test",
+        "role": "cm"
+      }
+    ],
+    "blobs": [
+      {
+        "id": "blob-test",
+        "kind": "logo",
+        "mimeType": "image/png",
+        "data": "iVBORw0KGgo=",
+        "size": 8,
+        "updatedAt": "2026-11-20T14:00:00.000Z"
+      }
+    ]
+  },
+  "meta": {
+    "seedVersion": 3,
+    "lastBackupAt": "2026-11-19T10:00:00.000Z",
+    "settings": {
+      "quickOptions": {
+        "rounds": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "methods": [
+          "KO",
+          "TKO",
+          "Soumission",
+          "Décision"
+        ],
+        "broadcasters": [
+          "RMC SPORT",
+          "DAZN",
+          "YouTube",
+          "Autre",
+          "Aucun"
+        ]
+      },
+      "igTruncation": 150,
+      "fbTruncation": 480,
+      "accountName": "compte_test",
+      "activeUserId": "user-default",
+      "aiProvider": "native",
+      "variantOrder": [
+        "signature",
+        "punchy",
+        "storytelling"
+      ],
+      "frenchSpacing": true,
+      "copyShortcut": "mod+shift+c",
+      "retrievalWeights": {
+        "sameCategory": 0.3,
+        "fighterOverlap": 0.2,
+        "sameEvent": 0.1,
+        "textSimilarity": 0.25,
+        "samePlatform": 0.1,
+        "recency": 0.05,
+        "usedRecently": 0.15
+      },
+      "lastMode": "live"
+    }
+  }
+}

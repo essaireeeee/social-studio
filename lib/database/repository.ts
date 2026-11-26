@@ -1,6 +1,6 @@
 /**
  * Contrat d'accès aux données. Toutes les écritures de l'application passent par lui.
- * v1 : `DexieRepository` (IndexedDB). Plus tard : `SupabaseRepository` (voir supabase.README.md).
+ * `DexieRepository` (IndexedDB), schéma 2. Plus tard : `SupabaseRepository` (voir supabase.README.md).
  */
 import type {
   BlobRecord,
@@ -17,6 +17,18 @@ import type {
   UserProfile,
   Wording,
 } from "@/types/domain";
+import type {
+  CalendarItem,
+  Campaign,
+  Engagement,
+  FrenchDictionaryEntry,
+  FrenchIssueRecord,
+  FrenchRuleState,
+  NewsItem,
+  NewsSource,
+  Reminder,
+  Suggestion,
+} from "@/types/v2";
 import type { Snapshot, TableName } from "./snapshot";
 
 export interface EntityMap {
@@ -31,6 +43,16 @@ export interface EntityMap {
   styleProfiles: StyleProfile;
   users: UserProfile;
   blobs: BlobRecord;
+  calendarItems: CalendarItem;
+  reminders: Reminder;
+  campaigns: Campaign;
+  suggestions: Suggestion;
+  frenchRules: FrenchRuleState;
+  frenchDictionary: FrenchDictionaryEntry;
+  frenchIssues: FrenchIssueRecord;
+  newsSources: NewsSource;
+  newsItems: NewsItem;
+  engagement: Engagement;
 }
 
 export type IndexableValue = string | number;
@@ -103,6 +125,16 @@ export interface DataRepository {
   readonly styleProfiles: EntityStore<StyleProfile>;
   readonly users: EntityStore<UserProfile>;
   readonly blobs: EntityStore<BlobRecord>;
+  readonly calendarItems: EntityStore<CalendarItem>;
+  readonly reminders: EntityStore<Reminder>;
+  readonly campaigns: EntityStore<Campaign>;
+  readonly suggestions: EntityStore<Suggestion>;
+  readonly frenchRules: EntityStore<FrenchRuleState>;
+  readonly frenchDictionary: EntityStore<FrenchDictionaryEntry>;
+  readonly frenchIssues: EntityStore<FrenchIssueRecord>;
+  readonly newsSources: EntityStore<NewsSource>;
+  readonly newsItems: EntityStore<NewsItem>;
+  readonly engagement: EntityStore<Engagement>;
 
   getMeta<K extends MetaKey>(key: K): Promise<MetaValues[K] | undefined>;
   setMeta<K extends MetaKey>(key: K, value: MetaValues[K]): Promise<void>;

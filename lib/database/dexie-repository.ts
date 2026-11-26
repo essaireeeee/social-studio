@@ -17,6 +17,18 @@ import {
   APP_ID,
   type Settings,
 } from "@/types/domain";
+import {
+  CalendarItemSchema,
+  CampaignSchema,
+  EngagementSchema,
+  FrenchDictionaryEntrySchema,
+  FrenchIssueRecordSchema,
+  FrenchRuleStateSchema,
+  NewsItemSchema,
+  NewsSourceSchema,
+  ReminderSchema,
+  SuggestionSchema,
+} from "@/types/v2";
 import { createDatabase, type HexagoneDB } from "./db";
 import { CURRENT_SCHEMA_VERSION, migrateSnapshot } from "./migrations";
 import {
@@ -138,6 +150,16 @@ export class DexieRepository implements DataRepository {
   readonly styleProfiles: EntityStore<EntityMap["styleProfiles"]>;
   readonly users: EntityStore<EntityMap["users"]>;
   readonly blobs: EntityStore<EntityMap["blobs"]>;
+  readonly calendarItems: EntityStore<EntityMap["calendarItems"]>;
+  readonly reminders: EntityStore<EntityMap["reminders"]>;
+  readonly campaigns: EntityStore<EntityMap["campaigns"]>;
+  readonly suggestions: EntityStore<EntityMap["suggestions"]>;
+  readonly frenchRules: EntityStore<EntityMap["frenchRules"]>;
+  readonly frenchDictionary: EntityStore<EntityMap["frenchDictionary"]>;
+  readonly frenchIssues: EntityStore<EntityMap["frenchIssues"]>;
+  readonly newsSources: EntityStore<EntityMap["newsSources"]>;
+  readonly newsItems: EntityStore<EntityMap["newsItems"]>;
+  readonly engagement: EntityStore<EntityMap["engagement"]>;
 
   private readonly listeners = new Set<(event: ChangeEvent) => void>();
 
@@ -221,6 +243,78 @@ export class DexieRepository implements DataRepository {
       db.blobs,
       BlobRecordSchema,
       (b) => joinNormalized(b.kind),
+      emit,
+    );
+
+    // --- Tables v2 ----------------------------------------------------------
+    this.calendarItems = new DexieEntityStore(
+      "calendarItems",
+      db.calendarItems,
+      CalendarItemSchema,
+      (c) => joinNormalized(c.title, c.notes, c.finalText),
+      emit,
+    );
+    this.reminders = new DexieEntityStore(
+      "reminders",
+      db.reminders,
+      ReminderSchema,
+      () => "",
+      emit,
+    );
+    this.campaigns = new DexieEntityStore(
+      "campaigns",
+      db.campaigns,
+      CampaignSchema,
+      (c) => joinNormalized(c.name, c.storyline.angle, c.storyline.tagline),
+      emit,
+    );
+    this.suggestions = new DexieEntityStore(
+      "suggestions",
+      db.suggestions,
+      SuggestionSchema,
+      (s) => joinNormalized(s.title, s.why),
+      emit,
+    );
+    this.frenchRules = new DexieEntityStore(
+      "frenchRules",
+      db.frenchRules,
+      FrenchRuleStateSchema,
+      (r) => joinNormalized(r.id, r.family),
+      emit,
+    );
+    this.frenchDictionary = new DexieEntityStore(
+      "frenchDictionary",
+      db.frenchDictionary,
+      FrenchDictionaryEntrySchema,
+      (d) => joinNormalized(d.word, d.frenchEquivalent),
+      emit,
+    );
+    this.frenchIssues = new DexieEntityStore(
+      "frenchIssues",
+      db.frenchIssues,
+      FrenchIssueRecordSchema,
+      (i) => joinNormalized(i.ruleId, i.excerpt, i.correction),
+      emit,
+    );
+    this.newsSources = new DexieEntityStore(
+      "newsSources",
+      db.newsSources,
+      NewsSourceSchema,
+      (n) => joinNormalized(n.name, n.url),
+      emit,
+    );
+    this.newsItems = new DexieEntityStore(
+      "newsItems",
+      db.newsItems,
+      NewsItemSchema,
+      (n) => joinNormalized(n.title),
+      emit,
+    );
+    this.engagement = new DexieEntityStore(
+      "engagement",
+      db.engagement,
+      EngagementSchema,
+      () => "",
       emit,
     );
   }

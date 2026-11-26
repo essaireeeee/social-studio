@@ -20,6 +20,18 @@ import {
   UserProfileSchema,
   WordingSchema,
 } from "@/types/domain";
+import {
+  CalendarItemSchema,
+  CampaignSchema,
+  EngagementSchema,
+  FrenchDictionaryEntrySchema,
+  FrenchIssueRecordSchema,
+  FrenchRuleStateSchema,
+  NewsItemSchema,
+  NewsSourceSchema,
+  ReminderSchema,
+  SuggestionSchema,
+} from "@/types/v2";
 
 export const TABLE_NAMES = [
   "wordings",
@@ -33,7 +45,32 @@ export const TABLE_NAMES = [
   "styleProfiles",
   "users",
   "blobs",
+  // v2
+  "calendarItems",
+  "reminders",
+  "campaigns",
+  "suggestions",
+  "frenchRules",
+  "frenchDictionary",
+  "frenchIssues",
+  "newsSources",
+  "newsItems",
+  "engagement",
 ] as const;
+
+/** Tables apparues en v2 : absentes des instantanés v1. */
+export const V2_TABLE_NAMES = [
+  "calendarItems",
+  "reminders",
+  "campaigns",
+  "suggestions",
+  "frenchRules",
+  "frenchDictionary",
+  "frenchIssues",
+  "newsSources",
+  "newsItems",
+  "engagement",
+] as const satisfies readonly TableName[];
 export type TableName = (typeof TABLE_NAMES)[number];
 
 const table = <T extends z.ZodType>(schema: T) => z.array(schema).default(() => []);
@@ -50,6 +87,16 @@ export const SnapshotTablesSchema = z.object({
   styleProfiles: table(StyleProfileSchema),
   users: table(UserProfileSchema),
   blobs: table(BlobRecordSchema),
+  calendarItems: table(CalendarItemSchema),
+  reminders: table(ReminderSchema),
+  campaigns: table(CampaignSchema),
+  suggestions: table(SuggestionSchema),
+  frenchRules: table(FrenchRuleStateSchema),
+  frenchDictionary: table(FrenchDictionaryEntrySchema),
+  frenchIssues: table(FrenchIssueRecordSchema),
+  newsSources: table(NewsSourceSchema),
+  newsItems: table(NewsItemSchema),
+  engagement: table(EngagementSchema),
 });
 export type SnapshotTables = z.infer<typeof SnapshotTablesSchema>;
 

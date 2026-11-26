@@ -26,7 +26,7 @@ test("11. Export JSON puis réimport JSON", async ({ page }) => {
   await page.goto("/settings/data");
   await waitForReady(page);
   const first = await exportJson(page);
-  expect(first.json.schemaVersion).toBe(1);
+  expect(first.json.schemaVersion).toBe(2);
 
   // Données modifiées : les exemples fictifs sont supprimés.
   await page.getByRole("button", { name: "Supprimer les exemples fictifs" }).click();

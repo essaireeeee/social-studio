@@ -10,18 +10,36 @@
  * 3. si les index IndexedDB changent, ajouter `db.version(N).stores(...)` dans `db.ts`.
  *
  * Historique :
- * - v1 : schéma initial (Phase 1). Aucune migration.
+ * - v1 : schéma initial (Phase 1).
+ * - v2 : dix tables ajoutées (calendrier, rappels, campagnes, suggestions, Atelier Français,
+ *   actualité, engagement) et `milestones` sur les événements. Rien n'est retiré ni renommé.
  */
 import { APP_ID } from "@/types/domain";
-import { SnapshotSchema, type Snapshot } from "./snapshot";
+import { SnapshotSchema, V2_TABLE_NAMES, type Snapshot } from "./snapshot";
 
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
 
 type RawSnapshot = Record<string, unknown>;
 type Migration = (snapshot: RawSnapshot) => RawSnapshot;
 
+/** v1 → v2 : nouvelles tables vides, jalons vides sur chaque événement. */
+function migrateV1toV2(snapshot: RawSnapshot): RawSnapshot {
+  const tables = isRecord(snapshot.tables) ? { ...snapshot.tables } : {};
+  for (const name of V2_TABLE_NAMES) {
+    if (!Array.isArray(tables[name])) tables[name] = [];
+  }
+  if (Array.isArray(tables.events)) {
+    tables.events = tables.events.map((event: unknown) =>
+      isRecord(event) && !Array.isArray(event.milestones) ? { ...event, milestones: [] } : event,
+    );
+  }
+  return { ...snapshot, tables };
+}
+
 /** `MIGRATIONS[n]` transforme un instantané de la version n vers la version n + 1. */
-export const MIGRATIONS: Readonly<Record<number, Migration>> = {};
+export const MIGRATIONS: Readonly<Record<number, Migration>> = {
+  1: migrateV1toV2,
+};
 
 export class SnapshotError extends Error {
   override name = "SnapshotError";

@@ -67,6 +67,7 @@ const EVENT: HexEvent = {
     { name: "Chaîne Test", channel: "Chaîne Test Max", startTime: "21h00", scope: "main_card" },
   ],
   confirmedSchedule: false,
+  milestones: [],
   fightCard: [],
   updatedAt: now.toISOString(),
 };

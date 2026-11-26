@@ -7,3 +7,6 @@ playwright-report
 test-results
 package-lock.json
 PROMPT.md
+PROMPT_V2.md
+# Export réel de la V1, conservé octet pour octet.
+tests/fixtures/snapshot-v1.json

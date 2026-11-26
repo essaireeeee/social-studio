@@ -5,8 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "@/app/api/storage/restore/route";
 import { POST } from "@/app/api/storage/snapshot/route";
 import type { DexieRepository } from "@/lib/database/dexie-repository";
+import { CURRENT_SCHEMA_VERSION } from "@/lib/database/migrations";
 import { runSeed } from "@/lib/database/seed";
-import { findForbiddenFields, type Snapshot } from "@/lib/database/snapshot";
+import { V2_TABLE_NAMES, findForbiddenFields, type Snapshot } from "@/lib/database/snapshot";
+import v1Export from "../../fixtures/snapshot-v1.json";
 import { createTestRepository, disposeRepository, fixedNow } from "../../fixtures/entities";
 
 let dir: string;
@@ -86,8 +88,11 @@ describe("POST /api/storage/snapshot", () => {
   });
 
   it("répond 409 si la page utilise une autre version de schéma", async () => {
-    const response = await post({ snapshot: { ...snapshot, schemaVersion: 2 } });
-    expect(response.status).toBe(409);
+    // Onglet V1 resté ouvert après la mise à jour, ou page plus récente que le serveur.
+    for (const schemaVersion of [CURRENT_SCHEMA_VERSION - 1, CURRENT_SCHEMA_VERSION + 1]) {
+      const response = await post({ snapshot: { ...snapshot, schemaVersion } });
+      expect(response.status).toBe(409);
+    }
   });
 
   it("répond 500 sans exposer le corps quand l'écriture échoue", async () => {
@@ -115,7 +120,7 @@ describe("GET /api/storage/restore", () => {
       valid: true,
       source: "main",
       savedAt: snapshot.exportedAt,
-      schemaVersion: 1,
+      schemaVersion: CURRENT_SCHEMA_VERSION,
     });
     expect(summary.counts.wordings).toBe(6);
     expect(summary.snapshot).toBeUndefined();
@@ -131,6 +136,15 @@ describe("GET /api/storage/restore", () => {
     const backup = await (await get(`?backup=${backups[0].name}`)).json();
     expect(backup).toMatchObject({ found: true, valid: true, source: "backup" });
     expect((await get("?backup=../hexagone-studio.json")).status).toBe(404);
+  });
+
+  it("un fichier local écrit par la V1 est relu et migré en v2", async () => {
+    await writeFile(path.join(dir, "hexagone-studio.json"), JSON.stringify(v1Export));
+    const full = await (await get("?include=snapshot")).json();
+    expect(full).toMatchObject({ found: true, valid: true, schemaVersion: CURRENT_SCHEMA_VERSION });
+    expect(full.snapshot.tables.wordings).toHaveLength(v1Export.tables.wordings.length);
+    expect(full.snapshot.tables.events[0].milestones).toEqual([]);
+    for (const table of V2_TABLE_NAMES) expect(full.snapshot.tables[table]).toEqual([]);
   });
 
   it("signale un fichier corrompu sans planter", async () => {

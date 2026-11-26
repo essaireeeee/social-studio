@@ -1,6 +1,91 @@
 # PROGRESS : HEXAGONE MMA SOCIAL STUDIO
 
-Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions prises et les écarts par rapport à `PROMPT.md`.
+Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions prises et les écarts par rapport au cahier des charges : `PROMPT_V2.md` pour la V2 (en haut), `PROMPT.md` pour la V1 (plus bas).
+
+# V2
+
+| Phase | Intitulé                            | Statut   |
+| ----- | ----------------------------------- | -------- |
+| V2-0  | Audit, migration, socle             | Terminée |
+| V2-1  | Design system iOS, mode jour / nuit | À faire  |
+| V2-2  | Atelier Français                    | À faire  |
+| V2-3  | Calendrier éditorial et rappels     | À faire  |
+| V2-4  | Plans de campagne                   | À faire  |
+| V2-5  | Suggestions de posts (« Idées »)    | À faire  |
+| V2-6  | Tests, QA, documentation            | À faire  |
+
+## Phase V2-0 : Audit, migration, socle (terminée le 26/11/2026)
+
+### Audit de la V1
+
+**État de départ.** Suite V1 complète lancée avant toute modification : typecheck et lint propres, 437 tests unitaires et 51 tests e2e au vert (dont les 15 scénarios de recette et l'annexe B). Aucun test rouge à corriger.
+
+**Écarts entre `PROMPT.md` et le code réel.** Tous sont justifiés dans les sections « Décisions et écarts » de chaque phase V1. Ceux qui comptent pour la V2 :
+
+| Domaine   | Écart V1                                                                                                                                                    | Phase   | Effet sur la V2                                                                         |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------- |
+| Base      | Aucun index IndexedDB sur un booléen (`isDemo`, `isReference`, `active`) : filtre en mémoire                                                                | 1       | Même règle pour `enabled` (`frenchRules`, `newsSources`)                                |
+| Base      | Méta exportées en objet, jamais de champ `key` ; champs interdits refusés (422), pas filtrés                                                                | 1       | Aucun champ V2 ne s'appelle `key`, `token` ou `secret`                                  |
+| Base      | Images en base64 dans `blobs` ; sauvegarde horodatée au plus toutes les 5 min                                                                               | 1       | Inchangé                                                                                |
+| Base      | Ajouts aux schémas : `Signature.requiresConfirmedSchedule`, `EditorialRule.description/flags/values`, `family` des catégories LIVE, `ctas.top[].categoryId` | 1, 3, 4 | Inchangé                                                                                |
+| Base      | Brouillon du Studio dans localStorage (store Zustand persistant)                                                                                            | 8       | Le Studio pré-rempli par le calendrier passera par ce brouillon                         |
+| Interface | shadcn/ui copié à la main ; `accent` = couleur du mode, survol `--subtle`                                                                                   | 0       | Refonte complète des tokens en V2-1                                                     |
+| Interface | Polices Geist embarquées (paquet `geist`)                                                                                                                   | 0       | Remplacées par la pile système en V2-1 (règle 1.2)                                      |
+| Interface | Sélecteur de mode écrit à la main (motif ARIA radio) ; indicateur de dev Next désactivé                                                                     | 7, 8    | Inchangé                                                                                |
+| Interface | Dashboard servi sur `/` ; section de Paramètres inconnue = 404                                                                                              | 6, 11   | Inchangé                                                                                |
+| Interface | Glisser-déposer natif HTML pour la fight card ; listes virtualisées à la main                                                                               | 9, 10   | `@dnd-kit/core` réservé au calendrier ; la fight card reste telle quelle                |
+| Moteurs   | Espace insécable U+00A0 (et non U+202F) avant `! ? ; :` dans le linter                                                                                      | 2       | L'Atelier Français (V2-2) gère U+202F avec le réglage « Compatibilité réseaux sociaux » |
+| Moteurs   | Ordre du post-traitement : adaptation plateforme avant le Fact Guard                                                                                        | 5       | L'Atelier Français s'insère avant l'affichage, après ce post-traitement                 |
+| Moteurs   | Formulations sans accord de genre ; liste de formules d'IA complétée                                                                                        | 2, 5    | Liste mutualisée avec l'Atelier Français (V2-2)                                         |
+| IA        | Effort `medium` (génération) et `low` (retouches) ; pas de modèle OpenAI par défaut ; refus du modèle = bascule native                                      | 6       | Mêmes réglages pour les routes IA V2                                                    |
+| IA        | Test de connexion par lecture de la fiche du modèle ; libellé d'erreur « clé refusée par le fournisseur (401) »                                             | 6, 12   | Inchangé                                                                                |
+| Données   | CSV sans exemples fictifs ; Excel sans images ; réinitialisation suivie d'un rechargement                                                                   | 11      | Feuilles Excel ajoutées pour les tables V2                                              |
+| Profils   | Contrôle de rôle local (tout profil peut activer un autre profil)                                                                                           | 11      | Interrupteurs admin de l'Atelier Français soumis à la même règle                        |
+
+**Fonctions désactivées.** Aucune entrée « Bientôt disponible » ne reste : tous les écrans de la navigation sont `available: true`. Le mécanisme (`COMING_SOON`, `lib/shell/navigation.ts`) est conservé pour les écrans V2 non livrés. Les désactivations conditionnelles (19 cas, toujours pour une raison affichée) sont listées dans l'audit des boutons de la Phase 12, plus bas. Non implémenté par choix du cahier des charges V1 : la synchro Supabase (documentée dans `lib/database/supabase.README.md`), toute publication sur les réseaux, toute lecture de compte Instagram.
+
+### Livré
+
+- **Dépendances de la section 3.1** : `next-themes`, `vaul`, `motion`, `date-fns`, `date-fns-tz`, `rrule`, `ics`, `@dnd-kit/core`, `rss-parser`.
+- **Schémas Zod V2** (`types/v2.ts`) : `CalendarItem`, `Reminder` (7.1), `Campaign`, `Storyline`, `CampaignStep` (8.1), `Suggestion` et ses 12 types (9.1, 9.2), `FrenchRuleState`, `FrenchDictionaryEntry`, `FrenchIssueRecord` (6.2, 6.3), `NewsSource`, `NewsItem` (9.4), `Engagement` (9.3), `BriefDraft`.
+- **Jalons d'événement** (`types/domain.ts`) : `HexEvent.milestones` (`weigh_in`, `press_conference`, `open_workout`, `media_day`, date facultative, `confirmed`), vide par défaut.
+- **Base Dexie v2** (`lib/database/db.ts`) : `DEXIE_SCHEMA_V2` reprend les tables V1 à l'identique et ajoute dix tables. L'`upgrade` ajoute `milestones: []` aux événements et passe `schemaVersion` à 2 dans `meta`. Aucune autre donnée V1 n'est touchée.
+- **Instantanés v2** : `TABLE_NAMES` et `SnapshotTablesSchema` couvrent les 21 tables ; `CURRENT_SCHEMA_VERSION = 2` ; `MIGRATIONS[1]` convertit un export v1 (tables V2 vides, jalons vides).
+- **`DataRepository`** : un store validé par Zod pour chaque nouvelle table, avec sa recherche texte. Export, import (fusion et remplacement), sauvegarde avant remplacement et synchro fichier couvrent les nouvelles tables sans code dédié : ils itèrent sur `TABLE_NAMES`. La route de restauration migre un fichier local écrit par la V1.
+- **Export Excel et aperçus d'import** : une feuille et un libellé par nouvelle table. Dans l'aperçu d'un import ou d'une restauration, les tables V2 vides sont masquées.
+- **`CLAUDE.md`** : règles de la section 1 (Projet Voltaire, interface iOS, calendrier, suggestions et campagnes), sécurité des nouvelles routes, repères pour ajouter une table.
+
+### Validation
+
+- `npm run typecheck`, `npm run lint`, `npm run format:check` : sans erreur.
+- `npm run test` : 460 tests au vert (23 de plus qu'en V1).
+- `npm run test:e2e` : 53 tests au vert, dont les 15 scénarios V1 et les 2 nouveaux tests de migration.
+- **Une base V1 remplie migre en v2 sans perte** : `tests/unit/database/migration-v2.test.ts` crée une base Dexie version 1 avec les données d'un vrai export V1, la rouvre avec le code V2 et compare chaque table, ligne par ligne. Même contrôle dans Chromium (`tests/e2e/v2-phase0-migration.spec.ts`) : base V1 écrite avec Dexie dans le navigateur, puis ouverture de l'application et export.
+- **Export v2 puis import v2 identiques** : toutes les tables remplies (une entité par table V2), export, JSON, import par remplacement, nouvel export : égalité stricte.
+- **Import d'un export v1 réussi** : en remplacement et en fusion (tests unitaires), depuis l'écran Gestion des données (e2e), et depuis le fichier local (route de restauration).
+
+### Décisions et écarts
+
+1. **Vrai export V1 comme fixture.** `tests/fixtures/snapshot-v1.json` a été produit par le code du commit `phase-12` (seed complet, une entité par table, réglages modifiés). Il est figé et exclu de Prettier : le régénérer avec le code V2 ferait perdre la garantie.
+2. **Index de `calendarItems`** : `*platforms` (index multi-valeurs) au lieu de `platform`, puisque le champ est une liste (`platforms: Platform[]` en 7.1).
+3. **Pas d'index sur `enabled`** (`frenchRules`, `newsSources`) : IndexedDB n'indexe pas les booléens (même règle qu'en V1, Phase 1). Filtrage en mémoire.
+4. **`frenchRules` ne stocke que l'état** (id, famille, niveau, activation, date). La détection, l'explication et les exemples vivent dans le code (`lib/french/rules`, V2-2) : une fonction ne se sérialise pas dans IndexedDB ni dans un export.
+5. **Journal `frenchIssues`** : `FrenchIssueRecord` (règle, couche, sévérité, confiance, auteur du texte, extrait, correction, suite donnée). `author` permet d'exclure les sorties des moteurs des statistiques « Mes points faibles » (6.5). Le type `FrenchIssue` à positions, renvoyé par le correcteur, sera défini en V2-2.
+6. **Consigne « sections 7.1, 8.1, 9.1, 10.1, 11.1 »** : 10.1 et 11.1 ne définissent pas de types. Interprétation retenue : tous les types des tables de la section 3.2, y compris l'Atelier Français (6.2, 6.3), l'engagement (9.3) et l'actualité (9.4).
+7. **Champs ajoutés aux modèles** : `CampaignStep.proposedBy` (`native` ou `ai`, pour distinguer l'enrichissement de 8.7), `Suggestion.dismissReason` (motif de rejet), `SuggestionSource.url` (lien externe, règle 1.4), `NewsItem.matchedEventIds` (correspondance sur le nom d'un événement, 9.4), `NewsSource.lastFetchedAt/lastError` (état affiché dans les réglages), `Engagement.origin` (`manual` ou `csv`).
+8. **Règles imposées par le schéma** : un `CalendarItem` « À confirmer » refuse une date (règle 1.4) ; une `Suggestion` exige au moins une source ; `suggestedTime` n'accepte que `HH:mm`.
+9. **`BriefDraft` sans valeurs par défaut** : `BriefSchema.partial()` aurait réintroduit `fields: {}` et `hashtagIds: []` (Zod 4 applique les défauts sous `optional`). Un brouillon garde ainsi exactement ce qui a été rempli.
+10. **Scénario V1 n° 11 ajusté** : il vérifiait `schemaVersion === 1` en dur. La valeur attendue est désormais 2 ; le parcours testé ne change pas. Les fiches événement injectées par les e2e portent `milestones: []`.
+11. **Version de schéma et onglets ouverts** : un onglet resté sur la V1 qui envoie un instantané v1 à la route de synchro reçoit un 409 (« Rechargez la page »), comme une page plus récente. Comportement V1 conservé, désormais testé dans les deux sens.
+
+### Fichiers créés ou modifiés
+
+- Créés : `PROMPT_V2.md`, `types/v2.ts`, `tests/fixtures/snapshot-v1.json`, `tests/unit/database/migration-v2.test.ts`, `tests/e2e/v2-phase0-migration.spec.ts`.
+- Modifiés : `types/domain.ts`, `lib/database/{db,snapshot,migrations,repository,dexie-repository}.ts`, `lib/data/{excel-export,import-json,maintenance}.ts`, `components/settings/data/CountsTable.tsx`, `package.json`, `package-lock.json`, `.prettierignore`, `CLAUDE.md`, tests existants (fixtures, base, données, événements).
+
+---
+
+# V1
 
 | Phase | Intitulé                                        | Statut   |
 | ----- | ----------------------------------------------- | -------- |
