@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Segmented } from "@/components/ui/segmented";
-import { Textarea } from "@/components/ui/textarea";
 import type { LibraryData } from "@/hooks/useLibraryData";
 import { useRepository } from "@/hooks/useRepository";
 import { getCategoriesByMode } from "@/lib/categories/registry";
@@ -26,6 +25,7 @@ import type { Mode, Wording } from "@/types/domain";
 import { FormField } from "@/components/ui/form-field";
 import { WordingFormFields } from "./WordingFormFields";
 import { excerptOf } from "./WordingRow";
+import { FrenchTextField } from "@/components/french/FrenchTextField";
 
 const FIELD_IDS: Record<Field, string> = {
   text: "wf-text",
@@ -127,7 +127,7 @@ export function WordingForm({
           }}
         >
           <FormField id="wf-text" label="Texte intégral" error={errors.text}>
-            <Textarea
+            <FrenchTextField
               id="wf-text"
               autoResize
               rows={6}
@@ -135,8 +135,10 @@ export function WordingForm({
               value={values.text}
               aria-invalid={Boolean(errors.text) || undefined}
               aria-describedby={errors.text ? "wf-text-error" : undefined}
-              onChange={(e) => {
-                setValues((v) => withText(v, e.target.value, classify));
+              mode={values.mode}
+              categoryId={values.categoryId || undefined}
+              onValueChange={(text) => {
+                setValues((v) => withText(v, text, classify));
                 setDuplicate({ kind: "new" });
               }}
               className="text-sm"

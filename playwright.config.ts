@@ -33,6 +33,8 @@ export default defineConfig({
       OPENAI_API_KEY: "",
       OPENAI_MODEL: "",
       AI_PROVIDER: "native",
+      // Atelier Français : couche LanguageTool non configurée (aucun appel réseau).
+      LANGUAGETOOL_URL: "",
     },
   },
 });

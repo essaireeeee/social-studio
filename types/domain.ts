@@ -485,6 +485,20 @@ export type RetrievalWeights = z.infer<typeof RetrievalWeightsSchema>;
  * `SettingsSchema.parse({})` donne une configuration complète.
  * Ne contient jamais de clé API (règle 1.5).
  */
+/** Règles maison de l'Atelier Français (V2, section 6). */
+export const FrenchPrefsSchema = z.object({
+  layers: z
+    .object({ languagetool: z.boolean().default(true), ai: z.boolean().default(false) })
+    .prefault({}),
+  hourFormat: z.enum(["21h", "21 h"]).default("21h"),
+  apostrophe: z.enum(["straight", "curly"]).default("straight"),
+  socialCompat: z.boolean().default(true),
+  anglicismHints: z.boolean().default(true),
+  numbers: z.enum(["digits", "letters"]).default("digits"),
+  ruleOfTheDay: z.boolean().default(true),
+});
+export type FrenchPrefsSettings = z.infer<typeof FrenchPrefsSchema>;
+
 export const SettingsSchema = z.object({
   quickOptions: z
     .object({
@@ -509,5 +523,7 @@ export const SettingsSchema = z.object({
   copyShortcut: z.enum(["mod+shift+c", "mod+alt+c"]).default("mod+shift+c"),
   retrievalWeights: RetrievalWeightsSchema.prefault({}),
   lastMode: ModeSchema.default("live"),
+  /** V2 : règles maison de l'Atelier Français. */
+  french: FrenchPrefsSchema.prefault({}),
 });
 export type Settings = z.infer<typeof SettingsSchema>;

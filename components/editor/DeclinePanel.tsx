@@ -4,7 +4,7 @@ import { Copy } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
+import { FrenchTextField } from "@/components/french/FrenchTextField";
 import { useRepository } from "@/hooks/useRepository";
 import { PLATFORM_RULES } from "@/lib/platforms/rules";
 import { saveDeclination } from "@/lib/studio/actions";
@@ -47,12 +47,21 @@ export function DeclinePanel({ generation, warnings }: DeclinePanelProps) {
           const text = drafts[p] ?? declinations[p] ?? "";
           return (
             <TabsContent key={p} value={p} className="flex flex-col gap-2 pt-3">
-              <Textarea
+              <FrenchTextField
                 aria-label={`Version ${PLATFORM_RULES[p].label}`}
                 autoResize
                 rows={4}
                 value={text}
-                onChange={(e) => setDrafts((d) => ({ ...d, [p]: e.target.value }))}
+                author={
+                  drafts[p] === undefined
+                    ? generation.engine === "native"
+                      ? "native"
+                      : "ai"
+                    : "cm"
+                }
+                mode={generation.brief.mode}
+                categoryId={generation.brief.categoryId}
+                onValueChange={(next) => setDrafts((d) => ({ ...d, [p]: next }))}
                 onBlur={() => void save(p)}
                 className="text-sm leading-[1.6]"
               />

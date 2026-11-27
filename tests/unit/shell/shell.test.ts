@@ -50,10 +50,10 @@ describe("navigation (section 12.1)", () => {
     expect(NAV_ITEMS.filter((i) => !i.available).map((i) => i.id)).toEqual([
       "calendar",
       "ideas",
-      "french",
       "campaigns",
     ]);
     expect(NAV_ITEMS.map((i) => i.href)).toContain("/settings/users");
+    expect(navItem("french")).toMatchObject({ href: "/french", available: true });
     expect(COMING_SOON).toBe("Bientôt disponible");
     expect(navItem("studio-live")).toMatchObject({ href: "/studio?mode=live", mode: "live" });
   });
@@ -118,6 +118,7 @@ describe("palette de commandes", () => {
       "Ouvrir : Événements",
       "Ouvrir : Hashtags & signatures",
       "Ouvrir : ADN éditorial",
+      "Ouvrir : Atelier Français",
       "Ouvrir : Historique",
       "Ouvrir : Publications validées",
       "Ouvrir : Intelligence artificielle",
@@ -138,6 +139,7 @@ describe("palette de commandes", () => {
       "nav:events",
       "nav:hashtags",
       "nav:editorial",
+      "nav:french",
       "nav:history",
       "nav:validated",
       "nav:settings-ai",

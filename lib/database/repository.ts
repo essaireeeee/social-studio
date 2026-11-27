@@ -88,6 +88,8 @@ export interface MetaValues {
   lastBackupAt: string;
   settings: Settings;
   hookBank: SavedHook[];
+  /** V2 : progression de l'entraînement de l'Atelier Français, par famille de règles. */
+  frenchProgress: Partial<Record<string, { answered: number; correct: number }>>;
 }
 export type MetaKey = keyof MetaValues;
 

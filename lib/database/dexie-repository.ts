@@ -54,6 +54,15 @@ import {
 
 type Emit = (event: ChangeEvent) => void;
 
+/** Méta exportées et importées (hors `schemaVersion`, toujours réécrite). */
+const META_KEYS = [
+  "seedVersion",
+  "lastBackupAt",
+  "settings",
+  "hookBank",
+  "frenchProgress",
+] as const;
+
 class DexieEntityStore<T extends { id: string }> implements EntityStore<T> {
   constructor(
     private readonly name: TableName,
@@ -363,7 +372,7 @@ export class DexieRepository implements DataRepository {
         TABLE_NAMES.map(async (name) => [name, await this.db.table(name).toArray()] as const),
       );
       const meta: SnapshotMeta = {};
-      for (const key of ["seedVersion", "lastBackupAt", "settings", "hookBank"] as const) {
+      for (const key of META_KEYS) {
         const value = await this.getMeta(key);
         if (value !== undefined) Object.assign(meta, { [key]: value });
       }
@@ -440,7 +449,7 @@ export class DexieRepository implements DataRepository {
   /** En fusion, les méta existantes (réglages, version de seed) sont conservées. */
   private async writeMeta(meta: SnapshotMeta, { overwrite }: { overwrite: boolean }) {
     await this.db.meta.put({ key: "schemaVersion", value: CURRENT_SCHEMA_VERSION });
-    for (const key of ["seedVersion", "lastBackupAt", "settings", "hookBank"] as const) {
+    for (const key of META_KEYS) {
       const value = meta[key];
       if (value === undefined) continue;
       if (overwrite || (await this.db.meta.get(key)) === undefined) {

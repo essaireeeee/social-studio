@@ -14,6 +14,7 @@ Le cahier des charges est dans [`PROMPT.md`](./PROMPT.md), le journal des phases
 - [Lancement](#lancement)
 - [Écrans](#écrans)
 - [Interface : thèmes, iPhone, application installable](#interface--thèmes-iphone-application-installable)
+- [Atelier Français](#atelier-français)
 - [Structure du projet](#structure-du-projet)
 - [Base locale : IndexedDB et dossier `data/`](#base-locale--indexeddb-et-dossier-data)
 - [Sauvegarde et restauration](#sauvegarde-et-restauration)
@@ -83,6 +84,7 @@ npm run start
 | Combattants, Événements           | Fiches datées (« À vérifier » après 90 jours), palmarès daté, fight card, diffuseurs et horaires confirmés.               |
 | Hashtags & signatures             | Groupes de hashtags, signatures à variables avec aperçu sur un événement.                                                 |
 | ADN éditorial (`/editorial`)      | Profil de style mesuré par mode, comparaison, validation par un administrateur, règles éditoriales.                       |
+| Atelier Français (`/french`)      | Vérifier un texte, points faibles, entraînement, référentiel des règles, dictionnaire maison, réglages du correcteur.     |
 | Historique, Publications validées | Toutes les générations et leurs statuts ; versement contrôlé des textes validés dans la bibliothèque.                     |
 | Paramètres (`/settings`)          | Intelligence artificielle, Préférences (dont Apparence), Gestion des données, Utilisateurs (rôles locaux).                |
 | Plus (`/plus`, mobile)            | Tous les écrans hors tab bar, en cellules groupées.                                                                       |
@@ -196,6 +198,31 @@ Le moteur natif (`lib/generation/native/`) est un moteur de **composition**, pas
 - Une information absente du brief ou des fiches n'apparaît jamais : un brief maigre donne un texte court.
 - Le style appris (longueurs, emojis, accroches, hashtags) n'est appliqué qu'après validation du profil par un administrateur.
 
+## Atelier Français
+
+Correcteur d'orthographe, de grammaire et de typographie, actif partout où l'on écrit : éditeur de variantes, déclinaisons, fiche wording, écran « Vérifier un texte ». Les fautes sont soulignées (rouge : faute, orange : à corriger ou « À vérifier », bleu pointillé : suggestion). Un clic ouvre la règle, la correction proposée et quatre actions : Corriger, Ignorer ici, Ignorer cette règle, Ajouter au dictionnaire. « Tout corriger » n'applique que les fautes sûres et la typographie. Valider une variante qui contient encore une faute demande confirmation.
+
+Trois couches :
+
+1. **Règles locales**, toujours actives, hors ligne : 164 règles en 12 familles (homophones, accords, participe passé, conjugaison, pluriels, nombres, confusions, majuscules, typographie, pléonasmes, syntaxe, marque), chacune avec son explication et ses exemples MMA. Hashtags, mentions, liens, emojis, citations de combattants et mots du dictionnaire ne sont jamais analysés.
+2. **LanguageTool** (facultatif), serveur libre hébergé par vos soins :
+
+```bash
+docker run -d -p 8010:8010 erikvl87/languagetool
+```
+
+Puis dans `.env.local` :
+
+```bash
+LANGUAGETOOL_URL=http://localhost:8010
+```
+
+Le bouton **Tester** de **Atelier Français > Réglages** vérifie la connexion. Sans URL, ou si le serveur ne répond pas (délai de 8 s), la couche est ignorée sans bloquer.
+
+3. **Relecture IA** (facultative) : le fournisseur choisi dans Paramètres > Intelligence artificielle, mêmes règles de clés que la génération. Elle corrige sans reformuler : une correction qui change plus de trois mots de suite est rejetée.
+
+Le dictionnaire maison regroupe le lexique MMA livré, les noms tirés des fiches (combattants, événements, salles, villes, diffuseurs, calculés à la volée) et les ajouts du CM (saisie ou import CSV, un mot par ligne). Les sorties des moteurs natif et IA passent par le correcteur avant affichage. Le Référentiel liste toutes les règles ; seul un administrateur les active ou les désactive.
+
 ## Clés API : `.env.local` et clé de session
 
 Le moteur natif fonctionne sans clé. Pour rédiger avec Claude ou OpenAI :
@@ -281,7 +308,7 @@ npm run test:e2e
 npm run test:scenarios
 ```
 
-- **Unitaires** (Vitest, `tests/unit`) : linter, coupures, compteur X, séparateur `===`, classifieur, doublons, extracteur de style, recherche des références, moteur natif (structures distinctes, aucune invention, anti-répétition), Fact Guard, anti-copie, signatures, aller-retour export / import, masquage des clés dans les journaux, et la logique de chaque écran.
+- **Unitaires** (Vitest, `tests/unit`) : règles de l'Atelier Français (fixtures fautives et correctes de chaque règle, corpus de 100 phrases MMA, 200 briefs natifs sans faute), linter, coupures, compteur X, séparateur `===`, classifieur, doublons, extracteur de style, recherche des références, moteur natif (structures distinctes, aucune invention, anti-répétition), Fact Guard, anti-copie, signatures, aller-retour export / import, masquage des clés dans les journaux, et la logique de chaque écran.
 - **E2E** (Playwright, `tests/e2e`) : le serveur de développement démarre seul sur le port 3100 avec un dossier de sauvegarde dédié (`.e2e-data`). `tests/e2e/scenarios/` contient les 15 scénarios de recette, un fichier par scénario ; `annexe-b-termine.spec.ts` rejoue la définition du « terminé » (50 posts collés, analyse par mode, propositions sans copie, travail retrouvé dans un autre navigateur).
 - Chromium est préinstallé dans l'environnement de développement ; ailleurs : `npx playwright install chromium`.
 

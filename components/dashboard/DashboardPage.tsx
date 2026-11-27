@@ -18,6 +18,7 @@ import { useDataStore } from "@/stores/data.store";
 import { DashboardBlock } from "./DashboardBlock";
 import { LargeTitle } from "@/components/layout/ScreenTitle";
 import { Fab } from "@/components/ui/fab";
+import { RuleOfTheDayCard } from "@/components/french/RuleOfTheDayCard";
 
 const excerpt = (text: string) => text.replace(/\s+/g, " ").trim();
 
@@ -81,6 +82,7 @@ export function DashboardPage() {
         </Link>
       </nav>
       <Fab href="/studio" label="Nouveau wording" />
+      <RuleOfTheDayCard />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <DashboardBlock title="Dernières générations" href="/history" linkLabel="Historique">

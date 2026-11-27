@@ -8,11 +8,60 @@ Journal d'avancement. Chaque phase liste ce qui a été livré, les décisions p
 | ----- | ----------------------------------- | -------- |
 | V2-0  | Audit, migration, socle             | Terminée |
 | V2-1  | Design system iOS, mode jour / nuit | Terminée |
-| V2-2  | Atelier Français                    | À faire  |
+| V2-2  | Atelier Français                    | Terminée |
 | V2-3  | Calendrier éditorial et rappels     | À faire  |
 | V2-4  | Plans de campagne                   | À faire  |
 | V2-5  | Suggestions de posts (« Idées »)    | À faire  |
 | V2-6  | Tests, QA, documentation            | À faire  |
+
+## Phase V2-2 : Atelier Français (terminée le 27/11/2026)
+
+### Livré
+
+- **Moteur local** (`lib/french/`) : 164 règles en 12 familles (homophones 35, accords 16, participe passé 8, conjugaison 16, pluriels 6, nombres 11, confusions 21, majuscules 11, marque 3, typographie 15, pléonasmes 14, syntaxe 8). Chaque règle a un niveau, une sévérité, une confiance (`medium` = « À vérifier »), une explication en deux phrases et des exemples MMA rédigés pour l'application. Zones protégées : liens, hashtags, mentions, emojis, citations d'une réaction de combattant, noms des fiches et mots du dictionnaire. Un post est analysé en moins de 30 ms, hors ligne.
+- **Couches 2 et 3** : route `/api/french/check` (GET : état et test LanguageTool ; POST : vérification). LanguageTool auto-hébergé (`LANGUAGETOOL_URL`, délai de 8 s) ; relecture IA par les adaptateurs V1 (mêmes règles de clés), corrections rejetées au-delà de trois mots consécutifs changés. Une couche absente ou en panne est signalée dans le badge, jamais bloquante.
+- **Intégration** : `FrenchAwareTextarea` (calque synchronisé, soulignés rouge / orange / bleu pointillé, popover sur desktop, feuille sur mobile) dans l'éditeur de variantes, les déclinaisons et la fiche wording. Actions Corriger, Ignorer ici, Ignorer cette règle, Ajouter au dictionnaire, « Comprendre la règle ». Badge « Français : 0 faute » / « N points à vérifier » / « N faute(s) » avec « Tout corriger ». Valider avec une faute restante ouvre l'ActionSheet « N faute(s) non corrigée(s) : Corriger / Valider quand même ». Sorties IA corrigées par `correctFrench` dans le post-traitement. Copie : espace fine remplacée par une insécable si « Compatibilité réseaux sociaux » est actif.
+- **Écran Atelier Français** (`/french`, onglet Plus et sidebar) : Vérifier un texte (copie du texte corrigé), Mes points faibles (barres horizontales, tendance sur 30 jours, rien sous 10 alertes), Entraînement (séries de 10, phrase à trou ou choix entre deux formes, correction immédiate, progression par famille), Référentiel (recherche, filtres famille et niveau, interrupteur réservé à l'administrateur, fiche détaillée), Dictionnaire (ajout, import CSV, suppression, mots tirés des fiches et lexique MMA en lecture seule), Réglages (couches, état et test de LanguageTool, état de la relecture IA, règles maison), À propos du correcteur (seule mention autorisée du Projet Voltaire, en texte simple).
+- **Règle du jour** sur l'Accueil : tirée des règles où le CM se trompe le plus, sinon au hasard, stable sur la journée. Masquable depuis la carte, réactivable dans les Réglages de l'Atelier.
+- **Journal** `frenchIssues` : chaque geste (corrigé, ignoré, règle coupée, ajout au dictionnaire, validé quand même) est consigné avec son auteur (`cm`, `native`, `ai`). Progression de l'entraînement dans la méta `frenchProgress`, incluse dans les sauvegardes.
+- README : section « Atelier Français » (installation de LanguageTool via Docker) ; `.env.example` : `LANGUAGETOOL_URL`.
+
+### Validation
+
+- `npm run typecheck`, `npm run lint`, `npm run format:check` : sans erreur. `npm run build` : sans erreur ; `npm run check:bundle` : conforme (aucune clé, aucun SDK ni hôte de fournisseur IA).
+- `npm run test` : 1 674 tests au vert, dont 1 079 pour l'Atelier.
+- **Au moins 120 règles** : 164, dans les 12 familles ; chacune a au moins deux phrases fautives détectées et deux phrases correctes non signalées (`rules.test.ts`).
+- **Corpus de 100 phrases MMA correctes** : 0 faux positif de sévérité `error` (seuil : moins de 3).
+- **Moteur natif** : 200 briefs aléatoires (graine fixe), zéro `error` de confiance `high`.
+- **Hors ligne, sans LanguageTool ni IA** : couche locale seule, aucune erreur bloquante ; le bouton Tester répond « LANGUAGETOOL_URL n'est pas défini dans .env.local. » (`v2-phase2-french.spec.ts`).
+- **Hashtags, mentions, URL, emojis, noms de combattants** jamais signalés (tests unitaires et e2e).
+- `npm run test:e2e` : 66 tests au vert, dont les 15 scénarios V1 et 6 nouveaux tests V2-2 (éditeur, Vérifier un texte, Référentiel, Dictionnaire, Réglages et À propos, Entraînement).
+
+### Décisions et écarts
+
+1. **Mots tirés des fiches calculés à la volée**, pas copiés dans `frenchDictionary` : un combattant renommé ou supprimé ne laisse aucun mot périmé. La table ne contient que les ajouts du CM.
+2. **Accords limités à un lexique** (noms masculins, féminins, adjectifs courants du MMA) : sans analyse morphologique complète, une règle d'accord ne se prononce que sur des mots qu'elle connaît. Moins de détections, pas de faux positifs.
+3. **LanguageTool et relecture IA toujours « À vérifier »** : leurs alertes ne sont jamais appliquées par « Tout corriger ».
+4. **Correction automatique des sorties IA seulement.** Le moteur natif est vérifié en amont par le test de propriété : une faute native est un bug à corriger dans le modèle, pas à masquer.
+5. **« Ignorer cette règle » ouvert à tous** depuis l'éditeur (geste du quotidien), journalisé ; seul l'administrateur réactive ou coupe une règle dans le Référentiel.
+6. **Règles maison modifiables par tous** : ce sont des préférences d'écriture (heures, apostrophe, nombres), pas des règles éditoriales.
+7. **Apostrophe droite par défaut**, comme le permet la spec pour Instagram ; l'apostrophe typographique est un réglage.
+8. **Tirets cadratins et tirets de dialogue** remplacés par une virgule ou deux-points selon le contexte (charte maison), le tiret de dialogue en début de ligne est supprimé.
+9. **Typographie en sévérité `warning`**, corrigée automatiquement par « Tout corriger » : une espace fine manquante ne bloque pas une validation.
+10. **« R1 » toléré en LIVE**, refusé en DAILY au profit de « 1er round ». Nombres en lettres : option (`Nombres : Lettres`), chiffres par défaut.
+11. **Badge placé en tête de l'éditeur** de chaque variante, juste au-dessus du texte, plutôt que dans l'en-tête de la carte : il suit le texte qu'il évalue, y compris dans les déclinaisons.
+12. **Consigne de campagne** : l'écran arrive en V2-4, il utilisera `FrenchTextField`.
+13. **Entraînement** : exercices construits à partir des exemples des règles et des erreurs passées du CM (extrait fautif et correction du journal). Aucun exercice externe.
+14. **Tendance des points faibles** : 30 derniers jours contre les 30 précédents.
+15. **Règle du jour** : la typographie en est exclue (peu parlante en carte) ; la graine est la date UTC.
+16. **Correctif V1** : un clic sur « Valider » juste après la frappe validait l'ancienne révision (le texte en cours était vidé au `blur`, avant la fin de l'enregistrement). Le texte en cours reste désormais la référence jusqu'à la fin de l'enregistrement.
+17. **Correctif V2-1** : `Button` en `asChild` passait deux enfants au `Slot` Radix (indicateur de chargement nul + lien) et cassait le rendu.
+18. **Tests V1 adaptés** (les 15 scénarios n'ont pas changé) : `ai/routes` accepte l'espace fine ou l'insécable avant « ! » ; `phase7-shell` compte 3 entrées désactivées au lieu de 4 ; `shell.test` (navigation et palette) inclut l'Atelier Français.
+
+### Fichiers créés ou modifiés
+
+- Créés : `lib/french/*` (moteur, règles, contexte, dictionnaire, journal, statistiques, entraînement, couches distantes), `app/api/french/check/route.ts`, `app/(workspace)/french/{page,[section]/page}.tsx`, `components/french/*` (champ, alertes, badge, fiche de règle, écrans, dictionnaire, réglages, règle du jour), `hooks/{useFrenchCheck,useFrenchContext,useFrenchEditor,useIssueActions}.ts`, `tests/unit/french/*`, `tests/fixtures/french-corpus.ts`, `tests/e2e/v2-phase2-french.spec.ts`.
+- Modifiés : `types/domain.ts` (`settings.french`), `lib/database/{repository,snapshot,dexie-repository}.ts` (méta `frenchProgress`), `lib/ai/post-process.ts`, `lib/generation/ai-client.ts`, `lib/shell/navigation.ts`, `components/editor/{VariantEditor,VariantCard,VariantActions,DeclinePanel}.tsx`, `components/library/WordingForm.tsx`, `components/dashboard/DashboardPage.tsx`, `components/ui/button.tsx`, `app/globals.css`, `playwright.config.ts`, `.env.example`, `README.md`, `CLAUDE.md`, tests listés au point 18.
 
 ## Phase V2-1 : Design system iOS et mode jour / nuit (terminée le 26/11/2026)
 

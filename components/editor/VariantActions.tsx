@@ -3,13 +3,22 @@
 import { Check, Copy, Ellipsis, Library, Star } from "lucide-react";
 import { DropdownMenu } from "radix-ui";
 import { useState } from "react";
+import { ActionSheet } from "@/components/ui/action-sheet";
 import { Button } from "@/components/ui/button";
+import { useFrenchSources } from "@/hooks/useFrenchContext";
 import { useRepository } from "@/hooks/useRepository";
-import { keepHook, publish, reopen, validate } from "@/lib/studio/actions";
+import { plural } from "@/lib/format";
+import { buildCheckContext } from "@/lib/french/context";
+import { checkLocal, fixAll, forCopy } from "@/lib/french/engine";
+import { logIssues } from "@/lib/french/journal";
+import type { FrenchIssue } from "@/lib/french/types";
+import { keepHook, publish, reopen, saveEdit, validate } from "@/lib/studio/actions";
+import { useStudioSession } from "@/stores/studio-session.store";
 import { toast } from "@/stores/toast.store";
 import type { Generation, Variant } from "@/types/domain";
 import { LibraryDialog } from "./LibraryDialog";
 import { PublishDialog } from "./PublishDialog";
+import { authorOf } from "./VariantEditor";
 
 interface VariantActionsProps {
   generation: Generation;
@@ -17,9 +26,13 @@ interface VariantActionsProps {
   text: string;
 }
 
-export async function copyText(text: string): Promise<void> {
+/**
+ * Copie dans le presse-papiers. « Compatibilité réseaux sociaux » (défaut) : l'espace fine
+ * U+202F devient une insécable U+00A0, mieux affichée par les applications.
+ */
+export async function copyText(text: string, socialCompat = true): Promise<void> {
   try {
-    await navigator.clipboard.writeText(text);
+    await navigator.clipboard.writeText(forCopy(text, socialCompat));
     toast("Copié", "success");
   } catch {
     toast("Copie impossible : autorisez l'accès au presse-papiers.", "danger");
@@ -29,7 +42,12 @@ export async function copyText(text: string): Promise<void> {
 /** Copier, garder l'accroche, bibliothèque, valider, publier (section 13.4). */
 export function VariantActions({ generation, variant, text }: VariantActionsProps) {
   const repository = useRepository();
+  const sources = useFrenchSources();
   const [dialog, setDialog] = useState<"library" | "publish" | null>(null);
+  const [unfixed, setUnfixed] = useState<FrenchIssue[] | null>(null);
+  const revision = variant.revisions.at(-1)!;
+  const author = text === revision.text ? authorOf(revision) : "cm";
+  const socialCompat = sources?.settings.french.socialCompat ?? true;
   const final = generation.variants.find((v) => v.selected)?.id === variant.id;
   const validated =
     final && (generation.status === "validated" || generation.status === "published");
@@ -43,9 +61,46 @@ export function VariantActions({ generation, variant, text }: VariantActionsProp
     }
   };
 
+  /** Valider avec une faute restante ouvre une ActionSheet (section 6.4). */
+  const requestValidation = () => {
+    if (!repository) return;
+    const errors = sources
+      ? checkLocal(text, {
+          ...buildCheckContext(sources),
+          categoryId: generation.brief.categoryId,
+          mode: generation.brief.mode,
+        }).filter((i) => i.severity === "error" && i.confidence === "high")
+      : [];
+    if (errors.length > 0) return setUnfixed(errors);
+    void run(() => validate(repository, generation.id, variant.id), "Variante validée");
+  };
+
+  const correctThenReview = async () => {
+    if (!repository || !unfixed) return;
+    const fixed = fixAll(text, unfixed);
+    if (fixed !== text) {
+      await saveEdit(repository, generation.id, variant.id, {
+        text: fixed,
+        factWarnings: [],
+        now: new Date(),
+      });
+      useStudioSession.getState().setLiveText(variant.id, undefined);
+      await logIssues(repository, unfixed, "corrected", author);
+      toast("Fautes corrigées : relisez puis validez.", "success");
+    } else {
+      document.getElementById(`editor-${variant.id}`)?.focus();
+    }
+  };
+
+  const validateAnyway = async () => {
+    if (!repository || !unfixed) return;
+    await logIssues(repository, unfixed, "validated_anyway", author);
+    await run(() => validate(repository, generation.id, variant.id), "Variante validée");
+  };
+
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <Button size="sm" variant="secondary" onClick={() => void copyText(text)}>
+      <Button size="sm" variant="secondary" onClick={() => void copyText(text, socialCompat)}>
         <Copy aria-hidden="true" />
         Copier
       </Button>
@@ -69,13 +124,7 @@ export function VariantActions({ generation, variant, text }: VariantActionsProp
           {generation.status === "published" ? "Publiée" : "Validée"}
         </span>
       ) : (
-        <Button
-          size="sm"
-          onClick={() =>
-            repository &&
-            void run(() => validate(repository, generation.id, variant.id), "Variante validée")
-          }
-        >
+        <Button size="sm" onClick={requestValidation}>
           <Check aria-hidden="true" />
           Valider
         </Button>
@@ -119,6 +168,16 @@ export function VariantActions({ generation, variant, text }: VariantActionsProp
         </DropdownMenu.Portal>
       </DropdownMenu.Root>
 
+      <ActionSheet
+        open={unfixed !== null}
+        onClose={() => setUnfixed(null)}
+        title={plural(unfixed?.length ?? 0, "faute non corrigée", "fautes non corrigées")}
+        description={unfixed?.map((i) => `« ${i.excerpt.trim()} » : ${i.message}`).join(" · ")}
+        actions={[
+          { label: "Corriger", onSelect: () => void correctThenReview() },
+          { label: "Valider quand même", onSelect: () => void validateAnyway() },
+        ]}
+      />
       {dialog === "library" ? (
         <LibraryDialog generation={generation} text={text} onClose={() => setDialog(null)} />
       ) : null}

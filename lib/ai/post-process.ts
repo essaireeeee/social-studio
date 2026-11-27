@@ -5,6 +5,7 @@
  * régénérer : le texte reste proposé, les passages à vérifier sont surlignés.
  */
 import { STOPWORDS_FR } from "@/lib/editorial/stopwords-fr";
+import { autoCorrect, checkLocal, isAutoFixable } from "@/lib/french/engine";
 import { hashtagRegex, normalizeText } from "@/lib/editorial/text-utils";
 import { buildAllowedFacts } from "@/lib/generation/fact-guard";
 import { TEMPLATE_VOCABULARY } from "@/lib/generation/native/templates";
@@ -50,9 +51,31 @@ export interface AiPostProcessContext {
   lint: { frenchSpacing: boolean; emojiThreshold?: number; recentHooks: readonly string[] };
 }
 
+/**
+ * Atelier Français (section 6.4) : les fautes sûres et la typographie d'une sortie IA sont
+ * corrigées avant le post-traitement. Les faits du brief (noms, lieux) servent de
+ * dictionnaire : ils ne sont jamais modifiés.
+ */
+export function correctFrench(
+  text: string,
+  ctx: Pick<AiPostProcessContext, "brief" | "facts" | "hashtags" | "broadcasters">,
+) {
+  const french = {
+    dictionary: new Set(
+      [...ctx.facts, ...ctx.hashtags].map((f) => f.trim().toLowerCase()).filter(Boolean),
+    ),
+    categoryId: ctx.brief.categoryId,
+    mode: ctx.brief.mode,
+    broadcasters: ctx.broadcasters,
+  };
+  const count = checkLocal(text, french).filter(isAutoFixable).length;
+  return { text: count > 0 ? autoCorrect(text, french) : text, count };
+}
+
 export function processAiText(raw: string, ctx: AiPostProcessContext): PostProcessResult {
-  const text = keepAllowedHashtags(raw, ctx.hashtags);
-  return postProcess(text, {
+  const french = correctFrench(keepAllowedHashtags(raw, ctx.hashtags), ctx);
+  const text = french.text;
+  const result = postProcess(text, {
     lint: {
       rules: ctx.rules,
       categoryId: ctx.brief.categoryId,
@@ -67,4 +90,16 @@ export function processAiText(raw: string, ctx: AiPostProcessContext): PostProce
     broadcasters: ctx.broadcasters,
     references: ctx.references.map((r) => ({ id: r.id, text: r.text })),
   });
+  if (french.count === 0) return result;
+  return {
+    ...result,
+    fixes: [
+      {
+        ruleId: "atelier-francais",
+        label: "Fautes corrigées par l'Atelier Français",
+        count: french.count,
+      },
+      ...result.fixes,
+    ],
+  };
 }

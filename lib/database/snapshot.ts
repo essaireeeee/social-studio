@@ -109,6 +109,15 @@ export const SnapshotMetaSchema = z.object({
   lastBackupAt: IsoDateSchema.optional(),
   settings: SettingsSchema.optional(),
   hookBank: z.array(SavedHookSchema).optional(),
+  frenchProgress: z
+    .record(
+      z.string(),
+      z.object({
+        answered: z.number().int().nonnegative(),
+        correct: z.number().int().nonnegative(),
+      }),
+    )
+    .optional(),
 });
 export type SnapshotMeta = z.infer<typeof SnapshotMetaSchema>;
 

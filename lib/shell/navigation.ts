@@ -120,13 +120,13 @@ export const NAV_SECTIONS: readonly NavSection[] = [
         icon: "editorial",
         available: true,
       },
-      // V2 : phases V2-2 (Atelier Français) et V2-4 (campagnes).
+      // V2 : Atelier Français (V2-2), campagnes (V2-4).
       {
         id: "french",
         label: "Atelier Français",
         href: "/french",
         icon: "french",
-        available: false,
+        available: true,
       },
       {
         id: "campaigns",
@@ -259,7 +259,18 @@ export function activeTab(pathname: string): string {
   return "more";
 }
 
+/** Sous-pages de l'Atelier Français (section 6.5). */
+export const FRENCH_SECTIONS = [
+  { id: "stats", label: "Mes points faibles", href: "/french/stats" },
+  { id: "training", label: "Entraînement", href: "/french/training" },
+  { id: "rules", label: "Référentiel", href: "/french/rules" },
+  { id: "dictionary", label: "Dictionnaire", href: "/french/dictionary" },
+  { id: "settings", label: "Réglages", href: "/french/settings" },
+  { id: "about", label: "À propos du correcteur", href: "/french/about" },
+] as const;
+
 const TITLES: Record<string, string> = {
+  ...Object.fromEntries(FRENCH_SECTIONS.map((s) => [s.href, s.label])),
   "/": "Accueil",
   "/studio": "Studio",
   "/plus": "Plus",
@@ -285,6 +296,7 @@ export interface BackLink {
  */
 export function parentOf(pathname: string, mobile: boolean): BackLink | null {
   if (pathname.startsWith("/settings/")) return { label: "Paramètres", href: "/settings" };
+  if (pathname.startsWith("/french/")) return { label: "Atelier Français", href: "/french" };
   if (!mobile) return null;
   if (pathname === "/settings" || MORE_PATHS.has(pathname)) return { label: "Plus", href: "/plus" };
   return null;

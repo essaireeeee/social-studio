@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
+import { FrenchAwareTextarea } from "@/components/french/FrenchAwareTextarea";
+import { FrenchBadge } from "@/components/french/FrenchBadge";
+import { RuleSheet } from "@/components/french/RuleSheet";
+import { useFrenchEditor } from "@/hooks/useFrenchEditor";
 import { useRepository } from "@/hooks/useRepository";
+import type { FrenchAuthor } from "@/lib/french/journal";
 import { formatFixSummary, lintText, type LintContext } from "@/lib/editorial/linter";
 import { EDIT_MERGE_WINDOW_MS } from "@/lib/studio/revisions";
 import { saveEdit } from "@/lib/studio/actions";
 import { useStudioSession } from "@/stores/studio-session.store";
-import type { Revision } from "@/types/domain";
+import type { Mode, Revision } from "@/types/domain";
 
 const SAVE_DELAY_MS = 500;
 const FACT_LABELS: Record<string, string> = {
@@ -26,6 +30,14 @@ interface VariantEditorProps {
   revision: Revision;
   lint: LintContext;
   label: string;
+  mode: Mode;
+  categoryId: string;
+}
+
+/** Auteur du texte pour le journal : le CM dès qu'il a modifié la variante. */
+export function authorOf(revision: Revision): FrenchAuthor {
+  if (revision.origin === "cm_edit") return "cm";
+  return revision.origin === "native" ? "native" : "ai";
 }
 
 /**
@@ -39,6 +51,8 @@ export function VariantEditor({
   revision,
   lint,
   label,
+  mode,
+  categoryId,
 }: VariantEditorProps) {
   const repository = useRepository();
   const ref = useRef<HTMLTextAreaElement | null>(null);
@@ -89,14 +103,29 @@ export function VariantEditor({
     if (text === revision.text && revision.origin !== "cm_edit") return;
     const linted = lintText(text, lint);
     if (linted.text !== text) setText(linted.text);
-    useStudioSession.getState().setLiveText(variantId, undefined);
+    // Le texte en cours reste la référence des actions (Valider, Copier) jusqu'à la fin de
+    // l'enregistrement : un clic sur « Valider » juste après la frappe contrôle ce texte-là.
+    useStudioSession.getState().setLiveText(variantId, linted.text);
     if (linted.text !== revision.text) {
       await save(linted.text);
       if (own.current) useStudioSession.getState().addFixes({ [own.current]: linted.fixes });
     }
+    useStudioSession.getState().setLiveText(variantId, undefined);
   };
 
-  const warnings = lintText(text, lint).warnings;
+  const french = useFrenchEditor({
+    text,
+    onText: (next) => {
+      onChange(next);
+      // Correction hors du champ : enregistrée tout de suite, sans attendre la frappe.
+      clearTimeout(timer.current);
+      void save(next);
+    },
+    author: text === revision.text ? authorOf(revision) : "cm",
+    categoryId,
+    mode,
+  });
+  const warnings = lintText(text, lint).warnings.filter((w) => w.kind !== "ai_formula");
   const facts = text === revision.text ? revision.factWarnings : [];
   const select = (start: number, end: number) => {
     ref.current?.focus();
@@ -105,18 +134,30 @@ export function VariantEditor({
 
   return (
     <div className="flex flex-col gap-2">
-      <Textarea
+      {french.ready ? (
+        <FrenchBadge
+          issues={french.issues}
+          actions={french.actions}
+          remote={french.remote}
+          onExplain={french.setExplain}
+        />
+      ) : null}
+      <FrenchAwareTextarea
         ref={ref}
         id={`editor-${variantId}`}
         aria-label={label}
         autoResize
         rows={4}
         value={text}
-        onChange={(event) => onChange(event.target.value)}
+        onValueChange={onChange}
+        issues={french.issues}
+        actions={french.actions}
+        onExplain={french.setExplain}
         onFocus={onFocus}
         onBlur={() => void onBlur()}
         className="text-sm leading-[1.6]"
       />
+      <RuleSheet ruleId={french.explain} onClose={() => french.setExplain(null)} />
       {facts.length > 0 ? (
         <div
           className="flex flex-col gap-1 rounded-md border border-warning/40 bg-warning/5 p-2"

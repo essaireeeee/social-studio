@@ -69,8 +69,8 @@ describe("POST /api/generate", () => {
       "storytelling",
     ]);
     for (const variant of body.variants) expect(variant.factWarnings).toEqual([]);
-    // Linter appliqué : espace insécable avant « ! ».
-    expect(body.variants[0].text).toContain(`Fictif${String.fromCodePoint(0x00a0)}!`);
+    // Atelier Français puis linter : espace fine (U+202F) ou insécable (U+00A0) avant « ! ».
+    expect(body.variants[0].text).toMatch(new RegExp("Fictif[\\u00A0\\u202F]!"));
 
     expect(calls).toHaveLength(1);
     expect(calls[0]!.url).toMatch(/\/v1\/messages$/);

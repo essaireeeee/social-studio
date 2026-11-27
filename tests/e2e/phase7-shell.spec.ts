@@ -85,9 +85,9 @@ test("navigation complète au clavier", async ({ page }) => {
     page.getByRole("link", { name: "Intelligence artificielle", exact: true }),
   ).toHaveAttribute("aria-current", "page");
 
-  // Écrans V2 pas encore livrés : visibles, désactivés (Calendrier, Idées, Atelier Français,
-  // Campagnes), jamais atteints par la tabulation.
-  await expect(page.locator('nav [aria-disabled="true"]:visible')).toHaveCount(4);
+  // Écrans V2 pas encore livrés : visibles, désactivés (Calendrier, Idées, Campagnes),
+  // jamais atteints par la tabulation. L'Atelier Français est livré en V2-2.
+  await expect(page.locator('nav [aria-disabled="true"]:visible')).toHaveCount(3);
   expect(stops.some((stop) => stop.includes("Calendrier"))).toBe(false);
 });
 

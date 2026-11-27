@@ -87,11 +87,17 @@ describe("barre de navigation : titre et retour", () => {
     expect(screenTitle("/library")).toBe("Bibliothèque");
     expect(screenTitle("/settings/data")).toBe("Gestion des données");
     expect(screenTitle("/inconnu")).toBe("Social Studio");
+    expect(screenTitle("/french")).toBe("Atelier Français");
+    expect(screenTitle("/french/dictionary")).toBe("Dictionnaire");
   });
 
   it("« ‹ Paramètres » depuis une section ; « ‹ Plus » sur mobile seulement", () => {
     expect(parentOf("/settings/ai", false)).toEqual({ label: "Paramètres", href: "/settings" });
     expect(parentOf("/settings/ai", true)).toEqual({ label: "Paramètres", href: "/settings" });
+    expect(parentOf("/french/rules", false)).toEqual({
+      label: "Atelier Français",
+      href: "/french",
+    });
     expect(parentOf("/library", true)).toEqual({ label: "Plus", href: "/plus" });
     expect(parentOf("/settings", true)).toEqual({ label: "Plus", href: "/plus" });
     expect(parentOf("/library", false)).toBeNull();

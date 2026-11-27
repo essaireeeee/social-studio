@@ -86,7 +86,8 @@ export function clearSessionCredentials(provider: ProviderId): void {
   }
 }
 
-function headersFor(provider: ProviderId): Record<string, string> {
+/** En-têtes d'une requête vers une route IA locale : clé et modèle de session éventuels. */
+export function headersFor(provider: ProviderId): Record<string, string> {
   const { key, model } = readSessionCredentials(provider);
   return {
     "Content-Type": "application/json",

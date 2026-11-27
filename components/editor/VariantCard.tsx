@@ -98,6 +98,8 @@ export function VariantCard({
         revision={revision}
         lint={lint}
         label={`Texte de la variante ${label}`}
+        mode={generation.brief.mode}
+        categoryId={generation.brief.categoryId}
       />
 
       <RefineBar engine={engine} busy={busy} disabled={locked} onRefine={onRefine} />
